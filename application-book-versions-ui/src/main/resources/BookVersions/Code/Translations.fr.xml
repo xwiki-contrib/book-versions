@@ -1,1 +1,116 @@
+<?xml version="1.1" encoding="UTF-8"?>
 
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.5" reference="BookVersions.Code.Translations" locale="fr">
+  <web>BookVersions.Code</web>
+  <name>Translations</name>
+  <language>fr</language>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>1</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <parent>BookVersions.Code.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <version>1.1</version>
+  <title>Translations</title>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>plain/1.0</syntaxId>
+  <hidden>true</hidden>
+  <content># Class
+### Missing: BookVersions.Code.VersionClass_precedingVersionReference=Preceding version reference
+
+# Creation templates
+BookVersions.template.newBook=Créer un nouveau livre.
+### Missing: BookVersions.template.newLibrary=Create a new library.
+### Missing: BookVersions.template.description=Description
+### Missing: BookVersions.template.title=Title
+
+# Creation form
+### Missing: BookVersions.creationForm.title=New page creation
+### Missing: BookVersions.creationForm.changedName=The chosen name isn't compatible with the naming policy chosen by your Administrator. A valid variant is proposed below. Please validate if the proposition is fine.
+### Missing: BookVersions.creationForm.noCollectionRef=The field [collectionRef] is missing in the URL. It is the reference of the collection (book/library) where to create the page.
+### Missing: BookVersions.creationForm.noTemplate=The field [template] is missing in the URL. It is the template to use for creating the new page.
+### Missing: BookVersions.creationForm.exists=The page [{0}] already exists, please select a new name.
+### Missing: BookVersions.creationForm.noPermission=Your user has no permission to create [{0}].
+### Missing: BookVersions.creationForm.docName=Enter the new {0} ID (different from the name, set later):
+### Missing: BookVersions.creationForm.submit=Create
+
+# Page Creation form
+### Missing: BookVersions.creationForm.newPage=New page
+### Missing: BookVersions.creationForm.pageTitle=Page title
+### Missing: BookVersions.creationForm.pageTitle.hint=The title of the page.
+### Missing: BookVersions.creationForm.pageUnversioned=Unversioned content
+### Missing: BookVersions.creationForm.pageUnversioned.hint=When the page is unversioned, the option of creating different content for multiple versions will be disabled and the same content of the page will be displayed in all versions of the book. It will be possible, though, to switch back to versioned content.
+### Missing: BookVersions.creationForm.create=Create
+### Missing: BookVersions.creationForm.add=Add
+### Missing: BookVersions.creationForm.name=Name
+### Missing: BookVersions.creationForm.libTitle=Library title
+
+# Version Creation form
+### Missing: BookVersions.creationForm.newVersion=New version
+
+# Variant Creation form
+### Missing: BookVersions.creationForm.newVariant=New variant
+
+# Library Creation form
+### Missing: BookVersions.creationForm.newLibrary=Add library
+
+# Navigation menu
+### Missing: BookVersions.navMenu.versionSelect=Version
+### Missing: BookVersions.navMenu.versioned=Content from version [{0}].
+### Missing: BookVersions.navMenu.inherited=Content inherited from version [{0}].
+### Missing: BookVersions.navMenu.createVersionWithLink=Create content for version {0}
+### Missing: BookVersions.navMenu.warning.noversion=The page is versioned, but it doesn''t have content for version {0} or its preceding versions.
+### Missing: BookVersions.navMenu.variantSelect=Variant
+### Missing: BookVersions.navMenu.contentForVariant=
+### Missing: BookVersions.navMenu.pageIsNotAssociated=Page not linked to variant [{0}].
+### Missing: BookVersions.navMenu.pageAvailableForAll=Page is not restricted to a variant.
+### Missing: BookVersions.navMenu.associateVariantWithLink=Link page to variant [{0}]
+
+# Administration menu
+### Missing: BookVersions.adminMenu.title=Versions
+### Missing: BookVersions.adminMenu.manage=Manage
+### Missing: BookVersions.adminMenu.manageVersions=Versions
+### Missing: BookVersions.adminMenu.manageVariants=Variants
+### Missing: BookVersions.adminMenu.manageLibraries=Libraries
+### Missing: BookVersions.adminMenu.pageActions=Page Actions
+### Missing: BookVersions.adminMenu.addPageToVariant=Link page to variant [{0}]
+### Missing: BookVersions.adminMenu.removePageFromVariant=Unlink page from variant [{0}]
+### Missing: BookVersions.adminMenu.publishLable=Publishing
+### Missing: BookVersions.navMenu.convertToUnversioned=Convert to unversioned
+### Missing: BookVersions.navMenu.convertToVersioned=Convert to versioned
+### Missing: BookVersions.adminMenu.publish=Publish current version
+
+# Admin live data values
+### Missing: BookVersions.adminLD.version=Version
+### Missing: BookVersions.adminLD.variant=Variant
+### Missing: BookVersions.adminLD.library=Librarie
+
+# Variants linked pages Admin UI
+### Missing: BookVersions.variants.linkedPagesListHeading=Pages linked with selected variant
+### Missing: BookVersions.variants.macrosPagesListHeading=Pages containing variant macro
+### Missing: BookVersions.variants.noLinkedPage=No pages linked to this variant.
+### Missing: BookVersions.variants.noMacroUsingPage=No pages use this variant macro.
+### Missing: BookVersions.variants.showPagesForVariant=Show linked pages for variant:
+</content>
+  </xwikidoc>
