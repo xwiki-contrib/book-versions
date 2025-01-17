@@ -39,6 +39,47 @@
   <content># Class
 ### Missing: BookVersions.Code.VersionClass_precedingVersionReference=Preceding version reference
 
+# Library Reference Class
+### Missing: BookVersions.Code.LibraryReferenceClass_libraryReference=Library Reference
+BookVersions.Code.LibraryReferenceClass_libraryReference.Empty=---
+### Missing: BookVersions.Code.LibraryReferenceClass_libraryReference_=
+### Missing: BookVersions.Code.LibraryReferenceClass_libraryVersionReference=Library Version Reference
+BookVersions.Code.LibraryReferenceClass_libraryVersionReference.Empty=---
+### Missing: BookVersions.Code.LibraryReferenceClass_libraryVersionReference_=
+
+# Publication Configuration Class
+BookVersions.Code.PublicationConfigurationClass_source=Page source*
+### Missing: BookVersions.Code.PublicationConfigurationClass_source_hint=The top page of the tree to be published, usually the top page of the book/library. (Mandatory)
+BookVersions.Code.PublicationConfigurationClass_destinationSpace=Page de destination*
+BookVersions.Code.PublicationConfigurationClass_destinationSpace_hint=L'espace dans lequel le contenu sera publié (obligatoire)
+BookVersions.Code.PublicationConfigurationClass_version=Version*
+BookVersions.Code.PublicationConfigurationClass_version_hint=La version à publier (obligatoire)
+### Missing: BookVersions.Code.PublicationConfigurationClass_variant=Variant
+### Missing: BookVersions.Code.PublicationConfigurationClass_variant_hint=The variant to publish.
+BookVersions.Code.PublicationConfigurationClass_language=Langue
+BookVersions.Code.PublicationConfigurationClass_language_hint=La langue à publier
+BookVersions.Code.PublicationConfigurationClass_publishOnlyComplete=Ne publier que les pages "Terminées"
+### Missing: BookVersions.Code.PublicationConfigurationClass_publishOnlyComplete_hint=Publish only the pages with the status "Complete". If unchecked, all statuses are published.
+BookVersions.Code.PublicationConfigurationClass_publishPageOrder=Ordre de publication des pages
+### Missing: BookVersions.Code.PublicationConfigurationClass_publishPageOrder_hint=Publish the page order from the source, which might overwrite the target ordering. If unchecked, the target ordering is left untouched.
+BookVersions.Code.PublicationConfigurationClass_publishBehaviour=Comportement de la publication
+### Missing: BookVersions.Code.PublicationConfigurationClass_publishBehaviour_hint=Which behaviour to adopt when the target space is already populated. "Cancel" for not publishing ; "Update" to publish update existing pages, add new pages from source but leave page deleted from source in the destination. Pages marked as deleted in source will be removed from destination. ; "Re-publish" to reset the destination space.
+BookVersions.Code.PublicationConfigurationClass_publishBehaviour_cancel=Annuler
+BookVersions.Code.PublicationConfigurationClass_publishBehaviour_update=Mettre à jour
+BookVersions.Code.PublicationConfigurationClass_publishBehaviour_republish=Re-publier
+BookVersions.Code.PublicationConfigurationClass_description=Description
+BookVersions.Code.PublicationConfigurationClass_description_hint=Description de la configuration
+
+# Sheet
+BookVersions.Code.VersionClassSheet.versionConfiguration=Configuration de la version
+### Missing: BookVersions.Code.VersionClassSheet.librariesConfiguration=Libraries Configuration
+BookVersions.Code.VersionClassSheet.newConfiguration=Nouvelle configuration
+BookVersions.Code.VariantClassSheet.associatedPages=Pages associées
+### Missing: BookVersions.Code.VariantClassSheet.variantConfiguration=Variant Configuration
+### Missing: BookVersions.Code.DeletedContentClassSheet.titlePrefix=DELETED: 
+### Missing: BookVersions.Code.DeletedContentClassSheet.warning=This content has been marked as deleted. It won't be published.
+BookVersions.Code.PublicationConfigurationSheet.nextButton=Publier
+
 # Creation templates
 BookVersions.template.newBook=Créer un nouveau livre.
 ### Missing: BookVersions.template.newLibrary=Create a new library.
@@ -65,18 +106,26 @@ BookVersions.template.newBook=Créer un nouveau livre.
 # Library Creation form
 ### Missing: BookVersions.creationForm.newLibrary=Add library
 
+# Publication Configuration Creation form
+BookVersions.creationForm.newPublicationConfiguration=Ajouter la configuration de publication
+
 # Navigation menu
 ### Missing: BookVersions.navMenu.versionSelect=Version
 ### Missing: BookVersions.navMenu.versioned=Content from version {0}.
 ### Missing: BookVersions.navMenu.inherited=Content inherited from version {0}.
-### Missing: BookVersions.navMenu.createVersionWithLink=Create content for version {0}
+### Missing: BookVersions.navMenu.unversioned=Content is {0}.
+BookVersions.navMenu.unversionedTitle=non versionné
+BookVersions.navMenu.createVersionWithLink=Créer du contenu pour la version {0}
 ### Missing: BookVersions.navMenu.warning.noversion=The page is versioned, but it doesn''t have content for version {0} or its preceding versions.
 ### Missing: BookVersions.navMenu.variantSelect=Variant
 ### Missing: BookVersions.navMenu.contentForVariant=
 ### Missing: BookVersions.navMenu.pageIsNotAssociated=Page not linked to variant {0}.
-### Missing: BookVersions.navMenu.pageRestrictedTo=Page is restricted to variant(s): {0}.
 ### Missing: BookVersions.navMenu.pageAvailableForAll=Page is not restricted to a variant.
+### Missing: BookVersions.navMenu.pageRestrictedTo=
 ### Missing: BookVersions.navMenu.associateVariantWithLink=Link page to variant {0}
+BookVersions.navMenu.languageSelect=Langue
+### Missing: BookVersions.navMenu.currentLanguage=
+### Missing: BookVersions.navMenu.noLanguageSelected=
 
 # Administration menu
 ### Missing: BookVersions.adminMenu.title=Versions
@@ -84,24 +133,68 @@ BookVersions.template.newBook=Créer un nouveau livre.
 ### Missing: BookVersions.adminMenu.manageVersions=Versions
 ### Missing: BookVersions.adminMenu.manageVariants=Variants
 ### Missing: BookVersions.adminMenu.manageLibraries=Libraries
+BookVersions.adminMenu.manageLanguages=Langues
 ### Missing: BookVersions.adminMenu.pageActions=Page Actions
 ### Missing: BookVersions.adminMenu.addPageToVariant=Link page to variant {0}
 ### Missing: BookVersions.adminMenu.removePageFromVariant=Unlink page from variant {0}
 ### Missing: BookVersions.adminMenu.publishLable=Publishing
 ### Missing: BookVersions.navMenu.convertToUnversioned=Convert to unversioned
 ### Missing: BookVersions.navMenu.convertToVersioned=Convert to versioned
-### Missing: BookVersions.adminMenu.publish=Publish current version
+BookVersions.adminMenu.statusLable=Statut
+BookVersions.adminMenu.publish=Publication
+BookVersions.navMenu.markDeleted=Marquer comme supprimé
+BookVersions.navMenu.unmarkDeleted=Ne plus marquer comme supprimé
+BookVersions.navMenu.deleteVersion=Supprimer cette version
+BookVersions.navMenu.deleteAllVersions=Supprimer toutes les versions
+BookVersions.navMenu.deletePage=Supprimer cette page
+### Missing: BookVersions.navMenu.noLanguageSelected=No language was selected.
+BookVersions.navMenu.defaultLanguage=Langue par défaut
+BookVersions.navMenu.translationStatus.not_translated=A traduire
+BookVersions.navMenu.translationStatus.outdated=Traduction périmée
+BookVersions.navMenu.translationStatus.translated=Traduit
+### Missing: BookVersions.adminMenu.librariesText=The following libraries are configured to be used in the current book. To edit the configuration, go to the Versions administration page of the book and edit the version pages.
+
+# PageSheet content
+BookVersion.pageSheet.nocontent=Il n'y a aucun contenu pour cette version
 
 # Admin live data values
 ### Missing: BookVersions.adminLD.version=Version
 ### Missing: BookVersions.adminLD.variant=Variant
-### Missing: BookVersions.adminLD.library=Librarie
+BookVersions.adminLD.library=Librairie
+### Missing: BookVersions.adminLD.emptyvalue=
+BookVersions.adminLD.doc.title=Titre
+BookVersions.adminLD.doc.creationDate=Date de création
+BookVersions.adminLD.doc.date=Dernière modification
+BookVersions.adminLD.doc.libraryReference=Librairie
+BookVersions.adminLD.doc.libraryVersionReference=Version de la librairie
+BookVersions.adminLD.doc.precedingVersionReference=Version précédente
+BookVersions.adminLD.description=Description
+BookVersions.adminLD._actions=Actions
 
 # Variants linked pages Admin UI
 ### Missing: BookVersions.variants.linkedPagesListHeading=Pages linked with selected variant
 ### Missing: BookVersions.variants.macrosPagesListHeading=Pages containing variant macro
 ### Missing: BookVersions.variants.noLinkedPage=No pages linked to this variant.
 ### Missing: BookVersions.variants.noMacroUsingPage=No pages use this variant macro.
-### Missing: BookVersions.variants.showPagesForVariant=Show linked pages for variant:
+### Missing: BookVersions.variants.showPagesForVariant=
+
+# Library include macro
+rendering.macro.includeLibrary.name=Inclure la librairie
+### Missing: rendering.macro.includeLibrary.description=Include content from a versioned library
+rendering.macro.includeLibrary.parameter.keyReference.name=Clé de librairie
+### Missing: rendering.macro.includeLibrary.parameter.keyReference.description=The key of a library to get the content from
+
+# Versions Admin UI
+BookVersions.versions.LD.status=Statut
+BookVersions.versions.LD.doc.date=Dernière modification
+BookVersions.versions.LD.doc.name=Version
+BookVersions.versions.LD.doc.title=Titre de la page
+BookVersions.versions.LD.doc.creationDate=Date de création
+### Missing: BookVersions.versions.LD.emptyvalue=
+
+# Multilingual
+BookVersions.languages.warning=Il n'y a aucune traduction pour la langue sélectionnée.
+BookVersions.languages.title.missing=Le titre n'est pas traduit dans la langue sélectionnée.
+BookVersions.language.select=Sélectionner la langue ...
 </content>
 </xwikidoc>
