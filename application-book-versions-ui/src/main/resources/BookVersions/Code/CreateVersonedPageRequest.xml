@@ -40,9 +40,9 @@
 #if ("$!request.sourceDocReference" != '' &amp;&amp; "$!request.targetDocReference" != '')
   #set($sourceDocReference = $services.model.resolveDocument($request.sourceDocReference))
   #set($targetDocReference = $services.model.resolveDocument($request.targetDocReference))
-  #if ($services.security.authorization.checkAccess("EDIT", $targetDocReference.lastSpaceReference))
+  #if ($services.security.authorization.hasAccess("EDIT", $targetDocReference.lastSpaceReference))
     #set($sourceDoc = $xwiki.XWiki.getDocument($sourceDocReference, $xcontext.context))
-    #set($newDocument = $sourceDoc.cloneRename($targetDocReference, $xcontext.context))
+    #set($newDocument = $sourceDoc.duplicate($targetDocReference))
     #set($discard = $xwiki.XWiki.saveDocument($newDocument, $xcontext.context))
     #jsonResponse({})
   #else
