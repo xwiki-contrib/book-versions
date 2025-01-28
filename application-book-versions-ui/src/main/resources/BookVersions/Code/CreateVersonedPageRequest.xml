@@ -41,13 +41,16 @@
   #set($sourceDocReference = $services.model.resolveDocument($request.sourceDocReference))
   #set($targetDocReference = $services.model.resolveDocument($request.targetDocReference))
   #if ($services.security.authorization.hasAccess("EDIT", $targetDocReference.lastSpaceReference))
-    #set($sourceDoc = $xwiki.XWiki.getDocument($sourceDocReference, $xcontext.context))
-    #set($newDocument = $sourceDoc.duplicate($targetDocReference))
-    #set($discard = $xwiki.XWiki.saveDocument($newDocument, $xcontext.context))
-    #jsonResponse({})
+    #if (!$xwiki.XWiki.exists($targetDocReference, $xcontext.context))
+      #set($sourceDoc = $xwiki.XWiki.getDocument($sourceDocReference, $xcontext.context))
+      #set($newDocument = $sourceDoc.duplicate($targetDocReference))
+      #set($discard = $xwiki.XWiki.saveDocument($newDocument, $xcontext.context))
+      #jsonResponse({"success": true})
+    #else
+      #jsonResponse({"success": false, "message": "Document already exist with reference: $targetDocReference"})
+    #end
   #else
-    You are not allowed to create a versioned page on the space $targetDocReference
-    #set($discard = $response.setStatus(403))
+    #jsonResponse({"success": false, "message": "You are not allowed to create a versioned page on the space $targetDocReference"})
   #end
 #end
 {{/velocity}}</content>

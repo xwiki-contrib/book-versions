@@ -148,11 +148,13 @@
       fetch("$xwiki.getURL('BookVersions.Code.CreateVersonedPageRequest')" + '?sourceDocReference=' + encodeURIComponent(currentDocReference) + '&amp;targetDocReference=' + encodeURIComponent(targetDocReferenceStr), {
         method: 'get'
       })
-        .then(response =&gt; {
-          if (response.status == 200) {
+        .then(response =&gt; response.json())
+        .then(data =&gt; {
+          if (data.success) {
             window.location = (new XWiki.Document(targetDocumentReference)).getURL(XWiki.contextaction) + '?force=1' + '#edit';
           }
           else {
+            console.error(data.message)
             throw new Error("Can't create the content for version " + versionSelect.val())
           }
         })
