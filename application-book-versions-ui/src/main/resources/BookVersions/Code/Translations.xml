@@ -199,7 +199,14 @@ BookVersions.languages.warning=There is no translation for the selected language
 BookVersions.languages.title.missing=There is no translated title for the selected language.
 BookVersions.language.select=Select language ...
 BookVersions.Code.MultilingualClass_enabled=Support multiple translation languages
-BookVersions.Code.MultilingualClass_supportedLanguages=Enabled translation languages</content>
+BookVersions.Code.MultilingualClass_supportedLanguages=Enabled translation languages
+
+# Edit inherited content
+BookVersions.Code.CustomEditHandler.popupTitle=Edit inherited content from {0}
+BookVersions.Code.CustomEditHandler.popupDescription=The content for version {0} does not exist. You have the option to either create the content for this version, or to switch to version {1}.
+BookVersions.Code.CustomEditHandler.popupSwitchVersion=Switch to version {0}
+BookVersions.Code.CustomEditHandler.popupCreateContentForVersion=Create content for version {0}
+BookVersions.Code.CustomEditHandler.popupCancel=Cancel</content>
   <object>
     <name>BookVersions.Code.Translations</name>
     <number>0</number>

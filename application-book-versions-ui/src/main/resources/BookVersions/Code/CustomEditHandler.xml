@@ -1,0 +1,345 @@
+<?xml version="1.1" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.5" reference="BookVersions.Code.CustomEditHandler" locale="">
+  <web>BookVersions.Code</web>
+  <name>CustomEditHandler</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <parent>WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content/>
+  <object>
+    <name>BookVersions.Code.CustomEditHandler</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>d46e253b-2dbe-486d-9496-f6e8e8e3c8ad</guid>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <defaultValue>long</defaultValue>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <contenttype>PureText</contenttype>
+        <disabled>0</disabled>
+        <editor>PureText</editor>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <restricted>0</restricted>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>require(['jquery', 'xwiki-meta'], function ($, xm) {
+  const versionSelect = $('#collectionVersion')
+  const editBtn = $('#tmEdit a.btn')
+  const unversioned = $('#unversioned')
+  const targetDocumentReference = XWiki.Model.resolve(versionSelect.val(), XWiki.EntityType.DOCUMENT)
+  const targetDocReferenceStr = XWiki.Model.serialize(targetDocumentReference)
+  const pathForVersionedDocument = (new XWiki.Document(targetDocumentReference)).getURL(XWiki.contextaction)
+  const currentDocReference = XWiki.Model.serialize(xm.documentReference)
+
+  if (unversioned[0].value != 'true' &amp;&amp; pathForVersionedDocument != window.location.pathname) {
+    editBtn.off('click')
+    editBtn.on('click', function (event) {
+      $('#inheritedVersionEditModal').modal('show')
+      event.preventDefault();
+    });
+    $('#inheritedVersionEditModalSwitchBtn').on('click', () =&gt; {
+      versionSelect.val(currentDocReference.substring(currentDocReference.indexOf(':') + 1))
+      versionSelect.change()
+    })
+    $('#inheritedVersionEditModalCreateBtn').on("click", () =&gt; {
+      fetch("$xwiki.getURL('BookVersions.Code.CreateVersonedPageRequest')" + '?sourceDocReference=' + encodeURIComponent(currentDocReference) + '&amp;targetDocReference=' + encodeURIComponent(targetDocReferenceStr), {
+        method: 'get'
+      })
+        .then(response =&gt; {
+          if (response.status == 200) {
+            window.location = (new XWiki.Document(targetDocumentReference)).getURL(XWiki.contextaction) + '?force=1' + '#edit';
+          }
+          else {
+            throw new Error("Can't create the content for version " + versionSelect.val())
+          }
+        })
+        .catch(err =&gt; {
+          console.log(err);
+        });
+    })
+  }
+})</code>
+    </property>
+    <property>
+      <name>editButtonHandler</name>
+    </property>
+    <property>
+      <parse>1</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <object>
+    <name>BookVersions.Code.CustomEditHandler</name>
+    <number>0</number>
+    <className>XWiki.UIExtensionClass</className>
+    <guid>7c97f654-bc17-4bfd-a79d-2034c4eca180</guid>
+    <class>
+      <name>XWiki.UIExtensionClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <async_cached>
+        <defaultValue>0</defaultValue>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType/>
+        <name>async_cached</name>
+        <number>3</number>
+        <prettyName>Cached</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </async_cached>
+      <async_context>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>1</multiSelect>
+        <name>async_context</name>
+        <number>4</number>
+        <prettyName>Context elements</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator>, </separator>
+        <separators>|, </separators>
+        <size>5</size>
+        <unmodifiable>0</unmodifiable>
+        <values>action=Action|doc.reference=Document|doc.revision|icon.theme=Icon theme|locale=Language|rendering.defaultsyntax=Default syntax|rendering.restricted=Restricted|rendering.targetsyntax=Target syntax|request.base=Request base URL|request.cookies|request.headers|request.parameters=Request parameters|request.remoteAddr|request.session|request.url=Request URL|request.wiki=Request wiki|sheet|user=User|wiki=Wiki</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </async_context>
+      <async_enabled>
+        <defaultValue>0</defaultValue>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType/>
+        <name>async_enabled</name>
+        <number>2</number>
+        <prettyName>Asynchronous rendering</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </async_enabled>
+      <content>
+        <disabled>0</disabled>
+        <editor>Text</editor>
+        <name>content</name>
+        <number>1</number>
+        <prettyName>Executed Content</prettyName>
+        <restricted>0</restricted>
+        <rows>25</rows>
+        <size>120</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </content>
+      <extensionPointId>
+        <disabled>0</disabled>
+        <name>extensionPointId</name>
+        <number>5</number>
+        <prettyName>Extension Point ID</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </extensionPointId>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>6</number>
+        <prettyName>Extension ID</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parameters>
+        <contenttype>PureText</contenttype>
+        <disabled>0</disabled>
+        <editor>PureText</editor>
+        <name>parameters</name>
+        <number>7</number>
+        <prettyName>Extension Parameters</prettyName>
+        <restricted>0</restricted>
+        <rows>10</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </parameters>
+      <scope>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>scope</name>
+        <number>8</number>
+        <prettyName>Extension Scope</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>wiki=Current Wiki|user=Current User|global=Global</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </scope>
+    </class>
+    <property>
+      <async_cached>0</async_cached>
+    </property>
+    <property>
+      <async_context/>
+    </property>
+    <property>
+      <async_enabled>0</async_enabled>
+    </property>
+    <property>
+      <content>{{velocity}}
+#set ($selectedVersionReference = $services.bookversions.getSelectedVersion($doc.documentReference))
+#set ($selectedVersion = $services.bookversions.getVersionName($selectedVersionReference))
+#set ($inheritedVersionReference = $services.bookversions.getInheritedVersionedContentReference($doc.documentReference))
+#set ($inheritedVersion = $services.bookversions.getVersionName($inheritedVersionReference))
+#if ($selectedVersionReference != $inheritedVersionReference)
+  #set ($discard = $xwiki.jsx.use('BookVersions.Code.CustomEditHandler'))
+  {{html clean="false"}}
+    &lt;div class="modal fade" tabindex="-1" role="dialog" id="inheritedVersionEditModal"&gt;
+      &lt;div class="modal-dialog" role="document"&gt;
+        &lt;div class="modal-content"&gt;
+          &lt;div class="modal-header"&gt;
+            &lt;button type="button" class="close" data-dismiss="modal" aria-label="Close"&gt;&lt;span aria-hidden="true"&gt;&amp;times;&lt;/span&gt;&lt;/button&gt;
+            &lt;h4 class="modal-title"&gt;$escapetool.xml($services.localization.render('BookVersions.Code.CustomEditHandler.popupTitle', [$selectedVersion]))&lt;/h4&gt;
+          &lt;/div&gt;
+          &lt;div class="modal-body"&gt;
+            &lt;p&gt;$escapetool.xml($services.localization.render('BookVersions.Code.CustomEditHandler.popupDescription', [$selectedVersion, $inheritedVersion]))&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;div class="modal-footer"&gt;
+            &lt;button type="button" class="btn btn-default" data-dismiss="modal"&gt;$escapetool.xml($services.localization.render('BookVersions.Code.CustomEditHandler.popupCancel'))&lt;/button&gt;
+            &lt;button type="button" class="btn btn-default" data-dismiss="modal" id="inheritedVersionEditModalSwitchBtn"&gt;$escapetool.xml($services.localization.render('BookVersions.Code.CustomEditHandler.popupSwitchVersion', [$inheritedVersion]))&lt;/button&gt;
+            &lt;button type="button" class="btn btn-primary" id="inheritedVersionEditModalCreateBtn"&gt;$escapetool.xml($services.localization.render('BookVersions.Code.CustomEditHandler.popupCreateContentForVersion', [$selectedVersion]))&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  {{/html}}
+#end
+{{/velocity}}</content>
+    </property>
+    <property>
+      <extensionPointId>org.xwiki.platform.template.content.header.after</extensionPointId>
+    </property>
+    <property>
+      <name>CustomEditHandler</name>
+    </property>
+    <property>
+      <parameters/>
+    </property>
+    <property>
+      <scope>wiki</scope>
+    </property>
+  </object>
+</xwikidoc>
