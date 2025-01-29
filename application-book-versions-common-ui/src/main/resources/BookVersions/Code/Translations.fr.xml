@@ -201,5 +201,12 @@ BookVersions.languages.title.missing=Le titre n'est pas traduit dans la langue s
 BookVersions.language.select=Sélectionner la langue ...
 ### Missing: BookVersions.Code.MultilingualClass_enabled=Support multiple translation languages
 ### Missing: BookVersions.Code.MultilingualClass_supportedLanguages=Enabled translation languages
+
+# Edit inherited content
+### Missing: BookVersions.Code.CustomEditHandler.popupTitle=Edit inherited content from {0}
+### Missing: BookVersions.Code.CustomEditHandler.popupDescription=The content for version {0} does not exist. You have the option to either create the content for this version, or to switch to version {1}.
+### Missing: BookVersions.Code.CustomEditHandler.popupSwitchVersion=Switch to version {0}
+### Missing: BookVersions.Code.CustomEditHandler.popupCreateContentForVersion=Create content for version {0}
+BookVersions.Code.CustomEditHandler.popupCancel=Annuler
 </content>
 </xwikidoc>
