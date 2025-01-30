@@ -79,6 +79,7 @@ BookVersions.Code.VersionClassSheet.versionConfiguration=Configuration de la ver
 BookVersions.Code.VersionClassSheet.newConfiguration=Nouvelle configuration
 BookVersions.Code.VariantClassSheet.associatedPages=Pages associées
 ### Missing: BookVersions.Code.VariantClassSheet.variantConfiguration=Variant Configuration
+BookVersions.Code.VersionClassSheet.deleteLibrairieConfiguration=Supprimer
 BookVersions.Code.DeletedContentClassSheet.titlePrefix=SUPPRIMÉ : 
 ### Missing: BookVersions.Code.DeletedContentClassSheet.warning=
 BookVersions.Code.PublicationConfigurationSheet.nextButton=Publier
