@@ -72,6 +72,14 @@ BookVersions.Code.PublicationConfigurationClass_publishBehaviour_update=Update
 BookVersions.Code.PublicationConfigurationClass_publishBehaviour_republish=Re-publish
 BookVersions.Code.PublicationConfigurationClass_description=Description
 BookVersions.Code.PublicationConfigurationClass_description_hint=The description of the configuration
+BookVersions.Code.PublicationConfigurationClass.sourceLocationLabel=Location
+BookVersions.Code.PublicationConfigurationClass.sourceLocationHint=Location in the page hierarchy which will be the source of the publication
+BookVersions.Code.PublicationConfigurationClass.destinationSpaceLabel=Name of the space
+BookVersions.Code.PublicationConfigurationClass.destinationSpaceHint=(optional) If you want to create a new space with the specified name.
+BookVersions.Code.PublicationConfigurationClass.destinationLocationLabel=Destination
+BookVersions.Code.PublicationConfigurationClass.destinationLocationHint=Location in the page hierarchy which will be the destination of the publication
+BookVersions.Code.PublicationConfigurationClass.destinationWikiLabel=Wiki name
+BookVersions.Code.PublicationConfigurationClass.destinationWikiHint=Name of the wiki for the publication destination
 
 # Sheet
 BookVersions.Code.VersionClassSheet.versionConfiguration=Version Configuration

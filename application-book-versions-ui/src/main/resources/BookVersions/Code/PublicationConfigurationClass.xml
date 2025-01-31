@@ -62,7 +62,61 @@
     <destinationSpace>
       <cache>0</cache>
       <classname/>
-      <customDisplay/>
+      <customDisplay>{{template name="locationPicker_macros.vm" /}}
+
+{{velocity}}
+#set ($discard = $xwiki.jsx.use('BookVersions.Code.PublicationConfigurationClass'))
+{{html}}
+#set ($currentValue = $doc.getObject("BookVersions.Code.PublicationConfigurationClass").getValue('destinationSpace'))
+#if ("$!currentValue" != '')
+  #set ($currentReference = $services.model.resolveSpace($currentValue))
+  #set ($currentWiki = $currentReference.wikiReference.name)
+#else
+  #set ($currentReference = $services.model.createWikiReference($services.wiki.getCurrentWikiDescriptor().id))
+  #set ($currentWiki = $services.wiki.getCurrentWikiDescriptor().id)
+#end
+#if ($xcontext.action == 'edit')
+    #locationPicker({
+      'id': 'destinationPicker',
+      'title': {
+        'label': 'BookVersions.Code.PublicationConfigurationClass.destinationSpaceLabel',
+        'hint': 'BookVersions.Code.PublicationConfigurationClass.destinationSpaceHint',
+        'name': 'title',
+        'value': $selectedDocument.plainTitle,
+        'placeholder': 'core.create.name.placeholder'
+      },
+      'preview': {
+        'label': 'BookVersions.Code.PublicationConfigurationClass.destinationLocationLabel',
+        'hint': 'BookVersions.Code.PublicationConfigurationClass.destinationLocationHint'
+      },
+      'parent': {
+        'label': 'BookVersions.Code.PublicationConfigurationClass.destinationLocationLabel',
+        'hint': 'BookVersions.Code.PublicationConfigurationClass.destinationLocationHint',
+        'name': 'destinationPickerParentReference',
+        'reference': $currentReference,
+        'placeholder': 'core.create.spaceReference.placeholder'
+      },
+      'name': {
+        'label': 'BookVersions.Code.PublicationConfigurationClass.destinationSpaceLabel',
+        'hint': 'BookVersions.Code.PublicationConfigurationClass.destinationSpaceHint',
+        'name': 'name',
+        'value': '',
+        'placeholder': 'core.create.name.placeholder'
+      },
+      'wiki': {
+        'label': 'BookVersions.Code.PublicationConfigurationClass.destinationWikiLabel',
+        'hint': 'BookVersions.Code.PublicationConfigurationClass.destinationWikiHint',
+        'name': 'targetWikiName',
+        'value': $currentWiki
+
+      }
+    })
+   &lt;input id="destinationPickerFullReference" name="BookVersions.Code.PublicationConfigurationClass_0_destinationSpace" type="hidden"&gt;
+#else
+  #hierarchy($currentReference, {"local": false})
+#end
+{{/html}}
+{{/velocity}}</customDisplay>
       <defaultValue/>
       <disabled>0</disabled>
       <displayType>input</displayType>
@@ -159,10 +213,88 @@
     <source>
       <cache>0</cache>
       <classname/>
-      <customDisplay/>
+      <customDisplay>{{template name="locationPicker_macros.vm" /}}
+
+{{velocity}}
+##
+## We need to override the documentPickerModal because we have some missing feature
+##
+#macro (documentPickerModal $options)
+  &lt;div class="modal fade" tabindex="-1" role="dialog" data-backdrop="static"&gt;
+    &lt;div class="modal-dialog" role="document"&gt;
+      &lt;div class="modal-content"&gt;
+        &lt;div class="modal-header"&gt;
+          &lt;button type="button" class="close" data-dismiss="modal" title="Close"&gt;
+            $services.icon.renderHTML('cross')
+          &lt;/button&gt;
+          &lt;div class="modal-title"&gt;$services.localization.render('core.documentPicker.title')&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="modal-body"&gt;
+          #set ($showWikis = $options.wiki &amp;&amp; $displayWikiFields)
+          ## If we don't show the wikis then we need to show the root node (the current wiki) in order to be able to
+          ## target top level documents (e.g. create a top level document, move a document to the top level, etc.).
+          #set ($showRoot = !$showWikis)
+          #set ($showTerminalDocuments = false || $options.showTerminalDocuments)
+          #set ($showSpaces = false || $options.showSpaces)
+          #documentTree({
+            'class': 'location-tree',
+            'finder': true,
+            'showAttachments': false,
+            'showRoot': $showRoot,
+            'showTerminalDocuments': $showTerminalDocuments,
+            'showTranslations': false,
+            'showWikis': $showWikis,
+            'exclusions': "$!options.exclusions",
+            'root': "$!options.root",
+            'showSpaces': $showSpaces
+          })
+        &lt;/div&gt;
+        &lt;div class="modal-footer"&gt;
+          &lt;button type="button" class="btn btn-default" data-dismiss="modal"&gt;
+            $services.localization.render('core.documentPicker.cancel')
+          &lt;/button&gt;
+          &lt;button type="button" class="btn btn-primary" disabled="disabled"&gt;
+            $services.localization.render('core.documentPicker.select')
+          &lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+#end
+{{html}}
+## TODO / FIXME we should have a better way to detect the root of the book
+#set ($rootDocument = $doc.documentReference.lastSpaceReference.parent)
+#set ($currentValueStr = $doc.getObject("BookVersions.Code.PublicationConfigurationClass").getValue('source'))
+#if ("$!currentValueStr" == '')
+  #set ($currentValue = $rootDocument)
+#else
+  #set ($currentValue = $services.model.resolveSpace($currentValueStr))
+#end
+#if ($xcontext.action == 'edit')
+    #locationPicker({
+      'id': 'sourcePicker',
+      'preview': {
+        'label': 'BookVersions.Code.PublicationConfigurationClass.sourceLocationLabel',
+        'hint': 'BookVersions.Code.PublicationConfigurationClass.sourceLocationHint'
+      },
+      'parent': {
+        'label': 'core.create.spaceReference.label',
+        'hint': 'core.create.spaceReference.hint',
+        'name': 'BookVersions.Code.PublicationConfigurationClass_0_source',
+        'reference': $currentValue,
+        'placeholder': 'core.create.spaceReference.placeholder'
+      },
+      "root": "space:$services.model.serialize($rootDocument, 'default')",
+      'showSpaces': true
+    })
+#else
+  #hierarchy($currentValue, {"local": false})
+#end
+{{/html}}
+{{/velocity}}</customDisplay>
       <defaultValue/>
       <disabled>0</disabled>
-      <displayType>input</displayType>
+      <displayType/>
       <freeText/>
       <hint/>
       <idField/>
@@ -170,7 +302,7 @@
       <multiSelect>0</multiSelect>
       <name>source</name>
       <number>1</number>
-      <picker>1</picker>
+      <picker>0</picker>
       <prettyName>source</prettyName>
       <relationalStorage>0</relationalStorage>
       <separator> </separator>
@@ -327,6 +459,115 @@
     </class>
     <property>
       <sheet>XWiki.ClassSheet</sheet>
+    </property>
+  </object>
+  <object>
+    <name>BookVersions.Code.PublicationConfigurationClass</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>c5743946-99b6-4b19-82dc-3b32ea824119</guid>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <defaultValue>long</defaultValue>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <contenttype>PureText</contenttype>
+        <disabled>0</disabled>
+        <editor>PureText</editor>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <restricted>0</restricted>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>document.observe("xwiki:actions:beforeSave", function (event) {
+  let parentReference = document.querySelector('#destinationPickerParentReference').value
+  let pageName = document.querySelector('#destinationPickerTitle').value
+  let wikiRef = document.querySelector('#destinationPickerWiki').value
+  let fullReferenceObj = new XWiki.Model.resolve(wikiRef + ":" + parentReference, XWiki.EntityType.SPACE)
+  if (pageName != null &amp;&amp; pageName.length &gt; 0) {
+    fullReferenceObj = new XWiki.EntityReference(pageName, XWiki.EntityType.SPACE, fullReferenceObj, false)
+  }
+  document.querySelector('#destinationPickerFullReference').value = XWiki.Model.serialize(fullReferenceObj)
+});</code>
+    </property>
+    <property>
+      <name/>
+    </property>
+    <property>
+      <parse>0</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
     </property>
   </object>
 </xwikidoc>

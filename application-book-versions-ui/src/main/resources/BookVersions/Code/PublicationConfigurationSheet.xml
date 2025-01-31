@@ -60,7 +60,9 @@
   &lt;dl&gt;
   #foreach ($property in $xclass.properties)
     &lt;dt #if (!$editing &amp;&amp; $hasEdit)
+          #if ($property.name != 'destinationSpace' &amp;&amp; $property.name != 'source')
           class="editableProperty"
+          #end
           #set ($xobjectPropertyReference = $xobject.getPropertyReference($property.name))
           data-property="$escapetool.xml($services.model.serialize($xobjectPropertyReference))"
           data-property-type="object"
