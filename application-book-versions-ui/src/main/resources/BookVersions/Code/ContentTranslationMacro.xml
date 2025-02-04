@@ -266,7 +266,7 @@
   #end
   ## Display content only if the selected language is the one set as parameter
   #if ($selectedLanguage == $contentLanguage || (!$selectedLanguage &amp;&amp; $isDefaultLanguage))
-    $wikimacro.content
+    {{wikimacrocontent/}}
   #end
 {{/velocity}}</code>
     </property>
@@ -274,7 +274,7 @@
       <contentDescription/>
     </property>
     <property>
-      <contentJavaType/>
+      <contentJavaType>Wiki</contentJavaType>
     </property>
     <property>
       <contentType>Optional</contentType>
