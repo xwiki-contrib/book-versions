@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -1520,7 +1521,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         }
 
         // The source is store as page, but we need a complete location.WebHome reference
-        if (sourceReference.getName() != this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE) {
+        if (!Objects.equals(sourceReference.getName(), this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE)) {
             SpaceReference sourceParentSpaceReference = new SpaceReference(
                 new EntityReference(sourceReference.getName(), EntityType.SPACE, sourceReference.getParent()));
             sourceReference =
@@ -1539,7 +1540,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
         DocumentReference targetReference =
             (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
-        if (targetReference.getName() != this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE) {
+        if (!Objects.equals(targetReference.getName(), this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE)) {
             SpaceReference targetParentSpaceReference = new SpaceReference(
                 new EntityReference(targetReference.getName(), EntityType.SPACE, targetReference.getParent()));
             targetReference =
