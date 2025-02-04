@@ -58,6 +58,7 @@ import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.model.reference.LocalDocumentReference;
 import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.model.reference.SpaceReferenceResolver;
 import org.xwiki.model.validation.EntityNameValidation;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
@@ -103,6 +104,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     @Inject
     private DocumentReferenceResolver<String> referenceResolver;
+
+    @Inject
+    private SpaceReferenceResolver<String> spaceReferenceResolver;
 
     @Inject
     @Named("currentmixed")
@@ -1470,7 +1474,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE,
             referenceResolver.resolve(sourceReferenceString, configurationReference.getWikiReference()));
         configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE,
-            referenceResolver.resolve(destinationReferenceString, configurationReference.getWikiReference()));
+            spaceReferenceResolver.resolve(destinationReferenceString, configurationReference.getWikiReference()));
         configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VERSION,
             referenceResolver.resolve(versionReferenceString, configurationReference.getWikiReference()));
 
@@ -1538,15 +1542,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         String publicationComment = collection != null && version != null ? publicationComment =
             "Published from [" + collection.getTitle() + "], version [" + version.getTitle() + "]." : null;
 
-        DocumentReference targetReference =
-            (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
-        if (!Objects.equals(targetReference.getName(), this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE)) {
-            SpaceReference targetParentSpaceReference = new SpaceReference(
-                new EntityReference(targetReference.getName(), EntityType.SPACE, targetReference.getParent()));
-            targetReference =
-                new DocumentReference(new EntityReference(this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE,
-                    EntityType.DOCUMENT, targetParentSpaceReference));
-        }
+        SpaceReference targetReference =
+            (SpaceReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
 
         DocumentReference variantReference =
             (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VARIANT);
@@ -1675,7 +1672,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         }
     }
 
-    private void addTopPublicationData(DocumentReference targetTopReference, String publicationComment,
+    private void addTopPublicationData(SpaceReference targetTopReference, String publicationComment,
         XWikiDocument collection, Map<String, Object> configuration) throws XWikiException
     {
         if (targetTopReference == null || collection == null || configuration == null) {
@@ -1692,7 +1689,10 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VARIANT);
 
         // Set metadata
-        XWikiDocument targetTop = xwiki.getDocument(targetTopReference, xcontext).clone();
+        DocumentReference targetDocumentReference =
+            new DocumentReference(new EntityReference(xwiki.DEFAULT_SPACE_HOMEPAGE, EntityType.DOCUMENT,
+                targetTopReference));
+        XWikiDocument targetTop = xwiki.getDocument(targetDocumentReference, xcontext).clone();
         BaseObject publicationObject =
             targetTop.newXObject(BookVersionsConstants.PUBLISHEDCOLLECTION_CLASS_REFERENCE, xcontext);
         publicationObject.set(BookVersionsConstants.PUBLISHEDCOLLECTION_PROP_MASTERNAME, collection.getTitle(),
@@ -1718,8 +1718,11 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         XWiki xwiki = xcontext.getWiki();
         DocumentReference sourceReference =
             (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE);
+        SpaceReference destinationSpaceReference =
+            (SpaceReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
         DocumentReference destinationReference =
-            (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
+            new DocumentReference(new EntityReference(xwiki.DEFAULT_SPACE_HOMEPAGE,
+                EntityType.DOCUMENT, destinationSpaceReference));
         DocumentReference versionReference =
             (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VERSION);
         XWikiDocument version = versionReference != null ? xwiki.getDocument(versionReference, xcontext) : null;
@@ -1806,14 +1809,14 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     private static DocumentReference getPublishedReference(DocumentReference originalReference,
-        DocumentReference collectionReference, DocumentReference targetReference)
+        DocumentReference collectionReference, SpaceReference targetReference)
     {
         if (originalReference == null || collectionReference == null || targetReference == null) {
             return null;
         }
 
         DocumentReference publishedReference =
-            originalReference.replaceParent(collectionReference.getParent(), targetReference.getLastSpaceReference());
+            originalReference.replaceParent(collectionReference.getParent(), targetReference);
 
         return publishedReference;
     }
@@ -2000,7 +2003,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
             // Compute the published page reference
             DocumentReference publishedPageReference =
-                getPublishedReference(libraryPageReference, libraryReference, publishedLibraryReference);
+                getPublishedReference(libraryPageReference, libraryReference,
+                    publishedLibraryReference.getLastSpaceReference());
             if (publishedPageReference != null) {
                 logger.debug("[transformLibrary] Page reference is changed to [{}].", publishedPageReference);
                 // Replace the macro by include macro and change to the published reference

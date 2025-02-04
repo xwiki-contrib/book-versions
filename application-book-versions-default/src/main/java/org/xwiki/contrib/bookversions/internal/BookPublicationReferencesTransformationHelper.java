@@ -107,9 +107,8 @@ public class BookPublicationReferencesTransformationHelper
         SpaceReference sourceSpaceReference =
             ((DocumentReference) publicationConfiguration.get(
                 BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE)).getLastSpaceReference();
-        SpaceReference publishedSpaceReference =
-            ((DocumentReference) publicationConfiguration.get(
-                BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE)).getLastSpaceReference();
+        SpaceReference publishedSpaceReference = (SpaceReference) publicationConfiguration.get(
+                BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
 
         // Build the space references map
         Map<SpaceReference, SpaceReference> spaceReferencesMap = new HashMap<>();
