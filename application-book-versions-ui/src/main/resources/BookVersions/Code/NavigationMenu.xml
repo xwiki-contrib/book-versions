@@ -1193,6 +1193,7 @@
         &lt;input type="hidden" name="selectedLanguage" id="selectedLanguageInput" value="$!selectedLanguage"/&gt;
         &lt;label for="collectionLanguage"&gt;$services.localization.render('BookVersions.navMenu.languageSelect')&lt;/label&gt;
         &lt;select name="collectionLanguage" id="collectionLanguage"&gt;
+          &lt;option value="" id="" #if("$!selectedLanguage" == '')selected#end&gt;---&lt;/option&gt;
           #set ($currentLocale = $services.localization.currentLocale)
           #foreach($language in $languages)
             #if ($language)
