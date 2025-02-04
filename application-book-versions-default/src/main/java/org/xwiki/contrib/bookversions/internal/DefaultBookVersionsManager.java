@@ -1732,7 +1732,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
         if (sourceReference == null || versionReference == null || version == null) {
             logger.error(
-                "Couldn't read the publication configuration when atempting to add metadata in the master and published locations.");
+                "Couldn't read the publication configuration when attempting to add metadata in the master and "
+                    + "published locations.");
             return;
         }
 
