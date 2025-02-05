@@ -142,7 +142,7 @@
       <classType>com.xpn.xwiki.objects.classes.PageClass</classType>
     </destinationSpace>
     <language>
-      <customDisplay/>
+      <customDisplay>{{include reference="BookVersions.Code.PublicationLanguagePicker" /}}</customDisplay>
       <disabled>0</disabled>
       <hint/>
       <name>language</name>
