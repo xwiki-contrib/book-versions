@@ -20,9 +20,9 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc version="1.5" reference="BookVersions.Code.PrecedingVersionsSuggestPicker" locale="">
+<xwikidoc version="1.5" reference="BookVersions.Code.VariantClassFieldSuggestPicker" locale="">
   <web>BookVersions.Code</web>
-  <name>PrecedingVersionsSuggestPicker</name>
+  <name>VariantClassFieldSuggestPicker</name>
   <language/>
   <defaultLanguage/>
   <translation>0</translation>
@@ -31,13 +31,13 @@
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <version>1.1</version>
-  <title>PrecedingVersionsSuggestPicker</title>
+  <title>VariantClassFieldSuggestPicker</title>
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
   <content>{{velocity}}
-#set ($discard = $xwiki.jsx.use('BookVersions.Code.PrecedingVersionsSuggestPicker'))
+#set ($discard = $xwiki.jsx.use('BookVersions.Code.VariantClassFieldSuggestPicker'))
 #set($book = $services.bookversions.getVersionedCollectionReference($doc.documentReference))
 #set ($id = $escapetool.xml("${prefix}${name}"))
 #set($currentDoc = $xwiki.getDocument($value))
@@ -45,7 +45,7 @@
 #if ($type == 'edit' || $type == 'search')
 {{html clean=false}}
 &lt;p&gt;
-&lt;select class="suggest-pversions" size="1" name="${id}" id="${id}" book="$!escapetool.xml($book)" currentPage="$!escapetool.xml($doc.fullName)" /&gt;
+&lt;select class="suggest-variant" size="1" name="${id}" id="${id}" book="$!escapetool.xml($book)" currentPage="$!escapetool.xml($doc.fullName)" /&gt;
  #if($value &amp;&amp; $value!="")
   &lt;option value="$!escapetool.xml($value)" selected&gt;$displayvalue&lt;/option&gt;
  #end
@@ -57,10 +57,10 @@
 #end
 {{/velocity}}</content>
   <object>
-    <name>BookVersions.Code.PrecedingVersionsSuggestPicker</name>
+    <name>BookVersions.Code.VariantClassFieldSuggestPicker</name>
     <number>0</number>
     <className>XWiki.JavaScriptExtension</className>
-    <guid>c06770da-1318-4013-a32d-0c8ed3d7f0e3</guid>
+    <guid>19d56229-dba8-4054-b534-e08bc8bc7619</guid>
     <class>
       <name>XWiki.JavaScriptExtension</name>
       <customClass/>
@@ -152,27 +152,27 @@
 
 require(['jquery', 'xwiki-suggestPages', 'xwiki-events-bridge'], function($) {
   var init = function(event, data) {
-    let restSearchURL = "$xwiki.getURL('BookVersions.Code.PrecedingVersionsSuggestService')";
+    let restSearchURL = "$xwiki.getURL('BookVersions.Code.VariantSuggestService')";
     let pageIcon = "$services.icon.getMetaData('page_white')";
     var settings = {
       load: function(typedText, callback) {
         $.getJSON(restSearchURL, {
           q: typedText,
-          book: $('.suggest-pversions')[0].getAttribute("book"),
-          currentPage: $('.suggest-pversions')[0].getAttribute("currentPage"),
+          book: $('.suggest-variant')[0].getAttribute("book"),
+          currentPage: $('.suggest-variant')[0].getAttribute("currentPage"),
         }).done(callback).fail(callback);
       },
       loadSelected: function(selectedValue, callback) {
         $.getJSON(restSearchURL, {
           q: selectedValue,
-          book: $('.suggest-pversions')[0].getAttribute("book"),
-          currentPage: $('.suggest-pversions')[0].getAttribute("currentPage"),
+          book: $('.suggest-variant')[0].getAttribute("book"),
+          currentPage: $('.suggest-variant')[0].getAttribute("currentPage"),
           exactMatch: true
         }).done(callback).fail(callback);
       }
     };
     var container = $((data &amp;&amp; data.elements) || document);
-    container.find('.suggest-pversions').xwikiSelectize(settings);
+    container.find('.suggest-variant').xwikiSelectize(settings);
   };
 
   $(document).on('xwiki:dom:loaded xwiki:dom:updated', init);

@@ -37,9 +37,8 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
   <content>{{velocity}}
-#set($book = $services.bookversions.getVersionedCollectionReference($xwiki.getDocument("Automation-DevSecOps.Other.Super-cleaner.Connecting to wi-fi.1\.0").documentReference))
+#set($book = $services.bookversions.getVersionedCollectionReference($doc.documentReference))
 #set($name = "name")
-#set($value = $doc.getValue($name))
 #set ($discard = $xwiki.jsx.use('BookVersions.Code.VariantSuggestPicker'))
 #set($currentvalue = $doc.getValue($name))
 #set($currentDoc = $xwiki.getDocument($currentvalue))
@@ -150,8 +149,8 @@
 
 require(['jquery', 'xwiki-suggestPages', 'xwiki-events-bridge'], function($) {
   var init = function(event, data) {
-    restSearchURL = "$xwiki.getURL('BookVersions.Code.VariantSuggestService')";
-    pageIcon = "$services.icon.getMetaData('page_white')";
+    let restSearchURL = "$xwiki.getURL('BookVersions.Code.VariantSuggestService')";
+    let pageIcon = "$services.icon.getMetaData('page_white')";
     var settings = {
       load: function(typedText, callback) {
         $.getJSON(restSearchURL, {

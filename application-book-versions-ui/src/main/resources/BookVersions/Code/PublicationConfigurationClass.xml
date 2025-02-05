@@ -319,7 +319,7 @@
     <variant>
       <cache>0</cache>
       <classname/>
-      <customDisplay/>
+      <customDisplay>{{include reference="BookVersions.Code.VariantClassFieldSuggestPicker" /}}</customDisplay>
       <defaultValue/>
       <disabled>0</disabled>
       <displayType>input</displayType>
