@@ -35,6 +35,11 @@ import org.xwiki.model.reference.EntityReference;
 public interface BookVersionsConstants
 {
     /**
+     * The name of the page administration of XWiki
+     */
+    String XWIKI_PAGEADMINISTRATION_NAME = "WebPreferences";
+
+    /**
      * The reference of the XWiki location.
      */
     EntityReference XWIKI_REFERENCE = new EntityReference("XWiki", org.xwiki.model.EntityType.SPACE);

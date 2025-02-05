@@ -763,15 +763,37 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         return queryPages(versionedCollectionReference, BookVersionsConstants.VARIANT_CLASS_REFERENCE);
     }
 
+    /**
+     * Query pages under a given document, ordered by descending creation date
+     * @param documentReference the root document for the query
+     * @return the list of pages under the document, ordered by descending creation date
+     * @throws QueryException happens when the query creation or execution has an issue.
+     */
+    private List<String> queryPages(DocumentReference documentReference)
+        throws QueryException
+    {
+        return queryPages(documentReference, null);
+    }
+
+    /**
+     * Query pages under a given document, having a given class, ordered by descending creation date
+     * @param documentReference the root document for the query
+     * @param classReference the class to select pages from
+     * @return the list of pages with the class, under the document, ordered by descending creation date
+     * @throws QueryException happens when the query creation or execution has an issue.
+     */
     private List<String> queryPages(DocumentReference documentReference, EntityReference classReference)
         throws QueryException
     {
-        if (documentReference == null || classReference == null) {
+        if (documentReference == null) {
             return Collections.emptyList();
         }
 
-        logger.debug("[queryPages] Query pages with class [{}] under [{}]", classReference.toString(),
-            documentReference.toString());
+        if (classReference != null) {
+            logger.debug("[queryPages] Query pages with class [{}] under [{}]", classReference, documentReference);
+        } else {
+            logger.debug("[queryPages] Query pages under [{}]", documentReference);
+        }
 
         SpaceReference spaceReference = documentReference.getLastSpaceReference();
         String spaceSerialized = localSerializer.serialize(spaceReference);
@@ -780,17 +802,24 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         logger.debug("[queryPages] spaceSerialized : [{}]", spaceSerialized);
         logger.debug("[queryPages] spacePrefix : [{}]", spacePrefix);
 
-        // Query inspired from getDocumentReferences of DefaultModelBridge.java in xwiki-platform
-        List<String> result = this.queryManagerProvider.get()
-            .createQuery(", BaseObject as obj where doc.fullName = obj.name and obj.className = :class "
-                + "and doc.space like :space escape '/' order by doc.creationDate desc", Query.HQL)
-            .bindValue("class", localSerializer.serialize(classReference)).bindValue("space", spacePrefix)
-            .setWiki(documentReference.getWikiReference().getName()).execute();
+        // Query inspired from getDocumentReferences of DefaultModelBridge.java in xwiki-platform-refactoring
+        String statement = "where doc.space like :space escape '/' order by doc.creationDate desc";
+        if (classReference != null) {
+            statement = ", BaseObject as obj where doc.fullName = obj.name and obj.className = :class "
+                + "and doc.space like :space escape '/' order by doc.creationDate desc";
+        }
+        Query query = this.queryManagerProvider.get()
+            .createQuery(statement, Query.HQL)
+            .bindValue("space", spacePrefix)
+            .setWiki(documentReference.getWikiReference().getName());
+        if (classReference != null) {
+            query = query.bindValue("class", localSerializer.serialize(classReference));
+        }
+        List<String> result = query.execute();
 
         logger.debug("[queryPages] result : [{}]", result);
 
         return result;
-
     }
 
     /**
@@ -1464,10 +1493,13 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             configurationObject.getStringValue(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
         String versionReferenceString =
             configurationObject.getStringValue(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VERSION);
+        String behaviour =
+            configurationObject.getStringValue(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR);
         if (sourceReferenceString == null || sourceReferenceString.isBlank() || destinationReferenceString == null
-            || destinationReferenceString.isBlank() || versionReferenceString.isBlank()) {
+            || behaviour == null || destinationReferenceString.isBlank() || versionReferenceString.isBlank()) {
             logger.error(
-                "One of the mandatory element in the configuration (source, destination or version) is " + "missing.");
+                "One of the mandatory element in the configuration (source, destination, version or behaviour) is " +
+                    "missing.");
             return configuration;
         }
 
@@ -1477,6 +1509,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             spaceReferenceResolver.resolve(destinationReferenceString, configurationReference.getWikiReference()));
         configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VERSION,
             referenceResolver.resolve(versionReferenceString, configurationReference.getWikiReference()));
+        configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR, behaviour);
 
         String variantReferenceString =
             configurationObject.getStringValue(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VARIANT);
@@ -1490,8 +1523,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             .getIntValue(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHONLYCOMPLETE) != 0);
         configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHPAGEORDER,
             configurationObject.getIntValue(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHPAGEORDER) != 0);
-        configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR,
-            configurationObject.getStringValue(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR));
 
         logger.debug("[loadPublicationConfiguration] Configuration loaded: [{}].", configuration);
         logger.info("Configuration loaded.");
@@ -1523,6 +1554,39 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             logger.error("[publish] Could not read the source from [{}]", configurationReference);
             return;
         }
+        SpaceReference targetReference =
+            (SpaceReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
+        if (targetReference == null) {
+            logger.error("[publish] Could not read the target from [{}].", configurationReference);
+            return;
+        }
+
+        String publicationBehaviour =
+            (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR);
+        if (publicationBehaviour == null) {
+            logger.error("[publish] Could not read the behaviour from [{}].", configurationReference);
+            return;
+        }
+        DocumentReference targetDocumentReference =
+            new DocumentReference(new EntityReference(xwiki.DEFAULT_SPACE_HOMEPAGE,
+                EntityType.DOCUMENT, targetReference));
+        List<String> subTargetDocumentsString = queryPages(targetDocumentReference);
+        if (publicationBehaviour.equals(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_CANCEL)
+            && !isEmptyTargetSpace(subTargetDocumentsString, targetDocumentReference))
+        {
+            logger.info("Publication is canceled because destination space [{}] is not empty.", targetReference);
+            return;
+        } else if (publicationBehaviour.equals(
+            BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_REPUBLISH))
+        {
+            // Clear the destination space
+            logger.info("Destination space [{}] is not empty. Removing all documents.", targetReference);
+            if (xwiki.exists(targetDocumentReference, xcontext)) {
+                // also removing the top page
+                subTargetDocumentsString.add(localSerializer.serialize(targetDocumentReference));
+            }
+            removeDocuments(subTargetDocumentsString, targetDocumentReference);
+        }
 
         // The source is store as page, but we need a complete location.WebHome reference
         if (!Objects.equals(sourceReference.getName(), this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE)) {
@@ -1541,9 +1605,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
         String publicationComment = collection != null && version != null ? publicationComment =
             "Published from [" + collection.getTitle() + "], version [" + version.getTitle() + "]." : null;
-
-        SpaceReference targetReference =
-            (SpaceReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
 
         DocumentReference variantReference =
             (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VARIANT);
@@ -1620,6 +1681,40 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         logger.debug("[publish] Publication ended.");
         logger.info("Publication finished");
         progressManager.popLevelProgress(this);
+    }
+
+    /**
+     * Remove the given documents
+     * @param documentReferencesString the documents to remove
+     * @param referenceParameter the reference used as a parameter to resolve the document references
+     * @throws XWikiException happens if there is an issue with the document deletion
+     */
+    private void removeDocuments(List<String> documentReferencesString, DocumentReference referenceParameter)
+        throws XWikiException
+    {
+        XWikiContext xcontext = this.getXWikiContext();
+        XWiki xwiki = xcontext.getWiki();
+
+        for (String toDeleteRefString : documentReferencesString) {
+            DocumentReference toDeleteRef = referenceResolver.resolve(toDeleteRefString, referenceParameter);
+            logger.debug("[removeDocuments] Deleting [{}].", toDeleteRef);
+            xwiki.deleteDocument(xwiki.getDocument(toDeleteRef, xcontext), xcontext);
+        }
+    }
+
+    /**
+     * Return if the given space is empty, except for his WebHome and WebPreferences pages
+     * @param subTargetDocumentsString list of pages under the target space
+     * @param targetDocumentReference WebHome document of the target space
+     * @return true if space is empty, except for his WebHome and WebPreferences pages
+     */
+    private boolean isEmptyTargetSpace(List<String> subTargetDocumentsString, DocumentReference targetDocumentReference)
+    {
+        subTargetDocumentsString.remove(localSerializer.serialize(targetDocumentReference));
+        subTargetDocumentsString.remove(localSerializer.serialize(
+            new DocumentReference(new EntityReference(BookVersionsConstants.XWIKI_PAGEADMINISTRATION_NAME,
+                EntityType.DOCUMENT, targetDocumentReference.getLastSpaceReference()))));
+        return subTargetDocumentsString.isEmpty();
     }
 
     // Adapted from org.xwiki.workflowpublication.internal.DefaultPublicationWorkflow (Publication Workflow Application)
