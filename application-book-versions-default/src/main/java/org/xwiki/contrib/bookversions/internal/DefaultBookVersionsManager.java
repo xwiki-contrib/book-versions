@@ -1585,6 +1585,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 // also removing the top page
                 subTargetDocumentsString.add(localSerializer.serialize(targetDocumentReference));
             }
+            logger.debug("[publish] Emptying the destination space, removing [{}] from wiki [{}].",
+                subTargetDocumentsString, targetDocumentReference.getWikiReference());
             removeDocuments(subTargetDocumentsString, targetDocumentReference);
         }
 
@@ -1617,6 +1619,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         // Execute publication job
         logger.info("Start publication.");
         List<String> pageReferenceTree = getPageReferenceTree(sourceReference);
+        List<DocumentReference> markedAsDeletedReferences = new ArrayList<>();
         int i = 1;
         int pageQuantity = pageReferenceTree != null ? pageReferenceTree.size() : 0;
         progressManager.pushLevelProgress(pageQuantity, this);
@@ -1643,18 +1646,21 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 continue;
             }
 
-            // Check if the content should be published
-            XWikiDocument contentPage = xwiki.getDocument(contentPageReference, xcontext).clone();
-            if (!isToBePublished(contentPage, variant, configuration)) {
-                // TODO: page shouldn't be ignored if it contains ordering and publishPageOrder is true
-                // TODO: markedAsDeleted shouldn't be ignored if update behaviour
-                continue;
-            }
-
             // Get the published reference
             DocumentReference publishedReference =
                 getPublishedReference(pageReference, collectionReference, targetReference);
             if (publishedReference == null) {
+                continue;
+            }
+
+            // Check if the content should be published
+            XWikiDocument contentPage = xwiki.getDocument(contentPageReference, xcontext).clone();
+            if (!isToBePublished(contentPage, variant, configuration)) {
+                // TODO: page shouldn't be ignored if it contains ordering and publishPageOrder is true
+                if(isMarkedDeleted(contentPage)) {
+                    // The original document is marked as deleted, add the published copy to be deleted from target
+                    markedAsDeletedReferences.add(publishedReference);
+                }
                 continue;
             }
 
@@ -1671,6 +1677,13 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             logger.debug("[publish] End working on page [{}].", pageStringReference);
             progressManager.endStep(this);
 
+        }
+
+        // Remove the pages marked as deleted
+        if (publicationBehaviour.equals(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_UPDATE)) {
+            logger.info("Removing the pages marked as deleted from the target space.");
+            logger.debug("[publish] Removing the following marked as deleted pages [{}].", markedAsDeletedReferences);
+            removeDocuments(markedAsDeletedReferences);
         }
 
         // Add metadata in the collection page (master) and top page (published space)
@@ -1692,13 +1705,29 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     private void removeDocuments(List<String> documentReferencesString, DocumentReference referenceParameter)
         throws XWikiException
     {
+        List<DocumentReference> toDeleteReferences = new ArrayList<>();
+        for (String toDeleteRefString : documentReferencesString) {
+            toDeleteReferences.add(referenceResolver.resolve(toDeleteRefString, referenceParameter));
+        }
+        removeDocuments(toDeleteReferences);
+    }
+
+    /**
+     * Remove the given documents
+     * @param documentReferencesString the documents to remove
+     * @throws XWikiException happens if there is an issue with the document deletion or checking its existence
+     */
+    private void removeDocuments(List<DocumentReference> documentReferencesString)
+        throws XWikiException
+    {
         XWikiContext xcontext = this.getXWikiContext();
         XWiki xwiki = xcontext.getWiki();
 
-        for (String toDeleteRefString : documentReferencesString) {
-            DocumentReference toDeleteRef = referenceResolver.resolve(toDeleteRefString, referenceParameter);
-            logger.debug("[removeDocuments] Deleting [{}].", toDeleteRef);
-            xwiki.deleteDocument(xwiki.getDocument(toDeleteRef, xcontext), xcontext);
+        for (DocumentReference toDeleteRef : documentReferencesString) {
+            if (xwiki.exists(toDeleteRef, xcontext)) {
+                logger.debug("[removeDocuments] Deleting [{}].", toDeleteRef);
+                xwiki.deleteDocument(xwiki.getDocument(toDeleteRef, xcontext), xcontext);
+            }
         }
     }
 
