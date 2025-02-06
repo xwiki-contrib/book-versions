@@ -1865,6 +1865,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     private void removeDocuments(List<String> documentReferencesString, DocumentReference referenceParameter)
         throws XWikiException
     {
+        if (documentReferencesString == null || referenceParameter == null) {
+            return;
+        }
         List<DocumentReference> toDeleteReferences = new ArrayList<>();
         for (String toDeleteRefString : documentReferencesString) {
             toDeleteReferences.add(referenceResolver.resolve(toDeleteRefString, referenceParameter));
@@ -1874,16 +1877,19 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     /**
      * Remove the given documents
-     * @param documentReferencesString the documents to remove
+     * @param documentReferences the documents to remove
      * @throws XWikiException happens if there is an issue with the document deletion or checking its existence
      */
-    private void removeDocuments(List<DocumentReference> documentReferencesString)
+    private void removeDocuments(List<DocumentReference> documentReferences)
         throws XWikiException
     {
+        if (documentReferences == null) {
+            return;
+        }
         XWikiContext xcontext = this.getXWikiContext();
         XWiki xwiki = xcontext.getWiki();
 
-        for (DocumentReference toDeleteRef : documentReferencesString) {
+        for (DocumentReference toDeleteRef : documentReferences) {
             if (xwiki.exists(toDeleteRef, xcontext)) {
                 logger.debug("[removeDocuments] Deleting [{}].", toDeleteRef);
                 xwiki.deleteDocument(xwiki.getDocument(toDeleteRef, xcontext), xcontext);
@@ -1895,10 +1901,13 @@ public class DefaultBookVersionsManager implements BookVersionsManager
      * Return if the given space is empty, except for his WebHome and WebPreferences pages
      * @param subTargetDocumentsString list of pages under the target space
      * @param targetDocumentReference WebHome document of the target space
-     * @return true if space is empty, except for his WebHome and WebPreferences pages
+     * @return true if space is empty, except for his WebHome and WebPreferences pages. False if any parameter is null
      */
     private boolean isEmptyTargetSpace(List<String> subTargetDocumentsString, DocumentReference targetDocumentReference)
     {
+        if (subTargetDocumentsString == null || targetDocumentReference == null) {
+            return false;
+        }
         subTargetDocumentsString.remove(localSerializer.serialize(targetDocumentReference));
         subTargetDocumentsString.remove(localSerializer.serialize(
             new DocumentReference(new EntityReference(BookVersionsConstants.XWIKI_PAGEADMINISTRATION_NAME,
