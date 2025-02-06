@@ -295,6 +295,18 @@
                 <new>method void org.xwiki.contrib.bookversions.BookVersionsManager::removeLibraryReferenceClassObject(org.xwiki.model.reference.DocumentReference, int) throws com.xpn.xwiki.XWikiException</new>
                 <justification>Needed for new features.</justification>
               </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.addedToInterface</code>
+                <new>method java.lang.String org.xwiki.contrib.bookversions.BookVersionsManager::getTranslatedTitle(com.xpn.xwiki.api.Document) throws com.xpn.xwiki.XWikiException, org.xwiki.query.QueryException</new>
+                <justification>Needed for new features.</justification>
+              </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.addedToInterface</code>
+                <new>method org.xwiki.model.reference.DocumentReference org.xwiki.contrib.bookversions.BookVersionsManager::getVersionedCollectionReference(com.xpn.xwiki.api.Document) throws com.xpn.xwiki.XWikiException, org.xwiki.query.QueryException</new>
+                <justification>Needed for new features.</justification>
+              </item>
             </differences>
           </revapi.differences>
         </analysisConfiguration>

@@ -31,6 +31,7 @@ import org.xwiki.query.QueryException;
 import org.xwiki.rendering.parser.ParseException;
 
 import com.xpn.xwiki.XWikiException;
+import com.xpn.xwiki.api.Document;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 /**
@@ -292,6 +293,16 @@ public interface BookVersionsManager
     String getTranslatedTitle(XWikiDocument document) throws XWikiException, QueryException;
 
     /**
+     * Get the translation title for the given document.
+     *
+     * @param document The document.
+     * @return the translation title for the given reference, for the selected language.
+     * @throws XWikiException In case the system can't provide an answer.
+     * @throws QueryException If any exception occurs while querying the database.
+     */
+    String getTranslatedTitle(Document document) throws XWikiException, QueryException;
+
+    /**
      * Get the translation title for the given reference, for the selected language.
      *
      * @param documentReference The document reference.
@@ -368,7 +379,7 @@ public interface BookVersionsManager
 
     /**
      * Get the versioned collection (book or library) reference of a given page.
-     * 
+     *
      * @param documentReference the page from which to take the collection reference
      * @return the versioned collection reference, or null if the page is not part of a collection
      * @throws XWikiException In case the system can't provide an answer.
@@ -376,6 +387,16 @@ public interface BookVersionsManager
      */
     DocumentReference getVersionedCollectionReference(DocumentReference documentReference)
         throws XWikiException, QueryException;
+
+    /**
+     * Get the versioned collection (book or library) reference of a given page.
+     * 
+     * @param document the page from which to take the collection reference
+     * @return the versioned collection reference, or null if the page is not part of a collection
+     * @throws XWikiException In case the system can't provide an answer.
+     * @throws QueryException If any exception occurs while querying the database.
+     */
+    DocumentReference getVersionedCollectionReference(Document document) throws XWikiException, QueryException;
 
     /**
      * Get the name of the referenced version.

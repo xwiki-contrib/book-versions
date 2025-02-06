@@ -36,6 +36,7 @@ import org.xwiki.query.QueryException;
 import org.xwiki.script.service.ScriptService;
 
 import com.xpn.xwiki.XWikiException;
+import com.xpn.xwiki.api.Document;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 /**
@@ -275,7 +276,20 @@ public class BookVersionsScriptService implements ScriptService
     }
 
     /**
-     * Get the translation title for the given reference, for the selected language.
+     * Get the translation title for the given document, in the selected language.
+     *
+     * @param document The document.
+     * @return the translation title for the given reference, for the selected language.
+     * @throws XWikiException In case the system can't provide an answer.
+     * @throws QueryException If any exception occurs while querying the database.
+     */
+    public String getTranslatedTitle(Document document) throws XWikiException, QueryException
+    {
+        return bookVersionsManagerProvider.get().getTranslatedTitle(document);
+    }
+
+    /**
+     * Get the translation title for the given reference, in the selected language.
      *
      * @param documentReference The document reference.
      * @return the translation title for the given reference, for the selected language.

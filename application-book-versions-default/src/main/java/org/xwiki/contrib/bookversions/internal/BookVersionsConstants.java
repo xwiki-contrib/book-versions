@@ -147,6 +147,31 @@ public interface BookVersionsConstants
         new EntityReference("XWikiComments", EntityType.DOCUMENT, XWIKI_REFERENCE);
 
     /**
+     * The id of the book class.
+     */
+    String BOOK_CLASS_SERIALIZED = "BookVersions.Code.BookClass";
+
+    /**
+     * The id of the libary class.
+     */
+    String LIBRARY_CLASS_SERIALIZED = "BookVersions.Code.LibraryClass";
+
+    /**
+     * The id of the libary class.
+     */
+    String BOOKVERSIONEDCONTENT_CLASS_SERIALIZED = "BookVersions.Code.BookVersionedContentClass";
+
+    /**
+     * The id of the libary class.
+     */
+    String BOOKPAGE_CLASS_SERIALIZED = "BookVersions.Code.BookPageClass";
+
+    /**
+     * The id of the page translation class.
+     */
+    String PAGE_TRANSLATION_CLASS_SERIALIZED = "BookVersions.Code.PageTranslationClass";
+
+    /**
      * The masterName property of a published collection data.
      */
     String PUBLISHEDCOLLECTION_PROP_MASTERNAME = "masterName";
@@ -369,7 +394,7 @@ public interface BookVersionsConstants
     /**
      * The default title value for translated documents.
      */
-    String DEFAULT_TRANSLATION_TITLE = "$!services.bookversions.getTranslatedTitle($doc.getDocumentReference())";
+    String DEFAULT_TRANSLATION_TITLE = "$!services.bookversions.getTranslatedTitle($doc)";
 
     /**
      * The message key about the missing title value for the selected translation.

@@ -75,6 +75,9 @@ import org.xwiki.rendering.renderer.BlockRenderer;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
 import org.xwiki.rendering.renderer.printer.WikiPrinter;
 
+import com.xpn.xwiki.api.Context;
+import com.xpn.xwiki.api.Document;
+
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -443,6 +446,38 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         return null;
     }
 
+    private String getSelectedLanguage(Document document) throws XWikiException, QueryException
+    {
+        if (document == null) {
+            return null;
+        }
+
+        DocumentReference documentReference = document.getDocumentReference();
+
+        Map<String, String> languagesMap = new HashMap<String, String>();
+        XWikiRequest request = getXWikiContext().getRequest();
+        HttpSession session = request.getSession();
+        if (session != null) {
+            languagesMap = (Map<String, String>) session.getAttribute(BookVersionsConstants.SESSION_SELECTEDLANGUAGE);
+
+            if (languagesMap != null) {
+                Iterator<?> it = languagesMap.entrySet().iterator();
+                DocumentReference versionedCollectionReference = getVersionedCollectionReference(document);
+
+                while (it.hasNext()) {
+                    Map.Entry<String, String> collectionLanguage = (Map.Entry<String, String>) it.next();
+                    String collectionReference = collectionLanguage.getKey();
+                    if (collectionReference != null && !collectionReference.isBlank()
+                        && collectionReference.equals(localSerializer.serialize(versionedCollectionReference))) {
+                        return collectionLanguage.getValue();
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
     @Override
     public void setSelectedLanguage(DocumentReference documentReference, String language)
     {
@@ -470,6 +505,20 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         return getDefaultTranslation(xcontext.getWiki().getDocument(documentReference, xcontext));
     }
 
+    private String getDefaultTranslation(Document document) throws XWikiException, QueryException
+    {
+        Map<String, Map<String, Object>> languageData = getLanguageData(document);
+
+        for (Entry<String, Map<String, Object>> languageDataEntry : languageData.entrySet()) {
+            if (languageDataEntry != null && languageDataEntry.getValue() != null
+                && (boolean) languageDataEntry.getValue().get(BookVersionsConstants.PAGETRANSLATION_ISDEFAULT)) {
+                return (String) languageDataEntry.getKey();
+            }
+        }
+
+        return null;
+    }
+
     private String getDefaultTranslation(XWikiDocument document) throws XWikiException, QueryException
     {
         Map<String, Map<String, Object>> languageData = getLanguageData(document);
@@ -482,6 +531,19 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         }
 
         return null;
+    }
+
+    @Override
+    public String getTranslatedTitle(Document document) throws XWikiException, QueryException
+    {
+        DocumentReference collectionRef = getVersionedCollectionReference(document);
+        String selectedLanguage = getSelectedLanguage(document);
+
+        if (selectedLanguage == null) {
+            selectedLanguage = this.getDefaultTranslation(document);
+        }
+
+        return selectedLanguage != null ? getTranslatedTitle(document, selectedLanguage) : null;
     }
 
     @Override
@@ -533,6 +595,42 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         }
 
         return title != null && !title.isEmpty() ? title : getInheritedTitle(document);
+    }
+
+    private String getTranslatedTitle(Document document, String language) throws XWikiException, QueryException
+    {
+        if (document == null || language == null || language.isEmpty()) {
+            return null;
+        }
+
+        String title = null;
+        com.xpn.xwiki.api.Object tObj = document.getObject(BookVersionsConstants.PAGE_TRANSLATION_CLASS_SERIALIZED,
+            BookVersionsConstants.PAGETRANSLATION_LANGUAGE, language);
+        if (tObj != null) {
+            title = (String) tObj.getValue(BookVersionsConstants.PAGETRANSLATION_TITLE);
+        }
+
+        return title != null && !title.isEmpty() ? title : getInheritedTitle(document);
+    }
+
+    private String getInheritedTitle(Document document) throws XWikiException
+    {
+        if (document.getObject(BookVersionsConstants.BOOKVERSIONEDCONTENT_CLASS_SERIALIZED) != null) {
+
+            DocumentReference documentReference = document.getDocumentReference();
+            SpaceReference parentSpaceReference = getSpaceReference(documentReference);
+            if (parentSpaceReference != null) {
+                DocumentReference parentPageReference = new DocumentReference("WebHome", parentSpaceReference);
+                // The parent is a book page, so use its title.
+                Document parentDocument = new Document(new XWikiDocument(parentPageReference), getXWikiContext());
+                if (parentDocument.getObject(BookVersionsConstants.BOOKPAGE_CLASS_SERIALIZED) != null) {
+                    return parentDocument.getTitle();
+                }
+            }
+
+        }
+
+        return document != null ? document.getDocumentReference().getName() : null;
     }
 
     private String getInheritedTitle(XWikiDocument document) throws XWikiException
@@ -820,6 +918,130 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         logger.debug("[queryPages] result : [{}]", result);
 
         return result;
+    }
+
+    /**
+     * Search for the parent storing the collection type (book or library).
+     */
+    @Override
+    public DocumentReference getVersionedCollectionReference(Document document) throws XWikiException, QueryException
+    {
+        if (document == null) {
+            return null;
+        }
+
+        DocumentReference documentReference = document.getDocumentReference();
+
+        if (document.getObject(BookVersionsConstants.BOOK_CLASS_SERIALIZED) != null
+            || document.getObject(BookVersionsConstants.LIBRARY_CLASS_SERIALIZED) != null) {
+            return documentReference;
+        }
+
+        EntityReference entityReference = documentReference.getParent();
+
+        if (entityReference != null) {
+
+            // Check if the parent is a document.
+            EntityReference documentEntityReference = entityReference.extractReference(EntityType.DOCUMENT);
+            if (documentEntityReference != null) {
+                DocumentReference parentDocumentReference = documentEntityReference instanceof DocumentReference
+                    ? (DocumentReference) documentEntityReference : new DocumentReference(documentEntityReference);
+
+                // Verify recursively if the parent is storing the collection definition.
+                return getVersionedCollectionReference(parentDocumentReference);
+            } else {
+                // Check if the parent is a space.
+                SpaceReference parentSpaceReference = getSpaceReference(entityReference);
+
+                // Check if the parent itself is a collection
+                DocumentReference parentDocumentReference = null;
+                if (parentSpaceReference != null) {
+                    parentDocumentReference = new DocumentReference(
+                        this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE, parentSpaceReference);
+                    if (isBook(parentDocumentReference) || isLibrary(parentDocumentReference)) {
+                        return parentDocumentReference;
+                    }
+                }
+
+                // If the parent is a space, but it's the last space of the given reference,
+                // then go upper with one level, to the parent of the parent to avoid Stack Overflow.
+                if (parentSpaceReference != null
+                    && parentSpaceReference.equals(documentReference.getLastSpaceReference())) {
+                    parentSpaceReference = getSpaceReference(parentSpaceReference.getParent());
+                }
+
+                // Get the document reference of the root for the parent space.
+                parentDocumentReference = parentSpaceReference != null ? new DocumentReference(
+                    this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE, parentSpaceReference) : null;
+
+                // Verify recursively if this document is storing the collection definition.
+                return getVersionedCollectionReference(parentDocumentReference);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Search for the parent storing the collection type (book or library).
+     */
+    @Override
+    public DocumentReference getVersionedCollectionReference(Document document) throws XWikiException, QueryException
+    {
+        if (document == null) {
+            return null;
+        }
+
+        DocumentReference documentReference = document.getDocumentReference();
+
+        if (document.getObject(BookVersionsConstants.BOOK_CLASS_SERIALIZED) != null
+            || document.getObject(BookVersionsConstants.LIBRARY_CLASS_SERIALIZED) != null) {
+            return documentReference;
+        }
+
+        EntityReference entityReference = documentReference.getParent();
+
+        if (entityReference != null) {
+
+            // Check if the parent is a document.
+            EntityReference documentEntityReference = entityReference.extractReference(EntityType.DOCUMENT);
+            if (documentEntityReference != null) {
+                DocumentReference parentDocumentReference = documentEntityReference instanceof DocumentReference
+                    ? (DocumentReference) documentEntityReference : new DocumentReference(documentEntityReference);
+
+                // Verify recursively if the parent is storing the collection definition.
+                return getVersionedCollectionReference(parentDocumentReference);
+            } else {
+                // Check if the parent is a space.
+                SpaceReference parentSpaceReference = getSpaceReference(entityReference);
+
+                // Check if the parent itself is a collection
+                DocumentReference parentDocumentReference = null;
+                if (parentSpaceReference != null) {
+                    parentDocumentReference = new DocumentReference(
+                        this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE, parentSpaceReference);
+                    if (isBook(parentDocumentReference) || isLibrary(parentDocumentReference)) {
+                        return parentDocumentReference;
+                    }
+                }
+
+                // If the parent is a space, but it's the last space of the given reference,
+                // then go upper with one level, to the parent of the parent to avoid Stack Overflow.
+                if (parentSpaceReference != null
+                    && parentSpaceReference.equals(documentReference.getLastSpaceReference())) {
+                    parentSpaceReference = getSpaceReference(parentSpaceReference.getParent());
+                }
+
+                // Get the document reference of the root for the parent space.
+                parentDocumentReference = parentSpaceReference != null ? new DocumentReference(
+                    this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE, parentSpaceReference) : null;
+
+                // Verify recursively if this document is storing the collection definition.
+                return getVersionedCollectionReference(parentDocumentReference);
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -2239,6 +2461,57 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         return result;
     }
 
+    private Map<String, Map<String, Object>> getLanguageData(Document document)
+    {
+
+        Map<String, Map<String, Object>> languageData = new HashMap<String, Map<String, Object>>();
+        if (document == null) {
+            return languageData;
+        }
+
+        XDOM xdom = document.getXDOM();
+
+        List<MacroBlock> macros = xdom.getBlocks(MACRO_MATCHER, Block.Axes.DESCENDANT_OR_SELF);
+        for (MacroBlock macroBlock : macros) {
+            if (macroBlock.getId().equals(BookVersionsConstants.CONTENTTRANSLATION_MACRO_ID)) {
+                String language = macroBlock.getParameter(BookVersionsConstants.PAGETRANSLATION_LANGUAGE);
+
+                if (language != null && !language.isEmpty()) {
+
+                    // Title
+                    String title = macroBlock.getParameter(BookVersionsConstants.PAGETRANSLATION_TITLE);
+
+                    // Status
+                    String statusParameterValue = macroBlock.getParameter(BookVersionsConstants.PAGETRANSLATION_STATUS);
+                    PageTranslationStatus status = PageTranslationStatus.NOT_TRANSLATED;
+                    if (statusParameterValue != null && !statusParameterValue.isEmpty()
+                        && statusParameterValue.equals("TRANSLATED")) {
+                        status = PageTranslationStatus.TRANSLATED;
+                    }
+                    if (statusParameterValue != null && !statusParameterValue.isEmpty()
+                        && statusParameterValue.equals("OUTDATED")) {
+                        status = PageTranslationStatus.OUTDATED;
+                    }
+
+                    // Default language
+                    String isDefault = macroBlock.getParameter(BookVersionsConstants.PAGETRANSLATION_ISDEFAULT);
+
+                    Map<String, Object> currentLanguageData = new HashMap<String, Object>();
+                    currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_TITLE,
+                        title != null && !title.isEmpty() ? title : "");
+                    currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_STATUS,
+                        status != null ? status : PageTranslationStatus.NOT_TRANSLATED);
+                    currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_ISDEFAULT,
+                        isDefault != null && !isDefault.isEmpty() ? Boolean.valueOf(isDefault) : false);
+
+                    languageData.put(language, currentLanguageData);
+                }
+            }
+        }
+
+        return languageData;
+    }
+
     @Override
     public Map<String, Map<String, Object>> getLanguageData(XWikiDocument document)
     {
@@ -2435,5 +2708,4 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     {
         return contextProvider.get();
     }
-
 }
