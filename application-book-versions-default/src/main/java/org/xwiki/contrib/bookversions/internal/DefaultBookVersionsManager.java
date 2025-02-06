@@ -986,68 +986,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
      * Search for the parent storing the collection type (book or library).
      */
     @Override
-    public DocumentReference getVersionedCollectionReference(Document document) throws XWikiException, QueryException
-    {
-        if (document == null) {
-            return null;
-        }
-
-        DocumentReference documentReference = document.getDocumentReference();
-
-        if (document.getObject(BookVersionsConstants.BOOK_CLASS_SERIALIZED) != null
-            || document.getObject(BookVersionsConstants.LIBRARY_CLASS_SERIALIZED) != null) {
-            return documentReference;
-        }
-
-        EntityReference entityReference = documentReference.getParent();
-
-        if (entityReference != null) {
-
-            // Check if the parent is a document.
-            EntityReference documentEntityReference = entityReference.extractReference(EntityType.DOCUMENT);
-            if (documentEntityReference != null) {
-                DocumentReference parentDocumentReference = documentEntityReference instanceof DocumentReference
-                    ? (DocumentReference) documentEntityReference : new DocumentReference(documentEntityReference);
-
-                // Verify recursively if the parent is storing the collection definition.
-                return getVersionedCollectionReference(parentDocumentReference);
-            } else {
-                // Check if the parent is a space.
-                SpaceReference parentSpaceReference = getSpaceReference(entityReference);
-
-                // Check if the parent itself is a collection
-                DocumentReference parentDocumentReference = null;
-                if (parentSpaceReference != null) {
-                    parentDocumentReference = new DocumentReference(
-                        this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE, parentSpaceReference);
-                    if (isBook(parentDocumentReference) || isLibrary(parentDocumentReference)) {
-                        return parentDocumentReference;
-                    }
-                }
-
-                // If the parent is a space, but it's the last space of the given reference,
-                // then go upper with one level, to the parent of the parent to avoid Stack Overflow.
-                if (parentSpaceReference != null
-                    && parentSpaceReference.equals(documentReference.getLastSpaceReference())) {
-                    parentSpaceReference = getSpaceReference(parentSpaceReference.getParent());
-                }
-
-                // Get the document reference of the root for the parent space.
-                parentDocumentReference = parentSpaceReference != null ? new DocumentReference(
-                    this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE, parentSpaceReference) : null;
-
-                // Verify recursively if this document is storing the collection definition.
-                return getVersionedCollectionReference(parentDocumentReference);
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Search for the parent storing the collection type (book or library).
-     */
-    @Override
     public DocumentReference getVersionedCollectionReference(DocumentReference documentReference)
         throws XWikiException, QueryException
     {
