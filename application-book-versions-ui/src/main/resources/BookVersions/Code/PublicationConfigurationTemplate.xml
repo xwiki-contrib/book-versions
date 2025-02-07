@@ -51,21 +51,6 @@
       <defaultWeb/>
       <nameField/>
       <validationScript/>
-      <createSubSpace>
-        <customDisplay/>
-        <defaultValue/>
-        <disabled>0</disabled>
-        <displayFormType>checkbox</displayFormType>
-        <displayType/>
-        <hint/>
-        <name>createSubSpace</name>
-        <number>6</number>
-        <prettyName>createSubSpace</prettyName>
-        <unmodifiable>0</unmodifiable>
-        <validationMessage/>
-        <validationRegExp/>
-        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
-      </createSubSpace>
       <description>
         <customDisplay>{{include reference="BookVersions.Code.ContentDisplay"/}}</customDisplay>
         <disabled>0</disabled>
@@ -261,9 +246,6 @@
         <classType>com.xpn.xwiki.objects.classes.PageClass</classType>
       </version>
     </class>
-    <property>
-      <createSubSpace/>
-    </property>
     <property>
       <destinationSpace/>
     </property>
