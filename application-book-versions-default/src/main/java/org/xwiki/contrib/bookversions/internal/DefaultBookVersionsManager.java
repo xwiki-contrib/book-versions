@@ -1840,7 +1840,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         }
 
         // Remove the pages marked as deleted
-        if (publicationBehaviour.equals(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_UPDATE)) {
+        if (publicationBehaviour.equals(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_UPDATE)
+            && markedAsDeletedReferences.size() > 0)
+        {
             logger.info("Removing the pages marked as deleted from the target space.");
             logger.debug("[publish] Removing the following marked as deleted pages [{}].", markedAsDeletedReferences);
             removeDocuments(markedAsDeletedReferences);
