@@ -551,7 +551,8 @@
       <code>document.observe("xwiki:actions:beforeSave", function (event) {
   let parentReference = document.querySelector('#destinationPickerParentReference').value
   let pageName = document.querySelector('#destinationPickerTitle').value
-  let wikiRef = document.querySelector('#destinationPickerWiki').value
+  let wikiElement = document.querySelector('#destinationPickerWiki');
+  let wikiRef = wikiElement ? wikiElement.value : 'xwiki';
   let fullReferenceObj = new XWiki.Model.resolve(wikiRef + ":" + parentReference, XWiki.EntityType.SPACE)
   if (pageName != null &amp;&amp; pageName.length &gt; 0) {
     fullReferenceObj = new XWiki.EntityReference(pageName, XWiki.EntityType.SPACE, fullReferenceObj, false)
