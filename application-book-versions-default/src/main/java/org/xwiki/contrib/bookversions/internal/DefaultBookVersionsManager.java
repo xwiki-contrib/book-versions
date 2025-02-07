@@ -1706,7 +1706,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         // Load Publication
         Map<String, Object> configuration = loadPublicationConfiguration(configurationReference);
         if (configuration == null || configuration.isEmpty()) {
-            logger.error("[publishInternal] No configuration provided (null or empty)."can);
+            logger.error("[publishInternal] No configuration provided (null or empty).");
             return;
         }
         DocumentReference sourceReference =
