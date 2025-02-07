@@ -66,12 +66,20 @@ BookVersions.Code.PublicationConfigurationClass_publishOnlyComplete=Ne publier q
 BookVersions.Code.PublicationConfigurationClass_publishPageOrder=Ordre de publication des pages
 ### Missing: BookVersions.Code.PublicationConfigurationClass_publishPageOrder_hint=Publish the page order from the source, which might overwrite the target ordering. If unchecked, the target ordering is left untouched.
 BookVersions.Code.PublicationConfigurationClass_publishBehaviour=Comportement de la publication
-### Missing: BookVersions.Code.PublicationConfigurationClass_publishBehaviour_hint=Which behaviour to adopt when the target space is already populated. "Cancel" for not publishing ; "Update" to publish update existing pages, add new pages from source but leave page deleted from source in the destination. Pages marked as deleted in source will be removed from destination. ; "Re-publish" to reset the destination space.
+BookVersions.Code.PublicationConfigurationClass_publishBehaviour_hint=Which behaviour to adopt when the target space is already populated. "Cancel" for not publishing ; "Update" to publish update existing pages, add new pages from source but leave page deleted from source in the destination. Pages marked as deleted in source will be removed from destination. ; "Re-publish" to reset the destination space.
 BookVersions.Code.PublicationConfigurationClass_publishBehaviour_cancel=Annuler
 BookVersions.Code.PublicationConfigurationClass_publishBehaviour_update=Mettre à jour
 BookVersions.Code.PublicationConfigurationClass_publishBehaviour_republish=Re-publier
 BookVersions.Code.PublicationConfigurationClass_description=Description
 BookVersions.Code.PublicationConfigurationClass_description_hint=Description de la configuration
+### Missing: BookVersions.Code.PublicationConfigurationClass.sourceLocationLabel=Location
+### Missing: BookVersions.Code.PublicationConfigurationClass.sourceLocationHint=Location in the page hierarchy which will be the source of the publication
+### Missing: BookVersions.Code.PublicationConfigurationClass.destinationSpaceLabel=Name of the space
+### Missing: BookVersions.Code.PublicationConfigurationClass.destinationSpaceHint=(optional) If you want to create a new space with the specified name.
+### Missing: BookVersions.Code.PublicationConfigurationClass.destinationLocationLabel=Destination
+### Missing: BookVersions.Code.PublicationConfigurationClass.destinationLocationHint=Location in the page hierarchy which will be the destination of the publication
+### Missing: BookVersions.Code.PublicationConfigurationClass.destinationWikiLabel=Wiki name
+### Missing: BookVersions.Code.PublicationConfigurationClass.destinationWikiHint=Name of the wiki for the publication destination
 
 # Sheet
 BookVersions.Code.VersionClassSheet.versionConfiguration=Configuration de la version
