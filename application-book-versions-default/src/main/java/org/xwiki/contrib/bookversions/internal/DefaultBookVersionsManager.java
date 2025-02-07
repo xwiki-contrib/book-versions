@@ -1715,10 +1715,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             logger.error("[publishInternal] Could not read the source from [{}]", configurationReference);
             return;
         }
-        if (!xwiki.exists(sourceReference, xcontext)) {
-            logger.error("[publishInternal] The provided source reference [{}] does not exist.", sourceReference);
-            return;
-        }
         SpaceReference targetReference =
             (SpaceReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
         if (targetReference == null) {
@@ -1762,6 +1758,10 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             sourceReference =
                 new DocumentReference(new EntityReference(this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE,
                     EntityType.DOCUMENT, sourceParentSpaceReference));
+        }
+        if (!xwiki.exists(sourceReference, xcontext)) {
+            logger.error("[publishInternal] The provided source reference [{}] does not exist.", sourceReference);
+            return;
         }
         DocumentReference collectionReference = getVersionedCollectionReference(sourceReference);
         XWikiDocument collection =
