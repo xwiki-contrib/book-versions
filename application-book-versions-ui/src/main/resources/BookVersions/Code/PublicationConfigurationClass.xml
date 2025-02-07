@@ -262,8 +262,7 @@
   &lt;/div&gt;
 #end
 {{html}}
-## TODO / FIXME we should have a better way to detect the root of the book
-#set ($rootDocument = $doc.documentReference.lastSpaceReference.parent)
+#set ($rootDocument = $services.bookversions.getVersionedCollectionReference($doc.getDocumentReference()))
 #set ($currentValueStr = $doc.getObject("BookVersions.Code.PublicationConfigurationClass").getValue('source'))
 #if ("$!currentValueStr" == '')
   #set ($currentValue = $rootDocument)
