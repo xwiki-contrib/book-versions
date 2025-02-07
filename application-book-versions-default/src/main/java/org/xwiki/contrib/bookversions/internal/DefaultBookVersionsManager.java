@@ -1715,6 +1715,10 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             logger.error("[publishInternal] Could not read the source from [{}]", configurationReference);
             return;
         }
+        if (!xwiki.exists(sourceReference, xcontext)) {
+            logger.error("[publishInternal] The provided source reference [{}] does not exist.", sourceReference);
+            return;
+        }
         SpaceReference targetReference =
             (SpaceReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
         if (targetReference == null) {
