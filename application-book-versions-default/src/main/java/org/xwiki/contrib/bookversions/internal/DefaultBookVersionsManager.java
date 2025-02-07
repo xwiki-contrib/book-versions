@@ -1698,7 +1698,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             return;
         }
 
-        logger.debug("[publish] Publication required with configuration [{}]", configurationReference);
+        logger.debug("[publishInternal] Publication required with configuration [{}]", configurationReference);
         logger.info("Starting publication job with configuration [{}].", configurationReference);
         XWikiContext xcontext = this.getXWikiContext();
         XWiki xwiki = xcontext.getWiki();
@@ -1706,25 +1706,26 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         // Load Publication
         Map<String, Object> configuration = loadPublicationConfiguration(configurationReference);
         if (configuration == null || configuration.isEmpty()) {
+            logger.error("[publishInternal] No configuration provided (null or empty)."can);
             return;
         }
         DocumentReference sourceReference =
             (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE);
         if (sourceReference == null) {
-            logger.error("[publish] Could not read the source from [{}]", configurationReference);
+            logger.error("[publishInternal] Could not read the source from [{}]", configurationReference);
             return;
         }
         SpaceReference targetReference =
             (SpaceReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
         if (targetReference == null) {
-            logger.error("[publish] Could not read the target from [{}].", configurationReference);
+            logger.error("[publishInternal] Could not read the target from [{}].", configurationReference);
             return;
         }
 
         String publicationBehaviour =
             (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR);
         if (publicationBehaviour == null) {
-            logger.error("[publish] Could not read the behaviour from [{}].", configurationReference);
+            logger.error("[publishInternal] Could not read the behaviour from [{}].", configurationReference);
             return;
         }
         DocumentReference targetDocumentReference =
@@ -1745,7 +1746,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 // also removing the top page
                 subTargetDocumentsString.add(localSerializer.serialize(targetDocumentReference));
             }
-            logger.debug("[publish] Emptying the destination space, removing [{}] from wiki [{}].",
+            logger.debug("[publishInternal] Emptying the destination space, removing [{}] from wiki [{}].",
                 subTargetDocumentsString, targetDocumentReference.getWikiReference());
             removeDocuments(subTargetDocumentsString, targetDocumentReference);
         }
@@ -1785,24 +1786,32 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         progressManager.pushLevelProgress(pageQuantity, this);
         for (String pageStringReference : pageReferenceTree) {
             if (pageStringReference == null) {
+                logger.debug("[publishInternal] Page publication cancelled because the page reference is null.");
+                logger.error("Page publication cancelled because the reference can't be found.");
                 continue;
             }
 
             progressManager.startStep(this, pageStringReference);
-            logger.info("Page publication {}/{}: [{}]", i, pageQuantity, pageStringReference);
+            logger.info("Start page publication {}/{}: [{}]", i, pageQuantity, pageStringReference);
             i++;
             DocumentReference pageReference = referenceResolver.resolve(pageStringReference, configurationReference);
 
             if (!isPage(pageReference)) {
+                logger.debug("[publishInternal] Page does not have a [{}] object.",
+                    BookVersionsConstants.BOOKPAGE_CLASS_REFERENCE);
+                logger.error("Page is not recognized as a book/library page.");
                 continue;
             }
             XWikiDocument page = xwiki.getDocument(pageReference, xcontext);
 
             // Get the relevant content for the page
             DocumentReference contentPageReference = getContentPage(page, configuration);
-            logger.debug("[publish] For page [{}], the content will be taken from [{}]", page.getDocumentReference(),
-                contentPageReference);
+            logger.debug("[publishInternal] For page [{}], the content will be taken from [{}]",
+                page.getDocumentReference(), contentPageReference);
             if (contentPageReference == null) {
+                logger.debug("[publishInternal] Page publication cancelled because the content to be published can't "
+                    + "be found by getContentPage. One input is probably null.");
+                logger.error("Page publication cancelled because the content to be published can't be found.");
                 continue;
             }
 
@@ -1810,6 +1819,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             DocumentReference publishedReference =
                 getPublishedReference(pageReference, collectionReference, targetReference);
             if (publishedReference == null) {
+                logger.debug("[publishInternal] Page publication cancelled because the published reference can't be "
+                    + "computed by getPublishedReference. One input is null.");
+                logger.error("Page publication cancelled because the published reference can't be computed.");
                 continue;
             }
 
@@ -1832,9 +1844,10 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             logger.info("Transforming content for publication.");
             prepareForPublication(contentPage, publishedDocument, publishedLibraries, configuration);
 
-            logger.debug("[publish] Publish page.");
+            logger.debug("[publishInternal] Publish page.");
             xwiki.saveDocument(publishedDocument, publicationComment, xcontext);
-            logger.debug("[publish] End working on page [{}].", pageStringReference);
+            logger.debug("[publishInternal] End working on page [{}].", pageStringReference);
+            logger.info("End page publication [{}].", pageStringReference);
             progressManager.endStep(this);
 
         }
@@ -1844,17 +1857,18 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             && markedAsDeletedReferences.size() > 0)
         {
             logger.info("Removing the pages marked as deleted from the target space.");
-            logger.debug("[publish] Removing the following marked as deleted pages [{}].", markedAsDeletedReferences);
+            logger.debug("[publishInternal] Removing the following marked as deleted pages [{}].",
+                markedAsDeletedReferences);
             removeDocuments(markedAsDeletedReferences);
         }
 
         // Add metadata in the collection page (master) and top page (published space)
-        logger.debug("[publish] Adding metadata on master and published space top pages.");
+        logger.debug("[publishInternal] Adding metadata on master and published space top pages.");
         addMasterPublicationData(collection, configuration);
         addTopPublicationData(targetReference, publicationComment, collection, configuration);
 
-        logger.debug("[publish] Publication ended.");
-        logger.info("Publication finished");
+        logger.debug("[publishInternal] Publication ended.");
+        logger.info("Publication finished in [{}].", targetDocumentReference);
         progressManager.popLevelProgress(this);
     }
 
