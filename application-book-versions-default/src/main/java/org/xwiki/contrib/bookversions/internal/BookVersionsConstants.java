@@ -367,6 +367,12 @@ public interface BookVersionsConstants
     String PAGETRANSLATION_STATUS = "status";
 
     /**
+     * The hasTranslated property, listing if there is at least one translated status for a language in the Page
+     * Translation class.
+     */
+    String PAGETRANSLATION_HASTRANSLATED = "hasTranslated";
+
+    /**
      * The 'not translated' status property in the Page Translation class.
      */
     String PAGETRANSLATION_STATUS_UNTRANSLATED = "notTranslated";

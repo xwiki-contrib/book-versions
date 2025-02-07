@@ -2352,6 +2352,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             return false;
         }
 
+        DocumentReference pageReference = page.getDocumentReference();
         List<DocumentReference> variants = getPageVariants(page);
         String status = getPageStatus(page);
         boolean publishOnlyComplete =
@@ -2361,29 +2362,55 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             excludePagesOutsideVariant = (variant.getXObject(BookVersionsConstants.VARIANT_CLASS_REFERENCE)
                 .getIntValue(BookVersionsConstants.VARIANT_PROP_EXCLUDE) == 1);
         }
+        String language = (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_LANGUAGE);
         if (isMarkedDeleted(page)) {
-            logger.debug("[isToBePublished] Page is ignored because it is marked as deleted.");
-            logger.info("Page is ignored because it is marked as deleted.");
+            // Page is marked as deleted
+            logger.debug("[isToBePublished] Page is [{}] ignored because it is marked as deleted.", pageReference);
+            logger.info("Page is [{}] ignored because it is marked as deleted.", pageReference);
             return false;
         } else if (publishOnlyComplete && status != null
             && !status.equals(BookVersionsConstants.PAGESTATUS_PROP_STATUS_COMPLETE)) {
-            logger.debug("[isToBePublished] Page is ignored because its status is [{}] and only complete page are "
-                + "published.", status);
-            logger.info("Page is ignored because its status is [{}] and only complete page are published.", status);
+            // Page doesn't have a "complete" status but only those are published
+            logger.debug("[isToBePublished] Page is [{}] ignored because its status is [{}] and only complete page are "
+                + "published.", pageReference, status);
+            logger.info("Page  [{}] is ignored because its status is [{}] and only complete page are published.",
+                pageReference, status);
             return false;
         } else if (variant == null && variants != null && !variants.isEmpty()) {
             // No variant to be published AND page is associated with variant(s)
-            logger.debug("[isToBePublished] Page is ignored because it is associated with variants.");
-            logger.info("Page is ignored because it is associated with variants.");
+            logger.debug("[isToBePublished] Page is [{}] ignored because it is associated with variants.",
+                pageReference);
+            logger.info("Page is [{}] ignored because it is associated with variants.", pageReference);
             return false;
         } else if (variant != null && variants != null && !variants.contains(variant.getDocumentReference())
             && (excludePagesOutsideVariant || (!excludePagesOutsideVariant && !variants.isEmpty()))) {
             // A variant is to be published AND the page is associated with other variant(s) AND
             // (pages outside the variant are excluded
             // OR pages outside the variant are excluded but the page is associated to the published variant)
-            logger.debug("[isToBePublished] Page is ignored because it is not associated with the published variant.");
-            logger.info("Page is ignored because it is not associated with the published variant.");
+            logger.debug("[isToBePublished] Page is [{}] ignored because it is not associated with the published "
+                + "variant.", pageReference);
+            logger.info("Page is [{}] ignored because it is not associated with the published variant.", pageReference);
             return false;
+        } else if (StringUtils.isNotEmpty(language)) {
+            Map<String, Map<String, Object>> languageData = getLanguageData(page);
+            if (languageData.get(language) == null)
+            {
+                // The page has no translation
+                logger.debug("[isToBePublished] Page is [{}] ignored because it is not associated with the "
+                    + "published language.", pageReference);
+                logger.info("Page is [{}] ignored because it is not associated with the published language.",
+                    pageReference);
+                return false;
+            } else if (languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED) == null
+                || !((boolean) languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED)))
+            {
+                // The page has no "Translated" translation
+                logger.debug("[isToBePublished] Page is [{}] ignored because the translation doesn't has a [{}] "
+                    + "status.", pageReference, BookVersionsConstants.PAGETRANSLATION_STATUS_TRANSLATED);
+                logger.error("Page is [{}] ignored because the translation doesn't has a [{}] status.",
+                    pageReference, BookVersionsConstants.PAGETRANSLATION_STATUS_TRANSLATED);
+                return false;
+            }
         }
         return true;
     }
@@ -2468,6 +2495,16 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                         title != null && !title.isEmpty() ? title : "");
                     currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_STATUS,
                         status != null ? status : PageTranslationStatus.NOT_TRANSLATED);
+                    if (languageData.get(language) != null
+                        && languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED) != null
+                        && (boolean) languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED)
+                    ) {
+                        // the current language already has a Translated status which should be kept
+                        currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED, true);
+                    } else {
+                        currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED,
+                            status == PageTranslationStatus.TRANSLATED);
+                    }
                     currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_ISDEFAULT,
                         isDefault != null && !isDefault.isEmpty() ? Boolean.valueOf(isDefault) : false);
 
@@ -2520,6 +2557,16 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                         title != null && !title.isEmpty() ? title : "");
                     currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_STATUS,
                         status != null ? status : PageTranslationStatus.NOT_TRANSLATED);
+                    if (languageData.get(language) != null
+                        && languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED) != null
+                        && (boolean) languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED)
+                    ) {
+                        // the current language already has a Translated status which should be kept
+                        currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED, true);
+                    } else {
+                        currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED,
+                            status == PageTranslationStatus.TRANSLATED);
+                    }
                     currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_ISDEFAULT,
                         isDefault != null && !isDefault.isEmpty() ? Boolean.valueOf(isDefault) : false);
 
