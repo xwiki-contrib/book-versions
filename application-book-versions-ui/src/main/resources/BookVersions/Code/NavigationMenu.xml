@@ -934,7 +934,9 @@
   #set ($versionedContentReference = $services.bookversions.getVersionedContentReference($docRef, $selectedVersion))
   #if ($versionedContentReference &amp;&amp; $xwiki.exists($versionedContentReference))
     #set ($discard = $debuglogger.debug("Redirect to version content selected: $versionedContentReference"))
-    $response.sendRedirect($xwiki.getURL($versionedContentReference, $xcontext.action))
+    #if("$!{request.viewer}" == '' &amp;&amp; "$!{request.xpage}" == '')
+      $response.sendRedirect($xwiki.getURL($versionedContentReference, $xcontext.action))
+    #end
   #else
     #handleInheritedContent()
   #end
