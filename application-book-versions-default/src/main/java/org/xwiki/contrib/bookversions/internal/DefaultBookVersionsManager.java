@@ -2297,6 +2297,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VARIANT);
         DocumentReference versionReference =
             (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VERSION);
+        String language = (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_LANGUAGE);
 
         // First, update any document macro that could contain nested content (variant macro)
 
@@ -2368,13 +2369,47 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             }
         }
 
+        boolean transformedTranslation = transformTranslation(xdom, language);
         boolean transformedLibrary =
             transformLibrary(xdom, originalDocumentReference, publishedLibraries, versionReference);
         Map<DocumentReference, DocumentReference> currentPublishedLibraries =
             publishedLibraries != null ? publishedLibraries.get(getVersionName(versionReference)) : new HashMap<>();
         boolean transformedReferences = publicationReferencesTransformationHelper.transform(xdom,
             originalDocumentReference, currentPublishedLibraries, configuration);
-        return hasXDOMChanged || transformedLibrary || transformedReferences;
+        return hasXDOMChanged || transformedTranslation || transformedLibrary || transformedReferences;
+    }
+
+    private boolean transformTranslation(XDOM xdom, String language)
+    {
+        if (xdom == null) {
+            return false;
+        }
+        logger.debug("[transformTranslation] Starting to remove macro [{}] with not a [{}] status.",
+            BookVersionsConstants.CONTENTTRANSLATION_MACRO_ID, PageTranslationStatus.TRANSLATED);
+        if (StringUtils.isNotEmpty(language)) {
+            logger.debug("[transformTranslation] Removing canceled as only [{}] are part of the publication of "
+                    + "language [{}].", PageTranslationStatus.TRANSLATED, language);
+        }
+
+        boolean hasChanged = false;
+        List<MacroBlock> listBlock = xdom.getBlocks(new ClassBlockMatcher(
+            new MacroBlock(BookVersionsConstants.CONTENTTRANSLATION_MACRO_ID, Collections.emptyMap(),
+                true).getClass()), Block.Axes.DESCENDANT_OR_SELF);
+        logger.debug("[transformTranslation] Found [{}] [{}] macros.", listBlock.size(),
+            BookVersionsConstants.CONTENTTRANSLATION_MACRO_ID);
+        for (MacroBlock macroBlock : listBlock) {
+            String macroStatus = macroBlock.getParameter(BookVersionsConstants.PAGETRANSLATION_STATUS);
+            if (StringUtils.isNotEmpty(macroStatus)
+                && !macroStatus.toLowerCase().equals(PageTranslationStatus.TRANSLATED.getTranslationStatus()))
+            {
+                logger.debug("[transformTranslation] Status is [{}], macro is removed.", macroStatus);
+                macroBlock.getParent().removeBlock(macroBlock);
+                hasChanged = true;
+            } else {
+                logger.debug("[transformTranslation] Status is [{}], macro is kept.", macroStatus);
+            }
+        }
+        return hasChanged;
     }
 
     private boolean transformLibrary(XDOM xdom, DocumentReference originalDocumentReference,
