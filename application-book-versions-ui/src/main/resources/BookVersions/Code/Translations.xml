@@ -215,7 +215,13 @@ BookVersions.Code.CustomEditHandler.popupTitle=Edit inherited content from {0}
 BookVersions.Code.CustomEditHandler.popupDescription=The content for version {0} does not exist. You have the option to either create the content for this version, or to switch to version {1}.
 BookVersions.Code.CustomEditHandler.popupSwitchVersion=Switch to version {0}
 BookVersions.Code.CustomEditHandler.popupCreateContentForVersion=Create content for version {0}
-BookVersions.Code.CustomEditHandler.popupCancel=Cancel</content>
+BookVersions.Code.CustomEditHandler.popupCancel=Cancel
+
+# Publication progress
+BookVersions.Code.PublicationProgress.title=Publication Progress
+BookVersions.Code.PublicationProgress.backToBook=Back to Book
+BookVersions.Code.PublicationActionHandler.error.jobCreation=Failed to create publication job
+BookVersions.Code.PublicationActionHandler.error.permission=Permission denied</content>
   <object>
     <name>BookVersions.Code.Translations</name>
     <number>0</number>

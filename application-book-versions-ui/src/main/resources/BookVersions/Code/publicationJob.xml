@@ -37,12 +37,17 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
   <content>{{velocity}}
-#if ($services.csrf.isTokenValid($!request.form_token))
+#if ($request.action == 'publish' &amp;&amp; $services.csrf.isTokenValid($!request.form_token))
   #set ($configReference = $!request.configReference)
-    #set ($jobId = $services.bookversions.publish($configReference))
-    #if ($jobId)
-      {{jobprogress jobid=$jobId/}}
-    #end
+  #set ($bookReference = $services.model.resolveDocument($doc.getObject('BookVersions.Code.PublicationConfigurationClass').getProperty('source').value))
+  #set ($jobId = $services.bookversions.publish($configReference))
+  #if ($jobId)
+     #set ($redirectParams = $escapetool.url({'jobId': $jobId}))
+     $response.sendRedirect($doc.getURL('view', $redirectParams))
+   #else
+     #set ($errorMsg = $services.localization.render('BookVersions.Code.PublicationActionHandler.error.jobCreation'))
+     $response.sendRedirect($doc.getURL('view', "error=$!{errorMsg}"))
+   #end
 #end
 {{/velocity}}</content>
 </xwikidoc>
