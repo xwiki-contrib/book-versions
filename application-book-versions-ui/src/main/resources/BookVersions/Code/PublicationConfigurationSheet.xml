@@ -55,7 +55,7 @@
 
 ## Temporary variable to hide properties that do not are considered yet by publication
 ## Once empty, code related to it can be removed
-#set ($disabledProperties = ['language','publishPageOrder'])
+#set ($disabledProperties = ['publishPageOrder'])
 
 ## We have to use wiki=true because $doc.display() can produce wiki syntax.
 {{html wiki="true" clean="false"}}

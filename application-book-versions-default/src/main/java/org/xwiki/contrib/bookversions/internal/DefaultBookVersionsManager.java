@@ -1728,6 +1728,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             logger.error("[publishInternal] Could not read the behaviour from [{}].", configurationReference);
             return;
         }
+        String language = (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_LANGUAGE);
         DocumentReference targetDocumentReference =
             new DocumentReference(new EntityReference(xwiki.DEFAULT_SPACE_HOMEPAGE,
                 EntityType.DOCUMENT, targetReference));
@@ -1843,6 +1844,10 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             // Create the published document
             logger.info("Copying page [{}] to [{}].", contentPage.getDocumentReference(), publishedReference);
             XWikiDocument publishedDocument = xwiki.getDocument(publishedReference, xcontext);
+            if (StringUtils.isNotEmpty(language)) {
+                // Change the original content if a translation is to be published
+                mergeTranslatedContent(contentPage, publishedDocument, language);
+            }
             copyContentsToNewVersion(contentPage, publishedDocument, xcontext);
 
             logger.info("Transforming content for publication.");
@@ -2406,9 +2411,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             {
                 // The page has no "Translated" translation
                 logger.debug("[isToBePublished] Page is [{}] ignored because the translation doesn't has a [{}] "
-                    + "status.", pageReference, BookVersionsConstants.PAGETRANSLATION_STATUS_TRANSLATED);
+                    + "status.", pageReference, PageTranslationStatus.TRANSLATED);
                 logger.error("Page is [{}] ignored because the translation doesn't has a [{}] status.",
-                    pageReference, BookVersionsConstants.PAGETRANSLATION_STATUS_TRANSLATED);
+                    pageReference, PageTranslationStatus.TRANSLATED);
                 return false;
             }
         }
