@@ -1753,11 +1753,24 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
         // The source is store as page, but we need a complete location.WebHome reference
         if (!Objects.equals(sourceReference.getName(), this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE)) {
-            SpaceReference sourceParentSpaceReference = new SpaceReference(
-                new EntityReference(sourceReference.getName(), EntityType.SPACE, sourceReference.getParent()));
-            sourceReference =
-                new DocumentReference(new EntityReference(this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE,
-                    EntityType.DOCUMENT, sourceParentSpaceReference));
+            DocumentReference newSourceReference;
+            // Check if parent is "Main" which indicates root level space
+            if (sourceReference.getParent().getName().equals("Main")) {
+                // Root level space - create direct reference
+                newSourceReference = new DocumentReference(
+                    sourceReference.getWikiReference().getName(),
+                    sourceReference.getName(),
+                    this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE
+                );
+            } else {
+                // Nested space - use original logic
+                SpaceReference sourceParentSpaceReference = new SpaceReference(
+                    new EntityReference(sourceReference.getName(), EntityType.SPACE, sourceReference.getParent()));
+                newSourceReference = new DocumentReference(
+                    new EntityReference(this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE,
+                        EntityType.DOCUMENT, sourceParentSpaceReference));
+            }
+            sourceReference = newSourceReference;
         }
         if (!xwiki.exists(sourceReference, xcontext)) {
             logger.error("[publishInternal] The provided source reference [{}] does not exist.", sourceReference);
