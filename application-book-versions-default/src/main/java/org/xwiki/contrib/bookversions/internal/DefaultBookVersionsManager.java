@@ -1935,6 +1935,13 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     private void mergeTranslatedContent(XWikiDocument masterDocument, XWikiDocument publishedDocument, String language)
         throws XWikiException
     {
+        if (masterDocument == null || publishedDocument == null || language == null) {
+            logger.error("[mergeTranslatedContent] A parameter is null: masterDocument [{}], publishedDocument [{}], "
+                + "language [{}]", masterDocument.getDocumentReference(), publishedDocument.getDocumentReference(),
+                language);
+            return;
+        }
+
         XWikiContext xcontext = this.getXWikiContext();
         XWiki xwiki = xcontext.getWiki();
         // Look for the content to be published
@@ -1981,6 +1988,12 @@ public class DefaultBookVersionsManager implements BookVersionsManager
      */
     private MacroBlock getTranslatedMacroBlock(XDOM xdom, String language)
     {
+        if (xdom == null ||  language == null) {
+            logger.error("[mergeTranslatedContent] A parameter is null: xdom [{}], language [{}]", xdom,
+                language);
+            return null;
+        }
+
         logger.debug("[getTranslatedMacroBlock] Looking for the first [{}] macro, with the [{}] status, for language "
             + "[{}].", BookVersionsConstants.CONTENTTRANSLATION_MACRO_ID,
             PageTranslationStatus.TRANSLATED, language);
