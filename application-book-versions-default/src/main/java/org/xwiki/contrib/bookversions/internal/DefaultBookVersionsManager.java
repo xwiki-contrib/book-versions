@@ -75,7 +75,6 @@ import org.xwiki.rendering.renderer.BlockRenderer;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
 import org.xwiki.rendering.renderer.printer.WikiPrinter;
 
-import com.xpn.xwiki.api.Context;
 import com.xpn.xwiki.api.Document;
 
 import com.xpn.xwiki.XWiki;
