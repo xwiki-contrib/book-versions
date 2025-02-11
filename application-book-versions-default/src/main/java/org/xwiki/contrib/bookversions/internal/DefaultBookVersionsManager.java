@@ -1923,6 +1923,101 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     /**
+     * Merge the new document's translated content with the current published document's content. This has some
+     * limitations:
+     * - only the first "Translated" macro of the right language will be considered
+     * - the content outside the macro will be ignored
+     * - New content will only be added to the end of the published document
+     * @param masterDocument the document to take the translated content from
+     * @param publishedDocument the document to which the translated content has to be merged into
+     * @param language the language to publish
+     * @throws XWikiException happens if checking if document exists or setting the XDOM content have an issue
+     */
+    private void mergeTranslatedContent(XWikiDocument masterDocument, XWikiDocument publishedDocument, String language)
+        throws XWikiException
+    {
+        XWikiContext xcontext = this.getXWikiContext();
+        XWiki xwiki = xcontext.getWiki();
+        // Look for the content to be published
+        logger.debug("[mergeTranslatedContent] Searching for the translated content of [{}] language in the "
+            + "content to be published.", language);
+        XDOM masterXdom = masterDocument.getXDOM();
+        MacroBlock masterBlock = getTranslatedMacroBlock(masterXdom, language);
+        if (masterBlock == null) {
+            logger.debug("[mergeTranslatedContent] No [{}] translated content to be published found.", language);
+            return;
+        }
+
+        // Search if some translated content has to be replaced in the currently published document
+        Block toPublishBlock = null;
+        if (xwiki.exists(publishedDocument.getDocumentReference(), xcontext)) {
+            logger.debug("[mergeTranslatedContent] Searching for existing translated content of [{}] in already "
+                    + "existing published document.", language);
+            XDOM publishedXdom = publishedDocument.getXDOM();
+            MacroBlock publishedBlock = getTranslatedMacroBlock(publishedXdom, language);
+            if (publishedBlock == null) {
+                logger.debug("[mergeTranslatedContent] No existing translated published content, adding translated "
+                    + "content macro at the end of the published of the published document.");
+                publishedXdom.addChild(masterBlock);
+                toPublishBlock = publishedXdom;
+            } else {
+                logger.debug("[mergeTranslatedContent] Found existing published content, replacing it by the new the "
+                    + "content to be published.");
+                publishedXdom.replaceChild(masterBlock, publishedBlock);
+                toPublishBlock = publishedXdom;
+            }
+        } else {
+            logger.debug("[mergeTranslatedContent] No existing published content, adding macro as new document.");
+            toPublishBlock = masterBlock;
+        }
+        masterDocument.setContent(new XDOM(Collections.singletonList(toPublishBlock)));
+    }
+
+    /**
+     * Get the first XDOM block of content translation macro for the given language, with the status "Translated", in
+     * the given document
+     * @param xdom the xdom of the document to get the macro block from
+     * @param language the language of the macro
+     * @return the macro block found, or null if none
+     */
+    private MacroBlock getTranslatedMacroBlock(XDOM xdom, String language)
+    {
+        logger.debug("[getTranslatedMacroBlock] Looking for the first [{}] macro, with the [{}] status, for language "
+            + "[{}].", BookVersionsConstants.CONTENTTRANSLATION_MACRO_ID,
+            PageTranslationStatus.TRANSLATED, language);
+        List<MacroBlock> listBlock = xdom.getBlocks(new ClassBlockMatcher(
+            new MacroBlock(BookVersionsConstants.CONTENTTRANSLATION_MACRO_ID, Collections.emptyMap(),
+                true).getClass()), Block.Axes.DESCENDANT_OR_SELF);
+        logger.debug("[getTranslatedMacroBlock] Found [{}] [{}] macros", listBlock.size(),
+            BookVersionsConstants.CONTENTTRANSLATION_MACRO_ID);
+        for (MacroBlock macroBlock : listBlock) {
+            String macroLanguage = macroBlock.getParameter(BookVersionsConstants.PAGETRANSLATION_LANGUAGE);
+            if (macroLanguage != null && !macroLanguage.isEmpty()) {
+                if (macroLanguage.equals(language)) {
+                    logger.debug("[getTranslatedMacroBlock] Macro language is [{}].", macroLanguage);
+                    String macroStatus = macroBlock.getParameter(BookVersionsConstants.PAGETRANSLATION_STATUS);
+                    if (StringUtils.isNotEmpty(macroStatus)
+                        && macroStatus.toLowerCase().equals(PageTranslationStatus.TRANSLATED.getTranslationStatus()))
+                    {
+                        logger.debug("[getTranslatedMacroBlock] Macro status is [{}]. Returning this one.",
+                            macroStatus);
+                        return macroBlock;
+                    } else {
+                        logger.debug("[getTranslatedMacroBlock] Macro status is [{}]. Continue searching.",
+                            macroStatus);
+                    }
+                } else {
+                    logger.debug("[getTranslatedMacroBlock] Macro language is [{}]. Continue searching.",
+                        macroLanguage);
+                }
+            }
+        }
+        logger.debug("[getTranslatedMacroBlock] No [{}] content found for language [{}].",
+            BookVersionsConstants.PAGETRANSLATION_STATUS, language);
+        return null;
+    }
+
+    /**
      * Return if the given space is empty, except for his WebHome and WebPreferences pages
      * @param subTargetDocumentsString list of pages under the target space
      * @param targetDocumentReference WebHome document of the target space
