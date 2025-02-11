@@ -264,6 +264,11 @@
 {{html}}
 #set ($rootDocument = $services.bookversions.getVersionedCollectionReference($doc.getDocumentReference()))
 #set ($currentValueStr = $doc.getObject("BookVersions.Code.PublicationConfigurationClass").getValue('source'))
+#set ($isNestedPage = $rootDocument.name == $services.model.getEntityReference('DOCUMENT', 'default').name)
+#set ($rootParentRef = $rootDocument)
+#if ($isNestedPage)
+  #set ($rootParentRef = $rootParentRef.parent)
+#end
 #if ("$!currentValueStr" == '')
   #set ($currentValue = $rootDocument)
 #else
@@ -283,7 +288,7 @@
         'reference': $currentValue,
         'placeholder': 'core.create.spaceReference.placeholder'
       },
-      "root": "space:$services.model.serialize($rootDocument, 'default')",
+      "root": "space:$services.model.serialize($rootParentRef, 'default')",
       'showSpaces': true
     })
 #else
