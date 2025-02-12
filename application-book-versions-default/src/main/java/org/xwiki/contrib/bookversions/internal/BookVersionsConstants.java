@@ -141,6 +141,12 @@ public interface BookVersionsConstants
         new EntityReference("PublishedBookClass", EntityType.DOCUMENT, BOOKVERSIONS_CODE_REFERENCE);
 
     /**
+     * The reference of a published translated page class.
+     */
+    EntityReference PUBLISHEDPAGETRANSLATION_CLASS_REFERENCE =
+        new EntityReference("PublishedPageTranslationClass", EntityType.DOCUMENT, BOOKVERSIONS_CODE_REFERENCE);
+
+    /**
      * The XWiki comments class.
      */
     EntityReference XWIKICOMMENTS_CLASS_REFERENCE =

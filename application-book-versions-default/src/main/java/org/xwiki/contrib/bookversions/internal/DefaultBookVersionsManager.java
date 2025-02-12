@@ -1885,6 +1885,12 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             logger.info("Transforming content for publication.");
             prepareForPublication(contentPage, publishedDocument, publishedLibraries, configuration);
 
+            if (!getLanguageData(publishedDocument).isEmpty()) {
+                logger.debug("[publishInternal] Adding [{}] object as the page contains translation.",
+                    BookVersionsConstants.PUBLISHEDPAGETRANSLATION_CLASS_REFERENCE);
+                publishedDocument.newXObject(BookVersionsConstants.PUBLISHEDPAGETRANSLATION_CLASS_REFERENCE, xcontext);
+            }
+
             logger.debug("[publishInternal] Publish page.");
             publishedDocument.getAuthors().setEffectiveMetadataAuthor(userReference);
             publishedDocument.getAuthors().setOriginalMetadataAuthor(userReference);
