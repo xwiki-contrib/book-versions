@@ -19,6 +19,8 @@
  */
 package org.xwiki.contrib.bookversions.internal;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -27,10 +29,13 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.contrib.bookversions.BookVersionsManager;
+import org.xwiki.contrib.bookversions.PublishBookRight;
 import org.xwiki.job.AbstractJob;
 import org.xwiki.job.DefaultJobStatus;
 import org.xwiki.job.DefaultRequest;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.security.authorization.AuthorizationManager;
+import org.xwiki.model.reference.EntityReference;
 
 /**
  * The job dedicated to publication of books and library.
@@ -45,6 +50,9 @@ public class PublicationJob extends AbstractJob<DefaultRequest, DefaultJobStatus
     @Inject
     private Provider<BookVersionsManager> bookVersionsManagerProvider;
 
+    @Inject
+    private AuthorizationManager authorizationManager;
+
     @Override
     public String getType()
     {
@@ -56,6 +64,33 @@ public class PublicationJob extends AbstractJob<DefaultRequest, DefaultJobStatus
     {
         DocumentReference configurationReference = this.request.getProperty("configurationReference");
         DocumentReference userReference = this.request.getProperty("userReference");
-        bookVersionsManagerProvider.get().publishInternal(configurationReference, userReference);
+
+        // Verify that the user has the rights needed to execute the publication before actually publishing
+        BookVersionsManager bookVersionsManager = bookVersionsManagerProvider.get();
+        Map<String, Object> publicationConfiguration =
+            bookVersionsManager.loadPublicationConfiguration(configurationReference);
+
+        if (publicationConfiguration.containsKey(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE)
+            && publicationConfiguration.containsKey(
+                BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE)) {
+            DocumentReference sourceReference = (DocumentReference) publicationConfiguration.get(
+                BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE);
+            EntityReference destinationReference = (EntityReference) publicationConfiguration.get(
+                BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
+
+            if (authorizationManager.hasAccess(PublishBookRight.getRight(), userReference,
+                sourceReference.getLastSpaceReference())
+                && authorizationManager.hasAccess(PublishBookRight.getRight(), userReference, destinationReference)) {
+                bookVersionsManager.publishInternal(configurationReference, userReference);
+            } else if (!authorizationManager.hasAccess(PublishBookRight.getRight(), userReference, sourceReference)) {
+                logger.error("User [{}] is missing book publication right on source book [{}]", userReference,
+                    sourceReference);
+            } else {
+                logger.error("User [{}] is missing book publication right on destination space [{}]", userReference,
+                    destinationReference);
+            }
+        } else {
+            logger.error("Incomplete publication configuration found for [{}]", configurationReference);
+        }
     }
 }
