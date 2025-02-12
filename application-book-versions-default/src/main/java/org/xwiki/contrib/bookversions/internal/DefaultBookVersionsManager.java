@@ -1437,6 +1437,14 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         return getConfiguredLibraryVersion(collectionRef, libraryReference, selectedVersionRef);
     }
 
+    /**
+     * Get the library version configured for the given book version which uses the given library.
+     * @param bookReference the book
+     * @param libraryReference the library used
+     * @param versionReference the version of the book
+     * @return the reference of the library version configured for the book version
+     * @throws XWikiException
+     */
     private DocumentReference getConfiguredLibraryVersion(DocumentReference bookReference,
         DocumentReference libraryReference, DocumentReference versionReference) throws XWikiException
     {
@@ -1454,7 +1462,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 libRefObject.getStringValue(BookVersionsConstants.BOOKLIBRARYREFERENCE_PROP_LIBRARY),
                 libraryReference))) {
                 return referenceResolver.resolve(
-                    libRefObject.getStringValue(BookVersionsConstants.BOOKLIBRARYREFERENCE_PROP_LIBRARYVERSION));
+                    libRefObject.getStringValue(BookVersionsConstants.BOOKLIBRARYREFERENCE_PROP_LIBRARYVERSION),
+                    libraryReference);
             }
         }
 
@@ -2250,11 +2259,19 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         xwiki.saveDocument(collectionClone, publicationComment, xcontext);
     }
 
+    /**
+     * Get the published space of a given collection for a given publication ID and source.
+     * @param collectionReference the collection
+     * @param publicationId the publication ID
+     * @param sourceReference the source
+     * @return the reference of the published space
+     * @throws XWikiException
+     */
     private DocumentReference getCollectionPublishedSpace(DocumentReference collectionReference, String publicationId,
         DocumentReference sourceReference) throws XWikiException
     {
         if (publicationId == null || collectionReference == null || sourceReference == null
-            || !(isBook(collectionReference) && !isLibrary(collectionReference))) {
+            || (!isBook(collectionReference) && !isLibrary(collectionReference))) {
             return null;
         }
 
