@@ -118,6 +118,10 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     private DocumentReferenceResolver<String> currentMixedReferenceResolver;
 
     @Inject
+    @Named("explicit")
+    private DocumentReferenceResolver<String> currentExplicitReferenceResolver;
+
+    @Inject
     @Named("document")
     private UserReferenceResolver<DocumentReference> userReferenceResolver;
 
@@ -1681,8 +1685,14 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             return configuration;
         }
 
-        configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE,
-            referenceResolver.resolve(sourceReferenceString, configurationReference.getWikiReference()));
+        try {
+            configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE,
+                    currentExplicitReferenceResolver.resolve(sourceReferenceString, configurationReference.getWikiReference()));
+        } catch (Exception e) {
+            sourceReferenceString = sourceReferenceString + ".WebHome";
+            configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE,
+                    currentExplicitReferenceResolver.resolve(sourceReferenceString, configurationReference.getWikiReference()));
+        }
         configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE,
             spaceReferenceResolver.resolve(destinationReferenceString, configurationReference.getWikiReference()));
         configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VERSION,
@@ -1772,24 +1782,11 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
         // The source is store as page, but we need a complete location.WebHome reference
         if (!Objects.equals(sourceReference.getName(), this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE)) {
-            DocumentReference newSourceReference;
-            // Check if parent is "Main" which indicates root level space
-            if (sourceReference.getParent().getName().equals("Main")) {
-                // Root level space - create direct reference
-                newSourceReference = new DocumentReference(
-                    sourceReference.getWikiReference().getName(),
-                    sourceReference.getName(),
-                    this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE
-                );
-            } else {
-                // Nested space - use original logic
-                SpaceReference sourceParentSpaceReference = new SpaceReference(
+            SpaceReference sourceParentSpaceReference = new SpaceReference(
                     new EntityReference(sourceReference.getName(), EntityType.SPACE, sourceReference.getParent()));
-                newSourceReference = new DocumentReference(
-                    new EntityReference(this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE,
-                        EntityType.DOCUMENT, sourceParentSpaceReference));
-            }
-            sourceReference = newSourceReference;
+            sourceReference =
+                    new DocumentReference(new EntityReference(this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE,
+                            EntityType.DOCUMENT, sourceParentSpaceReference));
         }
         if (!xwiki.exists(sourceReference, xcontext)) {
             logger.error("[publishInternal] The provided source reference [{}] does not exist.", sourceReference);
