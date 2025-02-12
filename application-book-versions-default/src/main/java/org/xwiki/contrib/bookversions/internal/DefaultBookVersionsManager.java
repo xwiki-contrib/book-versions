@@ -1632,8 +1632,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             jobRequest.setProperty("configurationReference", configurationReference);
             // The context won't be full in publishInternal as it is executed by a job, so the user executing the
             // publication has to be passed as a parameter.
-            UserReference userReference = userReferenceResolver.resolve(this.getXWikiContext().getUserReference());
-            jobRequest.setProperty("userReference", userReference);
+            jobRequest.setProperty("userReference", this.getXWikiContext().getUserReference());
             jobExecutor.execute(BookVersionsConstants.PUBLICATIONJOB_TYPE, jobRequest);
         }
         return jobId;
@@ -1709,7 +1708,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     @Override
-    public void publishInternal(DocumentReference configurationReference, UserReference userReference)
+    public void publishInternal(DocumentReference configurationReference, DocumentReference userDocumentReference)
         throws XWikiException, QueryException, ComponentLookupException, ParseException
     {
         if (configurationReference == null) {
@@ -1812,6 +1811,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         Map<String, Map<DocumentReference, DocumentReference>> publishedLibraries =
             collection != null && versionReference != null && isBook(collectionReference)
                 ? getUsedPublishedLibrariesWithInheritance(collection.getDocumentReference(), versionReference) : null;
+
+        UserReference userReference = userReferenceResolver.resolve(userDocumentReference);
 
         // Execute publication job
         logger.info("Start publication.");

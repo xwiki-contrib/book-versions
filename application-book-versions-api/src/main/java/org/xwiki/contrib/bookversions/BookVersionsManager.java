@@ -29,7 +29,6 @@ import org.xwiki.job.JobException;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.query.QueryException;
 import org.xwiki.rendering.parser.ParseException;
-import org.xwiki.user.UserReference;
 
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.api.Document;
@@ -656,7 +655,7 @@ public interface BookVersionsManager
      * @throws XWikiException could occur if loadPublicationConfiguration has an issue
      * @throws QueryException If any exception occurs while querying the database.
      */
-    void publishInternal(DocumentReference configurationReference, UserReference userReference)
+    void publishInternal(DocumentReference configurationReference, DocumentReference userReference)
         throws XWikiException, QueryException, ComponentLookupException, ParseException;
 
     /**
