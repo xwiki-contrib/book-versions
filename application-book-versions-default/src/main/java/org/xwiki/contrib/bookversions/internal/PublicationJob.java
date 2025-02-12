@@ -31,6 +31,7 @@ import org.xwiki.job.AbstractJob;
 import org.xwiki.job.DefaultJobStatus;
 import org.xwiki.job.DefaultRequest;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.user.UserReference;
 
 /**
  * The job dedicated to publication of books and library.
@@ -55,6 +56,7 @@ public class PublicationJob extends AbstractJob<DefaultRequest, DefaultJobStatus
     protected void runInternal() throws Exception
     {
         DocumentReference configurationReference = this.request.getProperty("configurationReference");
-        bookVersionsManagerProvider.get().publishInternal(configurationReference);
+        UserReference userReference = this.request.getProperty("userReference");
+        bookVersionsManagerProvider.get().publishInternal(configurationReference, userReference);
     }
 }

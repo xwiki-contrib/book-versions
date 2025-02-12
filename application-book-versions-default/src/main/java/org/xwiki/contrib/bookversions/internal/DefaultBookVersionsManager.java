@@ -74,6 +74,8 @@ import org.xwiki.rendering.parser.Parser;
 import org.xwiki.rendering.renderer.BlockRenderer;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
 import org.xwiki.rendering.renderer.printer.WikiPrinter;
+import org.xwiki.user.UserReference;
+import org.xwiki.user.UserReferenceResolver;
 
 import com.xpn.xwiki.api.Document;
 
@@ -113,6 +115,10 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     @Inject
     @Named("currentmixed")
     private DocumentReferenceResolver<String> currentMixedReferenceResolver;
+
+    @Inject
+    @Named("document")
+    private UserReferenceResolver<DocumentReference> userReferenceResolver;
 
     @Inject
     @Named("local")
@@ -1390,6 +1396,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             newObject.set(BookVersionsConstants.BOOKLIBRARYREFERENCE_PROP_LIBRARYVERSION, libraryVersionReference,
                 xcontext);
         }
+        UserReference userReference = userReferenceResolver.resolve(xcontext.getUserReference());
+        versionDoc.getAuthors().setEffectiveMetadataAuthor(userReference);
+        versionDoc.getAuthors().setOriginalMetadataAuthor(userReference);
         xwiki.saveDocument(versionDoc, "Setting version configuration for library ["
             + libraryReference.getParent().toString() + "]: [" + libraryVersionReference.toString() + "].", xcontext);
     }
@@ -1593,10 +1602,16 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             BaseObject object = document.getXObject(BookVersionsConstants.MARKEDDELETED_CLASS_REFERENCE);
             if (object != null) {
                 document.removeXObject(object);
+                UserReference userReference = userReferenceResolver.resolve(xcontext.getUserReference());
+                document.getAuthors().setEffectiveMetadataAuthor(userReference);
+                document.getAuthors().setOriginalMetadataAuthor(userReference);
                 xwiki.saveDocument(document, "Unmarked document as \"Deleted\"", xcontext);
             }
         } else {
             document.newXObject(BookVersionsConstants.MARKEDDELETED_CLASS_REFERENCE, xcontext);
+            UserReference userReference = userReferenceResolver.resolve(xcontext.getUserReference());
+            document.getAuthors().setEffectiveMetadataAuthor(userReference);
+            document.getAuthors().setOriginalMetadataAuthor(userReference);
             xwiki.saveDocument(document, "Marked document as \"Deleted\"", xcontext);
         }
     }
@@ -1615,6 +1630,10 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         if (jobId != null) {
             jobRequest.setId(jobId);
             jobRequest.setProperty("configurationReference", configurationReference);
+            // The context won't be full in publishInternal as it is executed by a job, so the user executing the
+            // publication has to be passed as a parameter.
+            UserReference userReference = userReferenceResolver.resolve(this.getXWikiContext().getUserReference());
+            jobRequest.setProperty("userReference", userReference);
             jobExecutor.execute(BookVersionsConstants.PUBLICATIONJOB_TYPE, jobRequest);
         }
         return jobId;
@@ -1690,7 +1709,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     @Override
-    public void publishInternal(DocumentReference configurationReference)
+    public void publishInternal(DocumentReference configurationReference, UserReference userReference)
         throws XWikiException, QueryException, ComponentLookupException, ParseException
     {
         if (configurationReference == null) {
@@ -1866,6 +1885,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             prepareForPublication(contentPage, publishedDocument, publishedLibraries, configuration);
 
             logger.debug("[publishInternal] Publish page.");
+            publishedDocument.getAuthors().setEffectiveMetadataAuthor(userReference);
+            publishedDocument.getAuthors().setOriginalMetadataAuthor(userReference);
             xwiki.saveDocument(publishedDocument, publicationComment, xcontext);
             logger.debug("[publishInternal] End working on page [{}].", pageStringReference);
             logger.info("End page publication [{}].", pageStringReference);
@@ -1885,8 +1906,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
         // Add metadata in the collection page (master) and top page (published space)
         logger.debug("[publishInternal] Adding metadata on master and published space top pages.");
-        addMasterPublicationData(collection, configuration);
-        addTopPublicationData(targetReference, publicationComment, collection, configuration);
+        addMasterPublicationData(collection, configuration, userReference);
+        addTopPublicationData(targetReference, publicationComment, collection, configuration, userReference);
 
         logger.debug("[publishInternal] Publication ended.");
         logger.info("Publication finished in [{}].", targetDocumentReference);
@@ -2111,7 +2132,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     private void addTopPublicationData(SpaceReference targetTopReference, String publicationComment,
-        XWikiDocument collection, Map<String, Object> configuration) throws XWikiException
+        XWikiDocument collection, Map<String, Object> configuration, UserReference userReference) throws XWikiException
     {
         if (targetTopReference == null || collection == null || configuration == null) {
             return;
@@ -2141,11 +2162,13 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             publicationObject.set(BookVersionsConstants.PUBLISHEDCOLLECTION_PROP_VARIANTNAME, variant.getTitle(),
                 xcontext);
         }
+        targetTop.getAuthors().setEffectiveMetadataAuthor(userReference);
+        targetTop.getAuthors().setOriginalMetadataAuthor(userReference);
         xwiki.saveDocument(targetTop, publicationComment != null ? publicationComment : "", xcontext);
     }
 
-    private void addMasterPublicationData(XWikiDocument collection, Map<String, Object> configuration)
-        throws XWikiException
+    private void addMasterPublicationData(XWikiDocument collection, Map<String, Object> configuration,
+        UserReference userReference) throws XWikiException
     {
         if (collection == null || configuration == null) {
             return;
@@ -2214,6 +2237,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         publicationObject.set(BookVersionsConstants.PUBLICATION_PROP_SOURCE, sourceReference.toString(), xcontext);
         publicationObject.set(BookVersionsConstants.PUBLICATION_PROP_PUBLISHEDSPACE, destinationReference.toString(),
             xcontext);
+        collectionClone.getAuthors().setEffectiveMetadataAuthor(userReference);
+        collectionClone.getAuthors().setOriginalMetadataAuthor(userReference);
         xwiki.saveDocument(collectionClone, publicationComment, xcontext);
     }
 
@@ -2850,6 +2875,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             new LocalDocumentReference(Arrays.asList("BookVersions", "Code"), "LibraryReferenceClass");
         XWikiDocument versionDocument = xcontext.getWiki().getDocument(versionReference, xcontext).clone();
         versionDocument.createXObject(libraryReferenceClassRef, xcontext);
+        UserReference userReference = userReferenceResolver.resolve(xcontext.getUserReference());
+        versionDocument.getAuthors().setEffectiveMetadataAuthor(userReference);
+        versionDocument.getAuthors().setOriginalMetadataAuthor(userReference);
         xcontext.getWiki().saveDocument(versionDocument, xcontext);
     }
 
@@ -2869,6 +2897,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         if (!versionDocument.isNew()) {
             List<BaseObject> objects = versionDocument.getXObjects(libraryReferenceClassRef);
             versionDocument.removeXObject(objects.get(objectNumber));
+            UserReference userReference = userReferenceResolver.resolve(xcontext.getUserReference());
+            versionDocument.getAuthors().setEffectiveMetadataAuthor(userReference);
+            versionDocument.getAuthors().setOriginalMetadataAuthor(userReference);
             xcontext.getWiki().saveDocument(versionDocument, xcontext);
         }
     }
