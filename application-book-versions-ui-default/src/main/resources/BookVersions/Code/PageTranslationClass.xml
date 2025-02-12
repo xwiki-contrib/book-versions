@@ -82,7 +82,7 @@
       <unmodifiable>0</unmodifiable>
       <validationMessage/>
       <validationRegExp/>
-      <values>not_translated=Not Translated|outdated=Outdated|translated=Translated</values>
+      <values>not_translated|outdated|translated</values>
       <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
     </status>
     <title>

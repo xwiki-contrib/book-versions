@@ -41,6 +41,9 @@ BookVersions.Code.VersionClass_precedingVersionReference=Preceding version refer
 BookVersions.Code.PageStatusClass_status_draft=Draft
 BookVersions.Code.PageStatusClass_status_review=Review
 BookVersions.Code.PageStatusClass_status_complete=Complete
+BookVersions.Code.PageTranslationClass_status_not_translated=Not Translated
+BookVersions.Code.PageTranslationClass_status_outdated=Outdated
+BookVersions.Code.PageTranslationClass_status_translated=Translated
 
 # Library Reference Class
 BookVersions.Code.LibraryReferenceClass_libraryReference=Library Reference
