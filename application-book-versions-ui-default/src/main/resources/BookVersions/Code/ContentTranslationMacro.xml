@@ -271,7 +271,7 @@
 {{/velocity}}</code>
     </property>
     <property>
-      <contentDescription/>
+      <contentDescription>Display the content in the selected language.</contentDescription>
     </property>
     <property>
       <contentJavaType>Wiki</contentJavaType>

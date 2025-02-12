@@ -27,11 +27,11 @@
     <artifactId>application-book-versions</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <artifactId>application-book-versions-ui</artifactId>
+  <artifactId>application-book-versions-ui-default</artifactId>
   <name>XWiki Book Versions Application</name>
   <packaging>xar</packaging>
   <properties>
-    <xwiki.extension.name>Book Versions Application</xwiki.extension.name>
+    <xwiki.extension.name>Book Versions Application - Default</xwiki.extension.name>
     <xwiki.extension.category>application</xwiki.extension.category>
     <xwiki.release.jira.skip>true</xwiki.release.jira.skip>
     <xwiki.issueManagement.system>jira</xwiki.issueManagement.system>
@@ -41,14 +41,8 @@
   <dependencies>
     <dependency>
       <groupId>org.xwiki.contrib</groupId>
-      <artifactId>application-book-versions-ui-default</artifactId>
+      <artifactId>application-book-versions-default</artifactId>
       <version>${project.version}</version>
-      <type>xar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.xwiki.contrib</groupId>
-      <artifactId>macro-job</artifactId>
-      <version>2.1</version>
     </dependency>
   </dependencies>
   <build>
