@@ -546,14 +546,14 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     @Override
     public String getTranslatedTitle(Document document) throws XWikiException, QueryException
     {
-        DocumentReference collectionRef = getVersionedCollectionReference(document);
         String selectedLanguage = getSelectedLanguage(document);
 
         if (selectedLanguage == null) {
             selectedLanguage = this.getDefaultTranslation(document);
         }
 
-        return selectedLanguage != null ? getTranslatedTitle(document, selectedLanguage) : null;
+        return selectedLanguage != null ? getTranslatedTitle(document, selectedLanguage)
+            : document.getDocumentReference().getName();
     }
 
     @Override
@@ -574,7 +574,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             selectedLanguage = this.getDefaultTranslation(document);
         }
 
-        return selectedLanguage != null ? getTranslatedTitle(document, selectedLanguage) : null;
+        return selectedLanguage != null ? getTranslatedTitle(document, selectedLanguage)
+            : document.getDocumentReference().getName();
     }
 
     @Override
