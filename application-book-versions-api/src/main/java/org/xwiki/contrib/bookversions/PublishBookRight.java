@@ -74,7 +74,8 @@ public final class PublishBookRight implements RightDescription
     @Override
     public Set<Right> getImpliedRights()
     {
-        return Collections.emptySet();
+        // Required because the title of translated pages contain velocity code
+        return Collections.singleton(Right.SCRIPT);
     }
 
     @Override
