@@ -738,6 +738,7 @@
   #set ($isVersionedPage = $services.bookversions.isVersionedPage($docRef))
   #set ($isVersionedContent = $services.bookversions.isVersionedContent($docRef))
   #set ($isUnversionedPage = $services.bookversions.isPage($docRef) &amp;&amp; !$services.bookversions.isVersionedPage($docRef))
+  #set ($isPublishedPage = $xwiki.getDocument($collectionRef).getObject('BookVersions.Code.PublishedBookClass') != $NULL)
   #set ($contentRef = $services.model.resolveDocument($services.model.serialize($docRef.getParent(),'local')))
   #set ($isUnexistingContent = !$xwiki.exists($doc) &amp;&amp; $services.bookversions.isPossibleVersionedContentReference($collectionRef,$contentRef))
   #set ($bookRef = $services.model.resolveDocument($services.model.serialize($collectionRef,'local')))
@@ -776,6 +777,8 @@
   #if ($languagesObj)
     #set ($multilingualEnabled = $languagesObj.getProperty('enabled').getValue())
     #set ($languages = $languagesObj.getProperty('supportedLanguages').getValue())
+  #elseif ($isPublishedPage)
+    #set ($languages = $xwiki.getDocument($collectionRef).getObject('BookVersions.Code.PublishedBookClass').getValue('languages'))
   #else
     #set ($languages = [])
   #end
@@ -998,7 +1001,7 @@
 ## Render the version and variant selectors
 ##
 #macro(renderSelectors)
-  #if ($isVersionedContent || $isVersionedPage || $isUnversionedPage)
+  #if ($isVersionedContent || $isVersionedPage || $isUnversionedPage || $isPublishedPage)
     #setupVersionDisplay()
     #setupVariantDisplay()
     #setupLanguageDisplay()
@@ -1186,7 +1189,7 @@
 ## Render language selector HTML
 ##
 #macro(renderLanguageSelector)
-  #if ($multilingualEnabled == 1 &amp;&amp; $languages.size() &gt; 0)
+  #if (($multilingualEnabled == 1 || $isPublishedPage) &amp;&amp; $languages.size() &gt; 0)
     #set ($translationStatus = $services.bookversions.getTranslationStatus($docRef, $selectedLanguage))
     #set ($isDefaultLanguage = $services.bookversions.isDefaultLanguage($docRef, $selectedLanguage))
     &lt;div class="formContainer"&gt;
@@ -1245,7 +1248,8 @@
 #handleLanguageSelection()
 ##
 ## Process version selection and handle redirections if needed
-#if ("$!collectionRef" != '' &amp;&amp; ($versions.size() &gt; 0 || $variants.size() &gt; 0) &amp;&amp; ($isVersionedPage || $isVersionedContent || $isUnexistingContent || $isUnversionedPage))
+
+#if ("$!collectionRef" != '' &amp;&amp; ($versions.size() &gt; 0 || $variants.size() &gt; 0 || $isPublishedPage) &amp;&amp; ($isVersionedPage || $isVersionedContent || $isUnexistingContent || $isUnversionedPage || $isPublishedPage))
   #set ($discard = $xwiki.ssx.use('BookVersions.Code.NavigationMenu'))
   #set ($discard = $xwiki.jsx.use('BookVersions.Code.NavigationMenu'))
 ##

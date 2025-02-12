@@ -944,7 +944,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         DocumentReference documentReference = document.getDocumentReference();
 
         if (document.getObject(BookVersionsConstants.BOOK_CLASS_SERIALIZED) != null
-            || document.getObject(BookVersionsConstants.LIBRARY_CLASS_SERIALIZED) != null) {
+            || document.getObject(BookVersionsConstants.LIBRARY_CLASS_SERIALIZED) != null
+            || document.getObject(BookVersionsConstants.PUBLISHED_BOOK_CLASS_SERIALIZED) != null)
+        {
             return documentReference;
         }
 
@@ -1004,7 +1006,10 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             return null;
         }
 
-        if (isBook(documentReference) || isLibrary(documentReference)) {
+        XWikiContext xcontext = getXWikiContext();
+
+        if (isBook(documentReference) || isLibrary(documentReference)
+            || xcontext.getWiki().getDocument(documentReference, xcontext).getXObject(BookVersionsConstants.PUBLISHEDCOLLECTION_CLASS_REFERENCE) != null) {
             return documentReference;
         }
 
@@ -2165,10 +2170,21 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 targetTopReference));
         XWikiDocument targetTop = xwiki.getDocument(targetDocumentReference, xcontext).clone();
         BaseObject publicationObject =
-            targetTop.newXObject(BookVersionsConstants.PUBLISHEDCOLLECTION_CLASS_REFERENCE, xcontext);
+            targetTop.getXObject(BookVersionsConstants.PUBLISHEDCOLLECTION_CLASS_REFERENCE);
+        if (publicationObject == null) {
+            publicationObject =
+                targetTop.newXObject(BookVersionsConstants.PUBLISHEDCOLLECTION_CLASS_REFERENCE, xcontext);
+        }
         publicationObject.set(BookVersionsConstants.PUBLISHEDCOLLECTION_PROP_MASTERNAME, collection.getTitle(),
             xcontext);
         publicationObject.set(BookVersionsConstants.PUBLISHEDCOLLECTION_PROP_VERSIONNAME, version.getTitle(), xcontext);
+        List languages = publicationObject.getListValue(BookVersionsConstants.PUBLISHEDCOLLECTION_PROP_LANGUAGES);
+        String publicationLanguage =
+            (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_LANGUAGE);
+        if (StringUtils.isNotEmpty(publicationLanguage) && !languages.contains(publicationLanguage)) {
+            languages.add(publicationLanguage);
+            publicationObject.set(BookVersionsConstants.PUBLISHEDCOLLECTION_PROP_LANGUAGES, languages, xcontext);
+        }
         if (variantReference != null) {
             XWikiDocument variant = xwiki.getDocument(variantReference, xcontext);
             publicationObject.set(BookVersionsConstants.PUBLISHEDCOLLECTION_PROP_VARIANTNAME, variant.getTitle(),

@@ -157,6 +157,11 @@ public interface BookVersionsConstants
     String LIBRARY_CLASS_SERIALIZED = "BookVersions.Code.LibraryClass";
 
     /**
+     * The id of published book class.
+     */
+    String PUBLISHED_BOOK_CLASS_SERIALIZED = "BookVersions.Code.PublishedBookClass";
+
+    /**
      * The id of the libary class.
      */
     String BOOKVERSIONEDCONTENT_CLASS_SERIALIZED = "BookVersions.Code.BookVersionedContentClass";
@@ -180,6 +185,11 @@ public interface BookVersionsConstants
      * The bookVersionName property of a published collection data.
      */
     String PUBLISHEDCOLLECTION_PROP_VERSIONNAME = "bookVersionName";
+
+    /**
+     * The languages property of a published collection data.
+     */
+    String PUBLISHEDCOLLECTION_PROP_LANGUAGES = "languages";
 
     /**
      * The variantName property of a published collection data.
