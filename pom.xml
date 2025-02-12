@@ -308,6 +308,12 @@
                 <new>method org.xwiki.model.reference.DocumentReference org.xwiki.contrib.bookversions.BookVersionsManager::getVersionedCollectionReference(com.xpn.xwiki.api.Document) throws com.xpn.xwiki.XWikiException, org.xwiki.query.QueryException</new>
                 <justification>Needed for new features.</justification>
               </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.addedToInterface</code>
+                <new>method void org.xwiki.contrib.bookversions.BookVersionsManager::publishInternal(org.xwiki.model.reference.DocumentReference, org.xwiki.model.reference.DocumentReference) throws com.xpn.xwiki.XWikiException, org.xwiki.query.QueryException, org.xwiki.component.manager.ComponentLookupException, org.xwiki.rendering.parser.ParseException</new>
+                <justification>Needed for new features</justification>
+              </item>
             </differences>
           </revapi.differences>
         </analysisConfiguration>
