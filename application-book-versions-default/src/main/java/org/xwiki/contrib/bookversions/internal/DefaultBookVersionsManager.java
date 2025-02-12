@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -1865,8 +1866,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             // Check if the content should be published
             XWikiDocument contentPage = xwiki.getDocument(contentPageReference, xcontext).clone();
             if (!isToBePublished(contentPage, variant, configuration)) {
-                // TODO: page shouldn't be ignored if it contains ordering and publishPageOrder is true
-                if(isMarkedDeleted(contentPage)) {
+                if (isMarkedDeleted(contentPage)) {
                     // The original document is marked as deleted, add the published copy to be deleted from target
                     markedAsDeletedReferences.add(publishedReference);
                 }
@@ -1909,6 +1909,10 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             logger.debug("[publishInternal] Removing the following marked as deleted pages [{}].",
                 markedAsDeletedReferences);
             removeDocuments(markedAsDeletedReferences);
+        }
+
+        if ((boolean) configuration.get("publishPageOrder")) {
+            copyPinnedPagesInfo(sourceReference, collectionReference, targetReference, publicationComment);
         }
 
         // Add metadata in the collection page (master) and top page (published space)
@@ -2523,6 +2527,77 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         }
 
         return hasChanged;
+    }
+
+    private void copyPinnedPagesInfo(DocumentReference sourceReference, DocumentReference collectionReference,
+        SpaceReference targetReference, String publicationComment)
+        throws QueryException, XWikiException
+    {
+        XWikiContext xcontext = getXWikiContext();
+        XWiki xwiki = xcontext.getWiki();
+
+        logger.info("Updating pinned pages");
+
+        SpaceReference spaceReference = sourceReference.getLastSpaceReference();
+        String spaceSerialized = localSerializer.serialize(spaceReference);
+        String hql = "SELECT doc.fullName FROM XWikiDocument as doc "
+            + "WHERE doc.name = 'WebPreferences' "
+            + "  AND doc.fullName LIKE :docFullNamePrefix";
+        List<String> webPreferences = this.queryManagerProvider.get()
+            .createQuery(hql, Query.HQL)
+            .bindValue("docFullNamePrefix").like(spaceSerialized + ".").anyChars().like("WebPreferences").query()
+            .setWiki(sourceReference.getWikiReference().getName())
+            .execute();
+
+        for (String source : webPreferences) {
+            DocumentReference sourceRef = referenceResolver.resolve(source);
+            DocumentReference publishedReference =
+                getPublishedReference(sourceRef, collectionReference, targetReference);
+            if (publishedReference == null) {
+                logger.debug("[publishInternal] Ignore pinned page for [{}] because 'publishedReference' is null",
+                    sourceRef);
+                continue;
+            }
+
+            XWikiDocument sourceDoc = xwiki.getDocument(sourceRef, xcontext);
+            XWikiDocument publishedDoc = xwiki.getDocument(publishedReference, xcontext).clone();
+            if (publishedDoc.isNew()) {
+                publishedDoc.setHidden(true);
+                publishedDoc.newXObject(new LocalDocumentReference("XWiki", "XWikiPreferences"), xcontext);
+            }
+
+            LocalDocumentReference pinnedPagesClass = new LocalDocumentReference("XWiki", "PinnedChildPagesClass");
+            BaseObject pinnedPageObject = sourceDoc.getXObject(pinnedPagesClass);
+            if (pinnedPageObject != null) {
+                logger.debug("[publishInternal] Update pinned page for space [{}]",
+                    sourceRef.getLastSpaceReference());
+                BaseObject publishedDocPinnedPageObject = publishedDoc.getXObject(pinnedPagesClass);
+
+                if (publishedDocPinnedPageObject == null) {
+                    publishedDocPinnedPageObject = publishedDoc.newXObject(pinnedPagesClass, xcontext);
+                }
+                List<String> pinnedPagesList = (List<String>) pinnedPageObject.getListValue("pinnedChildPages");
+                List<String> pinnedPagesListFiltered = pinnedPagesList.stream()
+                    .filter(x -> {
+                        // Note in the pinned pages in the list end with '/', so to resolve the page reference we
+                        // need to remove this
+                        String pageName = x.replaceAll("/$", "");
+                        DocumentReference targetPinnedPage =
+                            new DocumentReference("WebHome",
+                                new SpaceReference(pageName, publishedReference.getLastSpaceReference()));
+                        try {
+                            return xwiki.exists(targetPinnedPage, xcontext);
+                        } catch (XWikiException e) {
+                            logger.error("Can't detect if page exist at ref [{}]", targetPinnedPage, e);
+                            return false;
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+                publishedDocPinnedPageObject.setStringListValue("pinnedChildPages", pinnedPagesListFiltered);
+                xwiki.saveDocument(publishedDoc, publicationComment, xcontext);
+            }
+        }
     }
 
     private DocumentReference getContentPage(XWikiDocument page, Map<String, Object> configuration)
