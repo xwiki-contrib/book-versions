@@ -25,6 +25,7 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.xwiki.bridge.event.WikiReadyEvent;
+import org.xwiki.bridge.event.ApplicationReadyEvent;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.manager.ComponentLifecycleException;
 import org.xwiki.component.phase.Disposable;
@@ -62,7 +63,7 @@ public class PublishBookRightInitializer extends AbstractEventListener implement
      */
     public PublishBookRightInitializer()
     {
-        super(NAME, new WikiReadyEvent());
+        super(NAME, new WikiReadyEvent(), new ApplicationReadyEvent());
     }
 
     @Override
