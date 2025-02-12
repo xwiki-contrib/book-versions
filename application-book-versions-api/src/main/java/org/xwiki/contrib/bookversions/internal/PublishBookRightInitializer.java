@@ -29,6 +29,8 @@ import org.xwiki.bridge.event.ApplicationReadyEvent;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.manager.ComponentLifecycleException;
 import org.xwiki.component.phase.Disposable;
+import org.xwiki.component.phase.Initializable;
+import org.xwiki.component.phase.InitializationException;
 import org.xwiki.contrib.bookversions.PublishBookRight;
 import org.xwiki.observation.AbstractEventListener;
 import org.xwiki.observation.event.Event;
@@ -39,13 +41,15 @@ import org.xwiki.security.authorization.UnableToRegisterRightException;
 /**
  * Initializer for registering book publication rights.
  *
+ * We use an event listener coupled with an initializer because we want to address the case of
+ *
  * @version $Id$
  * @since 0.1
  */
 @Component
 @Named(PublishBookRightInitializer.NAME)
 @Singleton
-public class PublishBookRightInitializer extends AbstractEventListener implements Disposable
+public class PublishBookRightInitializer extends AbstractEventListener implements Initializable, Disposable
 {
     /**
      * The listener name.
@@ -69,11 +73,13 @@ public class PublishBookRightInitializer extends AbstractEventListener implement
     @Override
     public void onEvent(Event event, Object source, Object data)
     {
-        try {
-            this.authorizationManager.register(PublishBookRight.INSTANCE);
-        } catch (UnableToRegisterRightException e) {
-            logger.error("Error when trying to register the custom rights", e);
-        }
+        registerPublishBookRight();
+    }
+
+    @Override
+    public void initialize() throws InitializationException
+    {
+        registerPublishBookRight();
     }
 
     @Override
@@ -83,6 +89,15 @@ public class PublishBookRightInitializer extends AbstractEventListener implement
             this.authorizationManager.unregister(PublishBookRight.getRight());
         } catch (AuthorizationException e) {
             throw new ComponentLifecycleException("Error while unregistering rights", e);
+        }
+    }
+
+    private void registerPublishBookRight()
+    {
+        try {
+            this.authorizationManager.register(PublishBookRight.INSTANCE);
+        } catch (UnableToRegisterRightException e) {
+            logger.error("Error when trying to register the custom rights", e);
         }
     }
 }
