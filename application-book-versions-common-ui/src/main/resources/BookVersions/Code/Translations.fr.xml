@@ -41,6 +41,9 @@
 BookVersions.Code.PageStatusClass_status_draft=Brouillon
 ### Missing: BookVersions.Code.PageStatusClass_status_review=
 BookVersions.Code.PageStatusClass_status_complete=Terminé
+### Missing: BookVersions.Code.PageTranslationClass_status_not_translated=Not Translated
+### Missing: BookVersions.Code.PageTranslationClass_status_outdated=Outdated
+### Missing: BookVersions.Code.PageTranslationClass_status_translated=Translated
 
 # Library Reference Class
 ### Missing: BookVersions.Code.LibraryReferenceClass_libraryReference=
@@ -196,6 +199,16 @@ rendering.macro.includeLibrary.name=Inclure la librairie
 rendering.macro.includeLibrary.parameter.keyReference.name=Clé de librairie
 ### Missing: rendering.macro.includeLibrary.parameter.keyReference.description=The key of a library to get the content from
 
+# Content Translation macro
+### Missing: rendering.macro.contentTranslation.name=Content Translation (Book Versions)
+### Missing: rendering.macro.contentTranslation.description=Add translated content
+### Missing: rendering.macro.contentTranslation.parameter.language.name=Language
+### Missing: rendering.macro.contentTranslation.parameter.title.name=Title
+### Missing: rendering.macro.contentTranslation.parameter.status.name=Status
+### Missing: rendering.macro.contentTranslation.parameter.status.description=Status of the translation for the current language.
+### Missing: rendering.macro.contentTranslation.parameter.isDefault.name=Is default
+### Missing: rendering.macro.contentTranslation.parameter.isDefault.description=If true, the current language is the default language that is used when displaying the content of the page.
+
 # Versions Admin UI
 BookVersions.versions.LD.status=Statut
 BookVersions.versions.LD.doc.date=Dernière modification
@@ -217,5 +230,11 @@ BookVersions.language.select=Sélectionner la langue ...
 ### Missing: BookVersions.Code.CustomEditHandler.popupSwitchVersion=Switch to version {0}
 ### Missing: BookVersions.Code.CustomEditHandler.popupCreateContentForVersion=Create content for version {0}
 BookVersions.Code.CustomEditHandler.popupCancel=Annuler
+
+# Publication progress
+### Missing: BookVersions.Code.PublicationProgress.title=Publication Progress
+### Missing: BookVersions.Code.PublicationProgress.backToBook=Back to Book
+### Missing: BookVersions.Code.PublicationActionHandler.error.jobCreation=Failed to create publication job
+### Missing: BookVersions.Code.PublicationActionHandler.error.permission=Permission denied
 </content>
 </xwikidoc>
