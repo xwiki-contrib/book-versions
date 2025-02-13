@@ -72,9 +72,10 @@
   #set ($currentReference = $services.model.resolveSpace($currentValue))
   #set ($currentWiki = $currentReference.wikiReference.name)
 #else
-  #set ($currentReference = $services.model.createWikiReference($services.wiki.getCurrentWikiDescriptor().id))
+  #set ($currentReference = $services.model.resolveSpace($doc.name))
   #set ($currentWiki = $services.wiki.getCurrentWikiDescriptor().id)
 #end
+
 #if ($xcontext.action == 'edit')
     #locationPicker({
       'id': 'destinationPicker',
