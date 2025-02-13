@@ -1009,7 +1009,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         XWikiContext xcontext = getXWikiContext();
 
         if (isBook(documentReference) || isLibrary(documentReference)
-            || xcontext.getWiki().getDocument(documentReference, xcontext).getXObject(BookVersionsConstants.PUBLISHEDCOLLECTION_CLASS_REFERENCE) != null) {
+            || xcontext.getWiki().getDocument(documentReference, xcontext)
+            .getXObject(BookVersionsConstants.PUBLISHEDCOLLECTION_CLASS_REFERENCE) != null)
+        {
             return documentReference;
         }
 
@@ -1924,7 +1926,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         // Add metadata in the collection page (master) and top page (published space)
         logger.debug("[publishInternal] Adding metadata on master and published space top pages.");
         addMasterPublicationData(collection, configuration, userReference);
-        addTopPublicationData(targetReference, publicationComment, collection, configuration, userReference);
+        addTopPublicationData(targetReference, publicationComment, collection, configuration, userReference,
+            collectionReference);
 
         logger.debug("[publishInternal] Publication ended.");
         logger.info("Publication finished in [{}].", targetDocumentReference);
@@ -2149,7 +2152,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     private void addTopPublicationData(SpaceReference targetTopReference, String publicationComment,
-        XWikiDocument collection, Map<String, Object> configuration, UserReference userReference) throws XWikiException
+        XWikiDocument collection, Map<String, Object> configuration,
+        UserReference userReference, DocumentReference collectionReference) throws XWikiException
     {
         if (targetTopReference == null || collection == null || configuration == null) {
             return;
@@ -2181,10 +2185,14 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         List languages = publicationObject.getListValue(BookVersionsConstants.PUBLISHEDCOLLECTION_PROP_LANGUAGES);
         String publicationLanguage =
             (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_LANGUAGE);
-        if (StringUtils.isNotEmpty(publicationLanguage) && !languages.contains(publicationLanguage)) {
-            languages.add(publicationLanguage);
-            publicationObject.set(BookVersionsConstants.PUBLISHEDCOLLECTION_PROP_LANGUAGES, languages, xcontext);
+        if (StringUtils.isNotEmpty(publicationLanguage)) {
+            if (!languages.contains(publicationLanguage)) {
+                languages.add(publicationLanguage);
+            }
+        } else {
+            languages = getConfiguredLanguages(collectionReference);
         }
+        publicationObject.set(BookVersionsConstants.PUBLISHEDCOLLECTION_PROP_LANGUAGES, languages, xcontext);
         if (variantReference != null) {
             XWikiDocument variant = xwiki.getDocument(variantReference, xcontext);
             publicationObject.set(BookVersionsConstants.PUBLISHEDCOLLECTION_PROP_VARIANTNAME, variant.getTitle(),
