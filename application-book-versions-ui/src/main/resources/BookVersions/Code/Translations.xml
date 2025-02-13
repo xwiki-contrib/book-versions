@@ -193,10 +193,20 @@ BookVersions.variants.noMacroUsingPage=No pages use this variant macro.
 BookVersions.variants.showPagesForVariant=Show linked pages for variant: 
 
 # Library include macro
-rendering.macro.includeLibrary.name=Include Library
+rendering.macro.includeLibrary.name=Include Library (Book Versions)
 rendering.macro.includeLibrary.description=Include content from a versioned library
 rendering.macro.includeLibrary.parameter.keyReference.name=Library key
 rendering.macro.includeLibrary.parameter.keyReference.description=The key of a library to get the content from
+
+# Content Translation macro
+rendering.macro.contentTranslation.name=Content Translation (Book Versions)
+rendering.macro.contentTranslation.description=Add translated content
+rendering.macro.contentTranslation.parameter.language.name=Language
+rendering.macro.contentTranslation.parameter.title.name=Title
+rendering.macro.contentTranslation.parameter.status.name=Status
+rendering.macro.contentTranslation.parameter.status.description=Status of the translation for the current language.
+rendering.macro.contentTranslation.parameter.isDefault.name=Is default
+rendering.macro.contentTranslation.parameter.isDefault.description=If true, the current language is the default language that is used when displaying the content of the page.
 
 # Versions Admin UI
 BookVersions.versions.LD.status=Status

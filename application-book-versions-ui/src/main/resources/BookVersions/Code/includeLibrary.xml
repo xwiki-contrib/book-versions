@@ -274,7 +274,7 @@
       </defaultCategories>
     </property>
     <property>
-      <description>Include content from a versioned library</description>
+      <description/>
     </property>
     <property>
       <id>includeLibrary</id>

@@ -280,7 +280,9 @@
       <contentType>Optional</contentType>
     </property>
     <property>
-      <defaultCategories/>
+      <defaultCategories>
+        <value>Content</value>
+      </defaultCategories>
     </property>
     <property>
       <description/>
@@ -559,7 +561,7 @@
       <defaultValue/>
     </property>
     <property>
-      <description>Status of the translation for the current language.</description>
+      <description/>
     </property>
     <property>
       <mandatory/>
@@ -649,7 +651,7 @@
       <defaultValue/>
     </property>
     <property>
-      <description>If true, the current language is the default language that is used when displaying the content of the page.</description>
+      <description/>
     </property>
     <property>
       <mandatory/>
