@@ -41,9 +41,8 @@
   <dependencies>
     <dependency>
       <groupId>org.xwiki.contrib</groupId>
-      <artifactId>application-book-versions-ui-default</artifactId>
+      <artifactId>application-book-versions-default</artifactId>
       <version>${project.version}</version>
-      <type>xar</type>
     </dependency>
     <dependency>
       <groupId>org.xwiki.contrib</groupId>

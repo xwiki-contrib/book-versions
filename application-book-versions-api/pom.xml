@@ -30,6 +30,11 @@
   <artifactId>application-book-versions-api</artifactId>
   <name>XWiki Book Versions API</name>
   <packaging>jar</packaging>
+
+  <properties>
+    <xwiki.extension.category>api</xwiki.extension.category>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
