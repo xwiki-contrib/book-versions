@@ -1918,7 +1918,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         }
 
         if ((boolean) configuration.get("publishPageOrder")) {
-            copyPinnedPagesInfo(sourceReference, collectionReference, targetReference, publicationComment);
+            copyPinnedPagesInfo(sourceReference, collectionReference, targetReference, publicationComment, configurationReference);
         }
 
         // Add metadata in the collection page (master) and top page (published space)
@@ -2555,7 +2555,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     private void copyPinnedPagesInfo(DocumentReference sourceReference, DocumentReference collectionReference,
-        SpaceReference targetReference, String publicationComment)
+        SpaceReference targetReference, String publicationComment, DocumentReference configurationReference)
         throws QueryException, XWikiException
     {
         XWikiContext xcontext = getXWikiContext();
@@ -2575,7 +2575,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             .execute();
 
         for (String source : webPreferences) {
-            DocumentReference sourceRef = referenceResolver.resolve(source);
+            DocumentReference sourceRef = referenceResolver.resolve(source, configurationReference);
             DocumentReference publishedReference =
                 getPublishedReference(sourceRef, collectionReference, targetReference);
             if (publishedReference == null) {
