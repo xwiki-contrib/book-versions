@@ -208,7 +208,13 @@ rendering.macro.contentTranslation.parameter.status.description=Status of the tr
 rendering.macro.contentTranslation.parameter.isDefault.name=Is default
 rendering.macro.contentTranslation.parameter.isDefault.description=If true, the current language is the default language that is used when displaying the content of the page.
 
-# Versions Admin UI
+# Variant macro
+rendering.macro.variant.name=Variants content (Book Versions)
+rendering.macro.variant.description=Add content for specific variants
+rendering.macro.variant.parameter.name.name=Variants
+rendering.macro.variant.parameter.name.description=The multiple variants to which the content will be related to.
+
+    # Versions Admin UI
 BookVersions.versions.LD.status=Status
 BookVersions.versions.LD.doc.date=Last edit
 BookVersions.versions.LD.doc.name=Version
