@@ -77,10 +77,12 @@
     ## Add navigation links
     &lt;div class="publication-navigation"&gt;
       #set ($sourceValue = $xobject.getProperty('source').value)
-      #set ($bookReference = $services.bookversions.getVersionedCollectionReference($doc.getDocumentReference()))
-      &lt;a href="$xwiki.getURL($bookReference)" class="btn btn-default"&gt;
-        &lt;span class="fa fa-book"&gt;&lt;/span&gt;
-        $services.localization.render('BookVersions.Code.PublicationProgress.backToBook')
+      &lt;a href="$xwiki.getURL($doc)" class="btn btn-default"&gt;
+        $services.localization.render('BookVersions.Code.PublicationProgress.back')
+      &lt;/a&gt;
+      &lt;a href="$xwiki.getURL($services.model.createDocumentReference('WebHome',$services.model.resolveSpace($xobject.getValue('destinationSpace'))))" class="btn btn-primary"&gt;
+        &lt;span class="fa fa-print"&gt;&lt;/span&gt;
+          $services.localization.render('BookVersions.Code.PublicationProgress.goToPublished')
       &lt;/a&gt;
     &lt;/div&gt;
   &lt;/div&gt;

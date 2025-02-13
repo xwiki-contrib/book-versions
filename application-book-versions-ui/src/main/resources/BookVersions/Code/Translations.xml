@@ -238,7 +238,8 @@ BookVersions.Code.CustomEditHandler.popupCancel=Cancel
 
 # Publication progress
 BookVersions.Code.PublicationProgress.title=Publication Progress
-BookVersions.Code.PublicationProgress.backToBook=Back to Book
+BookVersions.Code.PublicationProgress.back=Back
+BookVersions.Code.PublicationProgress.goToPublished=Go to target space
 BookVersions.Code.PublicationActionHandler.error.jobCreation=Failed to create publication job
 BookVersions.Code.PublicationActionHandler.error.permission=Permission denied</content>
   <object>
