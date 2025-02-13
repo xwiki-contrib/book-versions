@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc version="1.6" reference="BookVersions.Code.AdministrationMenu" locale="">
+<xwikidoc version="1.5" reference="BookVersions.Code.AdministrationMenu" locale="">
   <web>BookVersions.Code</web>
   <name>AdministrationMenu</name>
   <language/>
@@ -470,7 +470,11 @@
 #set ($discard = $xwiki.jsx.use('BookVersions.Code.AdministrationMenu'))
 #set ($discard = $xwiki.ssx.use('BookVersions.Code.AdministrationMenu'))
 #set ($bookRef = $services.bookversions.getVersionedCollectionReference($doc.getDocumentReference()))
-#if ($services.security.authorization.hasAccess("edit", $doc.space) &amp;&amp; $xcontext.action == 'view' &amp;&amp; "$!bookRef" != '')
+#if ($services.security.authorization.hasAccess("edit", $doc.space)
+      &amp;&amp; $xcontext.action == 'view'
+      &amp;&amp; "$!{bookRef}" != ''
+      &amp;&amp; ($services.bookversions.isBook($bookRef) || $services.bookversions.isLibrary($bookRef))
+     )
   ## Create references for the nested pages using space array
   #set ($versionsRef = $services.model.resolveDocument('Versions', $bookRef.parent))
   #set ($variantsRef = $services.model.resolveDocument('Variants', $bookRef.parent))
