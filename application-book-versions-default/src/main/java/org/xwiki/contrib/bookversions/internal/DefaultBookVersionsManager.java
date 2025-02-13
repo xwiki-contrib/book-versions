@@ -1794,7 +1794,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             }
             logger.debug("[publishInternal] Emptying the destination space, removing [{}] from wiki [{}].",
                 subTargetDocumentsString, targetDocumentReference.getWikiReference());
-            removeDocuments(subTargetDocumentsString, targetDocumentReference);
+            removeDocuments(subTargetDocumentsString, targetDocumentReference, userDocumentReference);
         }
 
         // The source is store as page, but we need a complete location.WebHome reference
@@ -1916,7 +1916,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             logger.info("Removing the pages marked as deleted from the target space.");
             logger.debug("[publishInternal] Removing the following marked as deleted pages [{}].",
                 markedAsDeletedReferences);
-            removeDocuments(markedAsDeletedReferences);
+            removeDocuments(markedAsDeletedReferences, userDocumentReference);
         }
 
         if ((boolean) configuration.get("publishPageOrder")) {
@@ -1938,9 +1938,11 @@ public class DefaultBookVersionsManager implements BookVersionsManager
      * Remove the given documents
      * @param documentReferencesString the documents to remove
      * @param referenceParameter the reference used as a parameter to resolve the document references
+     * @param userReference the reference of the user who removes the documents
      * @throws XWikiException happens if there is an issue with the document deletion
      */
-    private void removeDocuments(List<String> documentReferencesString, DocumentReference referenceParameter)
+    private void removeDocuments(List<String> documentReferencesString, DocumentReference referenceParameter,
+        DocumentReference userReference)
         throws XWikiException
     {
         if (documentReferencesString == null || referenceParameter == null) {
@@ -1950,15 +1952,16 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         for (String toDeleteRefString : documentReferencesString) {
             toDeleteReferences.add(referenceResolver.resolve(toDeleteRefString, referenceParameter));
         }
-        removeDocuments(toDeleteReferences);
+        removeDocuments(toDeleteReferences, userReference);
     }
 
     /**
      * Remove the given documents
      * @param documentReferences the documents to remove
+     * @param userReference the reference of the user who removes the documents
      * @throws XWikiException happens if there is an issue with the document deletion or checking its existence
      */
-    private void removeDocuments(List<DocumentReference> documentReferences)
+    private void removeDocuments(List<DocumentReference> documentReferences, DocumentReference userReference)
         throws XWikiException
     {
         if (documentReferences == null) {
@@ -1970,6 +1973,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         for (DocumentReference toDeleteRef : documentReferences) {
             if (xwiki.exists(toDeleteRef, xcontext)) {
                 logger.debug("[removeDocuments] Deleting [{}].", toDeleteRef);
+                xcontext.setUserReference(userReference);
                 xwiki.deleteDocument(xwiki.getDocument(toDeleteRef, xcontext), xcontext);
             }
         }
