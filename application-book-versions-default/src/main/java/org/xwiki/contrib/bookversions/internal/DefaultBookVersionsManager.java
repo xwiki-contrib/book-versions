@@ -1920,7 +1920,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         }
 
         if ((boolean) configuration.get("publishPageOrder")) {
-            copyPinnedPagesInfo(sourceReference, collectionReference, targetReference, publicationComment, configurationReference);
+            copyPinnedPagesInfo(sourceReference, collectionReference, targetReference, publicationComment,
+                configurationReference, userReference);
         }
 
         // Add metadata in the collection page (master) and top page (published space)
@@ -2567,7 +2568,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     private void copyPinnedPagesInfo(DocumentReference sourceReference, DocumentReference collectionReference,
-        SpaceReference targetReference, String publicationComment, DocumentReference configurationReference)
+        SpaceReference targetReference, String publicationComment, DocumentReference configurationReference,
+        UserReference userReference)
         throws QueryException, XWikiException
     {
         XWikiContext xcontext = getXWikiContext();
@@ -2632,6 +2634,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     .collect(Collectors.toList());
 
                 publishedDocPinnedPageObject.setStringListValue("pinnedChildPages", pinnedPagesListFiltered);
+
+                publishedDoc.getAuthors().setEffectiveMetadataAuthor(userReference);
+                publishedDoc.getAuthors().setOriginalMetadataAuthor(userReference);
                 xwiki.saveDocument(publishedDoc, publicationComment, xcontext);
             }
         }
