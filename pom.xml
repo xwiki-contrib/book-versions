@@ -54,6 +54,10 @@
       <id>ppantiru</id>
       <name>Paul Pantiru</name>
     </developer>
+    <developer>
+      <id>JosueTille</id>
+      <name>Josué Tille</name>
+    </developer>
   </developers>
   <issueManagement>
     <system>jira</system>
