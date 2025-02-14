@@ -32,7 +32,7 @@
   <name>Book Versions Application</name>
   <description>Application for managing and publishing documentation (a collection of pages) that is versioned (with inheritance of content or not), described by a status, that can be conditioned by variants, and using libraries of keywords/rich content dynamically filled in.</description>
   <packaging>pom</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.301-SNAPSHOT</version>
   <properties>
     <xwiki.release.jira.skip>false</xwiki.release.jira.skip>
     <xwiki.issueManagement.jira.id>BVERSION</xwiki.issueManagement.jira.id>
@@ -72,6 +72,8 @@
   <modules>
     <module>application-book-versions-api</module>
     <module>application-book-versions-default</module>
+    <module>application-book-versions-common-ui</module>
+    <module>application-book-versions-publish-ui</module>
     <module>application-book-versions-ui</module>
     <module>application-book-versions-xip</module>
   </modules>

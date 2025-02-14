@@ -1,0 +1,601 @@
+<?xml version="1.1" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.5" reference="BookVersions.Code.PublishedTranslationLanguageSelector" locale="">
+  <web>BookVersions.Code</web>
+  <name>PublishedTranslationLanguageSelector</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <parent>BookVersions.Code.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <version>1.1</version>
+  <title>Published Translation Language Selector</title>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content/>
+  <object>
+    <name>BookVersions.Code.PublishedTranslationLanguageSelector</name>
+    <number>2</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>de80df4b-0f01-4fb1-8f64-339b57ba0141</guid>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <defaultValue>long</defaultValue>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <contenttype>PureText</contenttype>
+        <disabled>0</disabled>
+        <editor>PureText</editor>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <restricted>0</restricted>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>require(['jquery', 'xwiki-selectize'], function($) {
+  // Get the language selector elements
+  const languageSelect = $('#collectionLanguage');
+  const form = $('#changeLanguageStatus');
+  const selectedLanguageInput = $('#selectedLanguageInput');
+
+  // Handle language select change
+  languageSelect.on("change", function() {
+    const selectedLanguage = $(this).val();
+    selectedLanguageInput.val(selectedLanguage);
+    form.submit();
+  });
+});</code>
+    </property>
+    <property>
+      <name>Languages</name>
+    </property>
+    <property>
+      <parse/>
+    </property>
+    <property>
+      <use></use>
+    </property>
+  </object>
+  <object>
+    <name>BookVersions.Code.PublishedTranslationLanguageSelector</name>
+    <number>0</number>
+    <className>XWiki.StyleSheetExtension</className>
+    <guid>a644f6c1-ea9c-4a15-972b-9b0255417e27</guid>
+    <class>
+      <name>XWiki.StyleSheetExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <defaultValue>long</defaultValue>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <contenttype>PureText</contenttype>
+        <disabled>0</disabled>
+        <editor>PureText</editor>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <restricted>0</restricted>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <contentType>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>contentType</name>
+        <number>6</number>
+        <prettyName>Content Type</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>CSS|LESS</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </contentType>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>/* Set up grid for the entire document-info section */
+.book-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Form containers specific styling */
+.book-info > .formContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 80px;
+}
+
+/* Ensure document title and last modification span full width */
+.book-info > #document-title,
+.book-info > .xdocLastModification {
+  grid-column: 1 / -1;
+}
+
+/* Form styling */
+.xformInline {
+  margin-bottom: 0.5rem;
+}
+
+/* Text and button container */
+.noitems {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Select elements */
+#collectionLanguage {
+  width: 100%;
+  max-width: 200px;
+}</code>
+    </property>
+    <property>
+      <contentType></contentType>
+    </property>
+    <property>
+      <name>bookNavigation Styles</name>
+    </property>
+    <property>
+      <parse>0</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <object>
+    <name>BookVersions.Code.PublishedTranslationLanguageSelector</name>
+    <number>0</number>
+    <className>XWiki.UIExtensionClass</className>
+    <guid>6ec2aa51-9fe9-4fae-a697-9abcbf84acf6</guid>
+    <class>
+      <name>XWiki.UIExtensionClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <async_cached>
+        <defaultValue>0</defaultValue>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType/>
+        <name>async_cached</name>
+        <number>3</number>
+        <prettyName>Cached</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </async_cached>
+      <async_context>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>1</multiSelect>
+        <name>async_context</name>
+        <number>4</number>
+        <prettyName>Context elements</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator>, </separator>
+        <separators>|, </separators>
+        <size>5</size>
+        <unmodifiable>0</unmodifiable>
+        <values>action=Action|doc.reference=Document|doc.revision|icon.theme=Icon theme|locale=Language|rendering.defaultsyntax=Default syntax|rendering.restricted=Restricted|rendering.targetsyntax=Target syntax|request.base=Request base URL|request.cookies|request.headers|request.parameters=Request parameters|request.remoteAddr|request.session|request.url=Request URL|request.wiki=Request wiki|sheet|user=User|wiki=Wiki</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </async_context>
+      <async_enabled>
+        <defaultValue>0</defaultValue>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType/>
+        <name>async_enabled</name>
+        <number>2</number>
+        <prettyName>Asynchronous rendering</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </async_enabled>
+      <content>
+        <disabled>0</disabled>
+        <editor>Text</editor>
+        <name>content</name>
+        <number>1</number>
+        <prettyName>Executed Content</prettyName>
+        <restricted>0</restricted>
+        <rows>25</rows>
+        <size>120</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </content>
+      <extensionPointId>
+        <disabled>0</disabled>
+        <name>extensionPointId</name>
+        <number>5</number>
+        <prettyName>Extension Point ID</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </extensionPointId>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>6</number>
+        <prettyName>Extension ID</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parameters>
+        <contenttype>PureText</contenttype>
+        <disabled>0</disabled>
+        <editor>PureText</editor>
+        <name>parameters</name>
+        <number>7</number>
+        <prettyName>Extension Parameters</prettyName>
+        <restricted>0</restricted>
+        <rows>10</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </parameters>
+      <scope>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>scope</name>
+        <number>8</number>
+        <prettyName>Extension Scope</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>wiki=Current Wiki|user=Current User|global=Global</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </scope>
+    </class>
+    <property>
+      <async_cached>0</async_cached>
+    </property>
+    <property>
+      <async_context/>
+    </property>
+    <property>
+      <async_enabled>0</async_enabled>
+    </property>
+    <property>
+      <content>{{velocity output=none}}
+##
+## Initialize common variables and services
+##
+#macro(initializeCommonVariables)
+  #set ($docRef = $doc.getDocumentReference())
+  #set ($collectionRef = $services.bookversions.getVersionedCollectionReference($docRef))
+  #set ($isPublishedPage = $xwiki.getDocument($collectionRef).getObject('BookVersions.Code.PublishedBookClass') != $NULL)
+  #set ($contentRef = $services.model.resolveDocument($services.model.serialize($docRef.getParent(),'local')))
+  #set ($bookRef = $services.model.resolveDocument($services.model.serialize($collectionRef,'local')))
+#end
+
+##
+## Initialize language-related variables
+##
+#macro(initializeLanguageVariables)
+  #set ($languagesRef = $services.model.resolveDocument('Languages', $bookRef.parent))
+  #set ($languagesDoc = $xwiki.getDocument("${languagesRef}.WebHome"))
+  #set ($languagesObj = $languagesDoc.getObject('BookVersions.Code.MultilingualClass'))
+  #if ($languagesObj)
+    #set ($multilingualEnabled = $languagesObj.getProperty('enabled').getValue())
+    #set ($languages = $languagesObj.getProperty('supportedLanguages').getValue())
+  #elseif ($isPublishedPage)
+    #set ($languages = $xwiki.getDocument($collectionRef).getObject('BookVersions.Code.PublishedBookClass').getValue('languages'))
+  #else
+    #set ($languages = [])
+  #end
+  #set ($selectedLanguage = $services.bookversions.getSelectedLanguage($collectionRef))
+#end
+
+##
+## Handle language selection from request
+##
+#macro(handleLanguageSelection)
+  #if ("$!request.selectedLanguage" != '')
+    #set ($newLanguage = $request.selectedLanguage)
+    $services.bookversions.setSelectedLanguage($collectionRef, $newLanguage)
+    #set ($selectedLanguage = $newLanguage)
+    $response.sendRedirect($xwiki.getURL($doc, $xcontext.action))
+  #end
+#end
+
+##
+## Setup language display variables
+##
+#macro(setupLanguageDisplay)
+  #if ($selectedLanguage)
+    #set ($languageStateMessageKey = 'BookVersions.navMenu.currentLanguage')
+  #else
+    #set ($languageStateMessageKey = 'BookVersions.navMenu.noLanguageSelected')
+  #end
+#end
+
+##
+## Render the version and variant selectors
+##
+#macro(renderSelectors)
+  #if ($isVersionedContent || $isVersionedPage || $isUnversionedPage || $isPublishedPage)
+    #setupLanguageDisplay()
+    #renderSelectorsHTML()
+  #end
+#end
+
+
+##
+## Render the HTML for selectors
+##
+#macro(renderSelectorsHTML)
+  {{html}}
+  &lt;div class="book-info">
+    #if ($languages.size() > 0)
+      #renderLanguageSelector()
+    #end
+  &lt;/div>
+  {{/html}}
+#end
+
+##
+## Render language selector HTML
+##
+#macro(renderLanguageSelector)
+  #if (($multilingualEnabled == 1 || $isPublishedPage) &amp;&amp; $languages.size() > 0)
+    #set ($translationStatus = $services.bookversions.getTranslationStatus($docRef, $selectedLanguage))
+    #set ($isDefaultLanguage = $services.bookversions.isDefaultLanguage($docRef, $selectedLanguage))
+    &lt;div class="formContainer">
+      &lt;form class="xformInline" id="changeLanguageStatus" method="post">
+        &lt;input type="hidden" id="language_form_token" name="form_token" value="$escapetool.xml("$!services.csrf.token")"/>
+        &lt;input type="hidden" name="selectedLanguage" id="selectedLanguageInput" value="$!selectedLanguage"/>
+        &lt;label for="collectionLanguage">$services.localization.render('BookVersions.navMenu.languageSelect')&lt;/label>
+        &lt;select name="collectionLanguage" id="collectionLanguage">
+          &lt;option value="" id="" #if("$!selectedLanguage" == '')selected#end>---&lt;/option>
+          #set ($currentLocale = $services.localization.currentLocale)
+          #foreach($language in $languages)
+            #if ($language)
+              #set ($locale = $services.localization.toLocale($language))
+              #set ($displayvalue = $escapetool.xml($stringtool.capitalize($locale.getDisplayName($locale)) +
+      ' (' + $stringtool.capitalize($locale.getDisplayName($currentLocale)) + ')'))
+              #set ($isSelected = $language &amp;&amp; $selectedLanguage &amp;&amp; $language.equals($selectedLanguage))
+              &lt;option value="$language" #if($isSelected)selected#end>$escapetool.xml($displayvalue)&lt;/option>
+            #end
+          #end
+        &lt;/select>
+        &lt;p class="noitems">
+          #if($isDefaultLanguage)
+            $services.localization.render('BookVersions.navMenu.defaultLanguage')
+          #else
+            $services.localization.render($languageStateMessageKey, [$selectedLanguage])
+          #end
+          #if("$!translationStatus" != '')
+            $services.localization.render("BookVersions.navMenu.translationStatus.${translationStatus}")&lt;br />
+          #end
+        &lt;/p>
+      &lt;/form>
+    &lt;/div>
+  #end
+#end
+{{/velocity}}
+
+{{velocity}}
+##
+## Main execution flow
+##
+## Do nothing if not in the view action
+#if ($xcontext.action != 'view')
+  #stop
+#end
+## Initialize all required variables
+#initializeCommonVariables()
+#initializeLanguageVariables()
+##
+#set ($discard = $debuglogger.debug("START Navigation menu for [$docRef], collectionRef [$collectionRef]"))
+##
+## Handle language-related actions
+#handleLanguageSelection()
+##
+## Process version selection and handle redirections if needed
+
+#if ("$!collectionRef" != '' &amp;&amp; $isPublishedPage)
+  #set ($discard = $xwiki.ssx.use('BookVersions.Code.PublishedTranslationLanguageSelector'))
+  #set ($discard = $xwiki.jsx.use('BookVersions.Code.PublishedTranslationLanguageSelector'))
+##
+  #renderSelectors()
+#end
+
+#if($displaySpecialWarning)
+{{warning}}
+$services.localization.render('BookVersion.pageSheet.nocontent')
+{{/warning}}
+#end
+{{/velocity}}</content>
+    </property>
+    <property>
+      <extensionPointId>org.xwiki.platform.template.title.before</extensionPointId>
+    </property>
+    <property>
+      <name>NavigationMenu</name>
+    </property>
+    <property>
+      <parameters>order=1000</parameters>
+    </property>
+    <property>
+      <scope>wiki</scope>
+    </property>
+  </object>
+</xwikidoc>
