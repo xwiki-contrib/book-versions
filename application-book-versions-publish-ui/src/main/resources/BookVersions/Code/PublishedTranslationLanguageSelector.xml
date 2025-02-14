@@ -542,9 +542,6 @@
           #else
             $services.localization.render($languageStateMessageKey, [$selectedLanguage])
           #end
-          #if("$!translationStatus" != '')
-            $services.localization.render("BookVersions.navMenu.translationStatus.${translationStatus}")&lt;br />
-          #end
         &lt;/p>
       &lt;/form>
     &lt;/div>
