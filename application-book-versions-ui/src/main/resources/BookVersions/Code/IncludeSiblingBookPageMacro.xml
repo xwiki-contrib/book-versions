@@ -291,10 +291,10 @@
       <description>Use this macro to include pages of the same book, at the same version.</description>
     </property>
     <property>
-      <id>includeSiblingMacro</id>
+      <id>includeSiblingBookPage</id>
     </property>
     <property>
-      <name>Include Sibling Macro</name>
+      <name>Include Sibling Book Page Macro</name>
     </property>
     <property>
       <priority/>
