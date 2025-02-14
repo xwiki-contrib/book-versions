@@ -2788,11 +2788,11 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     String statusParameterValue = macroBlock.getParameter(BookVersionsConstants.PAGETRANSLATION_STATUS);
                     PageTranslationStatus status = PageTranslationStatus.NOT_TRANSLATED;
                     if (statusParameterValue != null && !statusParameterValue.isEmpty()
-                        && statusParameterValue.equals("TRANSLATED")) {
+                        && statusParameterValue.toLowerCase().equals("translated")) {
                         status = PageTranslationStatus.TRANSLATED;
                     }
                     if (statusParameterValue != null && !statusParameterValue.isEmpty()
-                        && statusParameterValue.equals("OUTDATED")) {
+                        && statusParameterValue.toLowerCase().equals("outdated")) {
                         status = PageTranslationStatus.OUTDATED;
                     }
 
