@@ -2714,9 +2714,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 || !((boolean) languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED)))
             {
                 // The page has no "Translated" translation
-                logger.debug("[isToBePublished] Page is [{}] ignored because the translation doesn't has a [{}] "
+                logger.debug("[isToBePublished] Page is [{}] ignored because the translation doesn't have a [{}] "
                     + "status.", pageReference, PageTranslationStatus.TRANSLATED);
-                logger.error("Page is [{}] ignored because the translation doesn't has a [{}] status.",
+                logger.error("Page is [{}] ignored because the translation doesn't have a [{}] status.",
                     pageReference, PageTranslationStatus.TRANSLATED);
                 return false;
             }
@@ -2850,11 +2850,11 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     String statusParameterValue = macroBlock.getParameter(BookVersionsConstants.PAGETRANSLATION_STATUS);
                     PageTranslationStatus status = PageTranslationStatus.NOT_TRANSLATED;
                     if (statusParameterValue != null && !statusParameterValue.isEmpty()
-                        && statusParameterValue.equals("TRANSLATED")) {
+                        && statusParameterValue.equals("translated")) {
                         status = PageTranslationStatus.TRANSLATED;
                     }
                     if (statusParameterValue != null && !statusParameterValue.isEmpty()
-                        && statusParameterValue.equals("OUTDATED")) {
+                        && statusParameterValue.equals("outdated")) {
                         status = PageTranslationStatus.OUTDATED;
                     }
 
