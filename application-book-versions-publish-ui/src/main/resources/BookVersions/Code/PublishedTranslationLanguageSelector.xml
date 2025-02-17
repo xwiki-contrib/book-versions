@@ -146,7 +146,7 @@
       <parse/>
     </property>
     <property>
-      <use></use>
+      <use/>
     </property>
   </object>
   <object>
@@ -263,15 +263,15 @@
 }
 
 /* Form containers specific styling */
-.book-info > .formContainer {
+.book-info &gt; .formContainer {
   display: flex;
   flex-direction: column;
   min-height: 80px;
 }
 
 /* Ensure document title and last modification span full width */
-.book-info > #document-title,
-.book-info > .xdocLastModification {
+.book-info &gt; #document-title,
+.book-info &gt; .xdocLastModification {
   grid-column: 1 / -1;
 }
 
@@ -296,7 +296,7 @@
 }</code>
     </property>
     <property>
-      <contentType></contentType>
+      <contentType/>
     </property>
     <property>
       <name>bookNavigation Styles</name>
@@ -503,11 +503,11 @@
 ##
 #macro(renderSelectorsHTML)
   {{html}}
-  &lt;div class="book-info">
-    #if ($languages.size() > 0)
+  &lt;div class="book-info"&gt;
+    #if ($languages.size() &gt; 0)
       #renderLanguageSelector()
     #end
-  &lt;/div>
+  &lt;/div&gt;
   {{/html}}
 #end
 
@@ -515,16 +515,16 @@
 ## Render language selector HTML
 ##
 #macro(renderLanguageSelector)
-  #if (($multilingualEnabled == 1 || $isPublishedPage) &amp;&amp; $languages.size() > 0)
+  #if (($multilingualEnabled == 1 || $isPublishedPage) &amp;&amp; $languages.size() &gt; 0)
     #set ($translationStatus = $services.bookversions.getTranslationStatus($docRef, $selectedLanguage))
     #set ($isDefaultLanguage = $services.bookversions.isDefaultLanguage($docRef, $selectedLanguage))
-    &lt;div class="formContainer">
-      &lt;form class="xformInline" id="changeLanguageStatus" method="post">
-        &lt;input type="hidden" id="language_form_token" name="form_token" value="$escapetool.xml("$!services.csrf.token")"/>
-        &lt;input type="hidden" name="selectedLanguage" id="selectedLanguageInput" value="$!selectedLanguage"/>
-        &lt;label for="collectionLanguage">$services.localization.render('BookVersions.navMenu.languageSelect')&lt;/label>
-        &lt;select name="collectionLanguage" id="collectionLanguage">
-          &lt;option value="" id="" #if("$!selectedLanguage" == '')selected#end>---&lt;/option>
+    &lt;div class="formContainer"&gt;
+      &lt;form class="xformInline" id="changeLanguageStatus" method="post"&gt;
+        &lt;input type="hidden" id="language_form_token" name="form_token" value="$escapetool.xml("$!services.csrf.token")"/&gt;
+        &lt;input type="hidden" name="selectedLanguage" id="selectedLanguageInput" value="$!selectedLanguage"/&gt;
+        &lt;label for="collectionLanguage"&gt;$services.localization.render('BookVersions.navMenu.languageSelect')&lt;/label&gt;
+        &lt;select name="collectionLanguage" id="collectionLanguage"&gt;
+          &lt;option value="" id="" #if("$!selectedLanguage" == '')selected#end&gt;---&lt;/option&gt;
           #set ($currentLocale = $services.localization.currentLocale)
           #foreach($language in $languages)
             #if ($language)
@@ -532,19 +532,19 @@
               #set ($displayvalue = $escapetool.xml($stringtool.capitalize($locale.getDisplayName($locale)) +
       ' (' + $stringtool.capitalize($locale.getDisplayName($currentLocale)) + ')'))
               #set ($isSelected = $language &amp;&amp; $selectedLanguage &amp;&amp; $language.equals($selectedLanguage))
-              &lt;option value="$language" #if($isSelected)selected#end>$escapetool.xml($displayvalue)&lt;/option>
+              &lt;option value="$language" #if($isSelected)selected#end&gt;$escapetool.xml($displayvalue)&lt;/option&gt;
             #end
           #end
-        &lt;/select>
-        &lt;p class="noitems">
+        &lt;/select&gt;
+        &lt;p class="noitems"&gt;
           #if($isDefaultLanguage)
             $services.localization.render('BookVersions.navMenu.defaultLanguage')
           #else
             $services.localization.render($languageStateMessageKey, [$selectedLanguage])
           #end
-        &lt;/p>
-      &lt;/form>
-    &lt;/div>
+        &lt;/p&gt;
+      &lt;/form&gt;
+    &lt;/div&gt;
   #end
 #end
 {{/velocity}}
