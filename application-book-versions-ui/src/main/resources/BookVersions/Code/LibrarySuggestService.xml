@@ -47,13 +47,15 @@
    #set($input = $!request.text.toLowerCase())
  #end
 #end
-#if($request.book)
+#if(!$request.book)
+  ## Shouldn't happen. We expect that in all cases the book parameter is provided
+  #jsonResponse([])
+  #stop
+#end
 #set ($book = $xwiki.getDocument($!request.book).getSpace())
 #set ($libs = $services.query.xwql("select distinct obj.libraryReference from Document doc, doc.object(BookVersions.Code.LibraryReferenceClass) as obj where doc.space like :space order by obj.libraryReference asc").bindValue('space').literal("${book}.").anyChars().query().execute())
-#end
 #set($binds = {})
 #set($likes = [])
-#if($libs &amp;&amp; $libs.size()&gt;0)
 #foreach($lib in $libs)
   #set($parent = $services.model.resolveDocument($lib).getParent())
   #set($spaceRef = $services.model.serialize($parent, 'local'))
@@ -62,9 +64,6 @@
 #end
 #set($slikes = $stringtool.join($likes, ' OR '))
 #set($hql = ", BaseObject as obj where obj.className='BookVersions.Code.BookPageClass' and obj.name=doc.fullName and ($slikes)")
-#else
-#set($hql = ", BaseObject as obj where obj.className='BookVersions.Code.BookPageClass' and obj.name=doc.fullName")
-#end
 #if("$!input" == "")
   #set($hql = "$hql order by lower(doc.title) asc")
 #elseif($request.exactMatch=="true")
