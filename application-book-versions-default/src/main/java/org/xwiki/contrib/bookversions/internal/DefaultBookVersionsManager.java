@@ -1522,7 +1522,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 .bindValue("space", spacePrefix).setWiki(bookReference.getWikiReference().getName()).execute();
 
             for (String resultString : resultStrings) {
-                result.add(currentMixedReferenceResolver.resolve(resultString, bookReference));
+                if (StringUtils.isNotEmpty(resultString)) {
+                    result.add(currentMixedReferenceResolver.resolve(resultString, bookReference));
+                }
             }
 
             logger.debug("[getUsedLibraries] Libraries used in book: [{}]", result);
@@ -1584,6 +1586,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 Map<DocumentReference, DocumentReference> libResult = new HashMap<>();
                 String versionName = getVersionName(ascendingVersionReference);
                 for (DocumentReference libraryReference : usedLibraries) {
+                    if (libraryReference == null) {
+                        continue;
+                    }
                     DocumentReference libraryVersionReference =
                         getConfiguredLibraryVersion(bookReference, libraryReference, ascendingVersionReference);
                     if (libraryVersionReference == null) {
@@ -1593,11 +1598,11 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                         continue;
                     }
                     DocumentReference publishedSpace =
-                        getCollectionPublishedSpace(libraryReference, libraryVersionReference.getName(), libraryReference);
+                        getCollectionPublishedSpace(libraryReference, libraryVersionReference.getName(),
+                            libraryReference);
                     if (publishedSpace == null) {
-                        logger.warn(
-                            "Library [{}], configured in book [{}] to use version [{}]" + " doesn't seem to be published.",
-                            libraryReference, bookReference, libraryVersionReference);
+                        logger.warn("Library [{}], configured in book [{}] to use version [{}] doesn't seem to be "
+                                + "published.", libraryReference, bookReference, libraryVersionReference);
                         libResult.put(libraryReference, null);
                         continue;
                     }
