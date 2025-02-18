@@ -90,27 +90,31 @@
     #end
     &lt;/dl&gt;
   &lt;/div&gt;
-  #set ($queryLinkedPages = "where doc.object(BookVersions.Code.VariantsListClass).variantsList like :variant")
-  #set ($resultsLinkedPages = $services.query.xwql($queryLinkedPages).bindValue('variant',"%${doc.fullName}%").execute())
-  #set ($queryForVariantMacroPages = "where doc.content like :pattern and doc.fullName &lt;&gt; 'BookVersions.Code.VariantSheet'")
-  #set ($resultsMacroPages = $services.query.xwql($queryForVariantMacroPages).bindValue('pattern',"%{{variant name=_${doc.fullName}%").execute())
+  #if($request.showAssociated == 'true')
+    #set ($queryLinkedPages = "where doc.object(BookVersions.Code.VariantsListClass).variantsList like :variant")
+    #set ($resultsLinkedPages = $services.query.xwql($queryLinkedPages).bindValue('variant',"%${doc.fullName}%").execute())
+    #set ($queryForVariantMacroPages = "where doc.content like :pattern and doc.fullName &lt;&gt; 'BookVersions.Code.VariantSheet'")
+    #set ($resultsMacroPages = $services.query.xwql($queryForVariantMacroPages).bindValue('pattern',"%{{variant name=_${doc.fullName}%").execute())
 
-  {{box}}
-  === $services.localization.render("BookVersions.variants.linkedPagesListHeading") ===
-  #if ($resultsLinkedPages.size() == 0 )
-    $services.localization.render("BookVersions.variants.noLinkedPage")
+    {{box}}
+    === $services.localization.render("BookVersions.variants.linkedPagesListHeading") ===
+    #if ($resultsLinkedPages.size() == 0 )
+      $services.localization.render("BookVersions.variants.noLinkedPage")
+    #end
+    #foreach($result in $resultsLinkedPages)
+      #displayAssociatedPage($result)
+    #end
+    === $services.localization.render("BookVersions.variants.macrosPagesListHeading") ===
+    #if ($resultsMacroPages.size() == 0 )
+      $services.localization.render("BookVersions.variants.noMacroUsingPage")
+    #end
+    #foreach($result in $resultsMacroPages)
+      #displayAssociatedPage($result)
+    #end
+    {{/box}}
+  #else
+    &lt;a href='?showAssociated=true' class='btn btn-primary'&gt;$services.localization.render("BookVersions.variants.loadPagesBtn")&lt;/a&gt;
   #end
-  #foreach($result in $resultsLinkedPages)
-    #displayAssociatedPage($result)
-  #end
-  === $services.localization.render("BookVersions.variants.macrosPagesListHeading") ===
-  #if ($resultsMacroPages.size() == 0 )
-    $services.localization.render("BookVersions.variants.noMacroUsingPage")
-  #end
-  #foreach($result in $resultsMacroPages)
-    #displayAssociatedPage($result)
-  #end
-  {{/box}}
 
 #macro(displayAssociatedPage $result)
   #set ($versionedContentDocRef = $services.model.resolveDocument($result))
