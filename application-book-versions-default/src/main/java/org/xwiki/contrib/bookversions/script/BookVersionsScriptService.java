@@ -60,7 +60,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Check if the given reference is a book.
-     * 
+     *
      * @param documentReference The document reference.
      * @return True, if the given reference is a book.
      * @throws XWikiException In case the system can't provide an answer.
@@ -72,7 +72,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Check if the given document is a book.
-     * 
+     *
      * @param document The document.
      * @return True, if the given document is a book.
      * @throws XWikiException In case the system can't provide an answer.
@@ -84,7 +84,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Check if the given reference is a book page.
-     * 
+     *
      * @param documentReference The document reference.
      * @return True, if the given reference is a book page.
      * @throws XWikiException In case the system can't provide an answer.
@@ -96,7 +96,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Check if the given reference is a versioned book page.
-     * 
+     *
      * @param documentReference The document reference.
      * @return True, if the given reference is a versioned book page.
      * @throws XWikiException In case the system can't provide an answer.
@@ -108,7 +108,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Check if the given reference is a versioned content document.
-     * 
+     *
      * @param documentReference The document reference.
      * @return true if the given reference is a versioned content document.
      * @throws XWikiException
@@ -120,7 +120,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Check if the given document is marked as deleted.
-     * 
+     *
      * @param documentReference The document reference
      * @return True if the document is marked as deleted
      * @throws XWikiException could occur if getDocument has an issue
@@ -132,7 +132,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Check if the given document is marked as deleted.
-     * 
+     *
      * @param document The document
      * @return True if the document is marked as deleted
      */
@@ -143,7 +143,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Check if the given document is a versioned content one.
-     * 
+     *
      * @param document The XWiki document.
      * @return true if the given document is a versioned content one.
      * @throws XWikiException
@@ -182,7 +182,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the selected version that is stored in the session for the given collection (book / library).
-     * 
+     *
      * @param documentReference the document reference.
      * @return the selected version.
      * @throws QueryException
@@ -195,7 +195,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Set the selected version in the session for the given collection (book / library).
-     * 
+     *
      * @param documentReference the document reference.
      * @param version the version to be stored for the given collection.
      */
@@ -206,7 +206,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the selected version that is stored in the session for the given collection (book / library).
-     * 
+     *
      * @param documentReference the document reference.
      * @return the selected version.
      * @throws QueryException
@@ -219,6 +219,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the variants the page belongs to.
+     *
      * @param page the page document
      * @return the variants which the page belongs to
      */
@@ -229,7 +230,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Set the selected variant in the session for the given collection (book / library).
-     * 
+     *
      * @param documentReference the document reference.
      * @param variant the variant to be stored for the given collection.
      */
@@ -240,7 +241,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the selected language that is stored in the session for the given collection (book / library).
-     * 
+     *
      * @param documentReference the document reference.
      * @return the selected version.
      * @throws QueryException
@@ -253,7 +254,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Set the selected language in the session for the given collection (book / library).
-     * 
+     *
      * @param documentReference the document reference.
      * @param language the language to be stored for the given collection.
      */
@@ -303,7 +304,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the translated title for a document based on the selected language.
-     * 
+     *
      * @param document The document to get the translated title for
      * @return The translated title if found, null otherwise
      * @throws XWikiException
@@ -346,7 +347,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Check if a page is a nested page of another one, recursively.
-     * 
+     *
      * @param spaceReference the reference of the supposed space
      * @param nestedReference the reference of the supposed nested page
      * @return true if the space contains the nested space in one of its sub-spaces.
@@ -358,7 +359,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the versioned collection (book or library) reference of a given page.
-     * 
+     *
      * @param pageReference the page from which to take the collection reference
      * @return the versioned collection reference, or null if the page is not part of a collection
      * @throws QueryException
@@ -371,7 +372,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the name of the referenced version.
-     * 
+     *
      * @param versionReference The version reference.
      * @return the name of the referenced version.
      */
@@ -382,7 +383,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the name of the referenced variant.
-     * 
+     *
      * @param variantReference The version reference.
      * @return the name of the referenced version.
      */
@@ -393,7 +394,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the reference of a given version id, in the given referenced collection.
-     * 
+     *
      * @param collectionReference The reference of the collection (book / library).
      * @param version The version id.
      * @return the reference of a given version id, in the given referenced collection.
@@ -407,7 +408,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the reference of a given varoamt id, in the given referenced collection.
-     * 
+     *
      * @param collectionReference The reference of the collection (book / library).
      * @param variant The variant id.
      * @return the reference of a given variant id, in the given referenced collection.
@@ -421,10 +422,10 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the version references from a versioned collection (book or library).
-     * 
+     *
      * @param collectionReference the reference of the collection to get versions from
      * @return a list of versions references declared in the versioned collection, ordered by descending date. Returns
-     *         an empty list if none are found.
+     *     an empty list if none are found.
      * @throws QueryException
      * @throws XWikiException
      */
@@ -436,10 +437,10 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the variants references from a versioned collection (book library or variant).
-     * 
+     *
      * @param collectionReference the reference of the collection to get versions from
      * @return a list of variants references declared in the versioned collection, ordered by descending date. Returns
-     *         an empty list if none are found.
+     *     an empty list if none are found.
      * @throws QueryException
      * @throws XWikiException
      */
@@ -452,7 +453,7 @@ public class BookVersionsScriptService implements ScriptService
     /**
      * Get the reference of the page content corresponding to the given version. No inheritance is used for this
      * computation.
-     * 
+     *
      * @param documentReference The page reference.
      * @param version The version id.
      * @return the reference of the page content corresponding to the given version.
@@ -467,7 +468,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Check if the page has content corresponding to the given version.
-     * 
+     *
      * @param documentReference The page reference.
      * @param version The version id.
      * @return true if the page has content corresponding to the given version.
@@ -482,7 +483,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the reference of a versioned page content. This does not check existence or page class.
-     * 
+     *
      * @param documentReference the reference of the (versioned content) page
      * @return the reference of the versioned page content
      * @throws XWikiException
@@ -496,7 +497,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the reference of a versioned page content. This does not check existence or page class.
-     * 
+     *
      * @param pageReference the reference of the (versioned content) page
      * @param versionReference the reference of the version page
      * @return the reference of the versioned page content
@@ -509,11 +510,11 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the reference of the version of the content to be displayed, be it the required version, or inherited one.
-     * 
+     *
      * @param pageReference the reference of the page to get the content from
      * @param versionReference the reference of the version from which to get the content from, or inherit
      * @return the reference of the version of the content to be displayed. Null if there's no versioned content for the
-     *         page, neither to inherit.
+     *     page, neither to inherit.
      * @throws QueryException
      * @throws XWikiException
      */
@@ -526,11 +527,11 @@ public class BookVersionsScriptService implements ScriptService
     /**
      * Get the reference of the content to be displayed, be it corresponding to the required version, or inherited from
      * another version.
-     * 
+     *
      * @param pageReference the reference of the page to get the content from
      * @param versionReference the reference of the version from which to get the content from, or inherit
      * @return the reference of the content to be displayed. Null if there's no versioned content for the page, neither
-     *         to inherit.
+     *     to inherit.
      * @throws QueryException
      * @throws XWikiException
      */
@@ -568,7 +569,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Set a library configuration to a book if it doesn't exit yet.
-     * 
+     *
      * @param bookReference the reference of the book
      * @param libraryReference the reference of the library to add
      * @param libraryVersionReference the reference of the version of the library to add
@@ -615,6 +616,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get a list of used libraries in the given book.
+     *
      * @param bookReference the reference of the book
      * @return the list of used library references
      * @throws XWikiException In case the isBook method has an issue.
@@ -628,12 +630,14 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the published space for each of the libraries used in the given book.
+     *
      * @param bookReference the reference of the book
      * @param versionReference the version of the book, which corresponds to a library's version in the book
-     * configuration
+     *     configuration
      * @return the published space reference of each library used in the book
      * @throws XWikiException In case a getDocument method or a check of type (isBook, ...) has an issue
-     * @throws QueryException If any exception occurs while querying the database for the used libraries in the book.
+     * @throws QueryException If any exception occurs while querying the database for the used libraries in the
+     *     book.
      */
     public Map<DocumentReference, DocumentReference> getUsedPublishedLibraries(DocumentReference bookReference,
         DocumentReference versionReference) throws XWikiException, QueryException
@@ -665,6 +669,7 @@ public class BookVersionsScriptService implements ScriptService
 
     /**
      * Get the page status.
+     *
      * @param page the page document
      * @return the status of the page
      */

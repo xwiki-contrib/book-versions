@@ -78,11 +78,10 @@ import org.xwiki.rendering.renderer.printer.WikiPrinter;
 import org.xwiki.user.UserReference;
 import org.xwiki.user.UserReferenceResolver;
 
-import com.xpn.xwiki.api.Document;
-
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
+import com.xpn.xwiki.api.Document;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.doc.merge.MergeConfiguration;
 import com.xpn.xwiki.doc.merge.MergeResult;
@@ -262,7 +261,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     {
         for (String versionStringRef : getCollectionVersions(libraryReference)) {
             if (versionStringRef != null && libraryVersionReference != null && libraryVersionReference
-                .equals(referenceResolver.resolve(versionStringRef, libraryVersionReference))) {
+                .equals(referenceResolver.resolve(versionStringRef, libraryVersionReference)))
+            {
                 return true;
             }
         }
@@ -321,10 +321,10 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     Map.Entry<String, String> collectionVersion = (Map.Entry<String, String>) it.next();
                     String collectionReference = collectionVersion.getKey();
                     if (collectionReference != null && !collectionReference.isBlank()
-                        && collectionReference.equals(localSerializer.serialize(versionedCollectionReference))) {
+                        && collectionReference.equals(localSerializer.serialize(versionedCollectionReference)))
+                    {
                         return collectionVersion.getValue();
                     }
-
                 }
             }
         }
@@ -377,10 +377,10 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     Map.Entry<String, String> collectionVariant = (Map.Entry<String, String>) it.next();
                     String collectionReference = collectionVariant.getKey();
                     if (collectionReference != null && !collectionReference.isBlank()
-                        && collectionReference.equals(localSerializer.serialize(versionedCollectionReference))) {
+                        && collectionReference.equals(localSerializer.serialize(versionedCollectionReference)))
+                    {
                         return collectionVariant.getValue();
                     }
-
                 }
             }
         }
@@ -446,7 +446,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     Map.Entry<String, String> collectionLanguage = (Map.Entry<String, String>) it.next();
                     String collectionReference = collectionLanguage.getKey();
                     if (collectionReference != null && !collectionReference.isBlank()
-                        && collectionReference.equals(localSerializer.serialize(versionedCollectionReference))) {
+                        && collectionReference.equals(localSerializer.serialize(versionedCollectionReference)))
+                    {
                         return collectionLanguage.getValue();
                     }
                 }
@@ -478,7 +479,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     Map.Entry<String, String> collectionLanguage = (Map.Entry<String, String>) it.next();
                     String collectionReference = collectionLanguage.getKey();
                     if (collectionReference != null && !collectionReference.isBlank()
-                        && collectionReference.equals(localSerializer.serialize(versionedCollectionReference))) {
+                        && collectionReference.equals(localSerializer.serialize(versionedCollectionReference)))
+                    {
                         return collectionLanguage.getValue();
                     }
                 }
@@ -521,7 +523,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
         for (Entry<String, Map<String, Object>> languageDataEntry : languageData.entrySet()) {
             if (languageDataEntry != null && languageDataEntry.getValue() != null
-                && (boolean) languageDataEntry.getValue().get(BookVersionsConstants.PAGETRANSLATION_ISDEFAULT)) {
+                && (boolean) languageDataEntry.getValue().get(BookVersionsConstants.PAGETRANSLATION_ISDEFAULT))
+            {
                 return (String) languageDataEntry.getKey();
             }
         }
@@ -535,7 +538,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
         for (Entry<String, Map<String, Object>> languageDataEntry : languageData.entrySet()) {
             if (languageDataEntry != null && languageDataEntry.getValue() != null
-                && (boolean) languageDataEntry.getValue().get(BookVersionsConstants.PAGETRANSLATION_ISDEFAULT)) {
+                && (boolean) languageDataEntry.getValue().get(BookVersionsConstants.PAGETRANSLATION_ISDEFAULT))
+            {
                 return (String) languageDataEntry.getKey();
             }
         }
@@ -600,7 +604,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 String languageEntry = tObj.getStringValue(BookVersionsConstants.PAGETRANSLATION_LANGUAGE);
                 if (languageEntry != null && !languageEntry.isEmpty() && languageEntry.equals(language)) {
                     title = tObj.getStringValue(BookVersionsConstants.PAGETRANSLATION_TITLE);
-
                 }
             }
         }
@@ -638,7 +641,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     return parentDocument.getTitle();
                 }
             }
-
         }
 
         return document != null ? document.getDocumentReference().getName() : null;
@@ -660,7 +662,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     return xcontext.getWiki().getDocument(parentPageReference, xcontext).getTitle();
                 }
             }
-
         }
 
         return document != null ? document.getDocumentReference().getName() : null;
@@ -689,7 +690,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         for (BaseObject tObj : document.getXObjects(BookVersionsConstants.PAGETRANSLATION_CLASS_REFERENCE)) {
             String languageEntry = tObj.getStringValue(BookVersionsConstants.PAGETRANSLATION_LANGUAGE);
             if (languageEntry != null && !languageEntry.isEmpty() && selectedLanguage != null
-                && languageEntry.equals(selectedLanguage)) {
+                && languageEntry.equals(selectedLanguage))
+            {
                 translationObject = tObj;
                 break;
             }
@@ -709,7 +711,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         for (BaseObject tObj : document.getXObjects(BookVersionsConstants.PAGETRANSLATION_CLASS_REFERENCE)) {
             String languageEntry = tObj.getStringValue(BookVersionsConstants.PAGETRANSLATION_LANGUAGE);
             if (languageEntry != null && !languageEntry.isEmpty() && language != null
-                && languageEntry.equals(language)) {
+                && languageEntry.equals(language))
+            {
                 return tObj.getStringValue(BookVersionsConstants.PAGETRANSLATION_STATUS);
             }
         }
@@ -732,7 +735,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         for (BaseObject tObj : document.getXObjects(BookVersionsConstants.PAGETRANSLATION_CLASS_REFERENCE)) {
             String languageEntry = tObj.getStringValue(BookVersionsConstants.PAGETRANSLATION_LANGUAGE);
             if (languageEntry != null && !languageEntry.isEmpty() && language != null
-                && languageEntry.equals(language)) {
+                && languageEntry.equals(language))
+            {
                 int isDefault = tObj.getIntValue(BookVersionsConstants.PAGETRANSLATION_ISDEFAULT);
                 if (isDefault == 1) {
                     return true;
@@ -763,7 +767,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     /**
      * Get the name of the page, but escaped for dot character.
-     * 
+     *
      * @param documentReference the document reference to get the name from
      * @return the escaped name of the page
      */
@@ -774,7 +778,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     /**
      * Get the name of the page, but escaped for dot character.
-     * 
+     *
      * @param name the name to escape
      * @return the escaped name of the page
      */
@@ -874,6 +878,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     /**
      * Query pages under a given document, ordered by descending creation date
+     *
      * @param documentReference the root document for the query
      * @return the list of pages under the document, ordered by descending creation date
      * @throws QueryException happens when the query creation or execution has an issue.
@@ -886,6 +891,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     /**
      * Query pages under a given document, having a given class, ordered by descending creation date
+     *
      * @param documentReference the root document for the query
      * @param classReference the class to select pages from
      * @return the list of pages with the class, under the document, ordered by descending creation date
@@ -979,7 +985,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 // If the parent is a space, but it's the last space of the given reference,
                 // then go upper with one level, to the parent of the parent to avoid Stack Overflow.
                 if (parentSpaceReference != null
-                    && parentSpaceReference.equals(documentReference.getLastSpaceReference())) {
+                    && parentSpaceReference.equals(documentReference.getLastSpaceReference()))
+                {
                     parentSpaceReference = getSpaceReference(parentSpaceReference.getParent());
                 }
 
@@ -1044,7 +1051,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 // If the parent is a space, but it's the last space of the given reference,
                 // then go upper with one level, to the parent of the parent to avoid Stack Overflow.
                 if (parentSpaceReference != null
-                    && parentSpaceReference.equals(documentReference.getLastSpaceReference())) {
+                    && parentSpaceReference.equals(documentReference.getLastSpaceReference()))
+                {
                     parentSpaceReference = getSpaceReference(parentSpaceReference.getParent());
                 }
 
@@ -1076,7 +1084,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
             SpaceReference parentSpaceReference = getSpaceReference(documentReference);
             if (parentSpaceReference != null
-                && parentSpaceReference.equals(documentReference.getLastSpaceReference())) {
+                && parentSpaceReference.equals(documentReference.getLastSpaceReference()))
+            {
                 parentSpaceReference = getSpaceReference(parentSpaceReference.getParent());
             }
             if (parentSpaceReference != null) {
@@ -1353,7 +1362,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         DocumentReference libraryVersionReference) throws QueryException, XWikiException
     {
         if (isBook(bookReference) && isLibrary(libraryReference)
-            && isFromLibrary(libraryReference, libraryVersionReference)) {
+            && isFromLibrary(libraryReference, libraryVersionReference))
+        {
             List<String> versionsLocalRef = getCollectionVersions(bookReference);
             for (String versionLocalRef : versionsLocalRef) {
                 DocumentReference versionRef = referenceResolver.resolve(versionLocalRef);
@@ -1384,11 +1394,13 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 libRefObject.getStringValue(BookVersionsConstants.BOOKLIBRARYREFERENCE_PROP_LIBRARY);
 
             if (libraryPropValue != null
-                && libraryReference.equals(referenceResolver.resolve(libraryPropValue, libraryReference))) {
+                && libraryReference.equals(referenceResolver.resolve(libraryPropValue, libraryReference)))
+            {
 
                 if (libraryVersionReference.equals(referenceResolver.resolve(
                     libRefObject.getStringValue(BookVersionsConstants.BOOKLIBRARYREFERENCE_PROP_LIBRARYVERSION),
-                    libraryVersionReference))) {
+                    libraryVersionReference)))
+                {
                     // The version library is already set with the proper value, nothing to do
                     return;
                 } else {
@@ -1398,7 +1410,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     createObject = false;
                 }
             }
-
         }
 
         if (createObject) {
@@ -1447,6 +1458,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     /**
      * Get the library version configured for the given book version which uses the given library.
+     *
      * @param bookReference the book
      * @param libraryReference the library used
      * @param versionReference the version of the book
@@ -1468,7 +1480,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         for (BaseObject libRefObject : libRefObjects) {
             if (libraryReference.equals(referenceResolver.resolve(
                 libRefObject.getStringValue(BookVersionsConstants.BOOKLIBRARYREFERENCE_PROP_LIBRARY),
-                libraryReference))) {
+                libraryReference)))
+            {
                 return referenceResolver.resolve(
                     libRefObject.getStringValue(BookVersionsConstants.BOOKLIBRARYREFERENCE_PROP_LIBRARYVERSION),
                     libraryReference);
@@ -1567,13 +1580,15 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     /**
      * Get the published space for each of the libraries used in the given book, for the current version and the
      * preceding ones.
+     *
      * @param bookReference the reference of the book
      * @param versionReference the version of the book, which corresponds to a library's version in the book
-     * configuration
+     *     configuration
      * @return the published space reference of each library used in the book as a map of {bookVersionName, {
-     * libraryReference, publishedSpaceReference}}
+     *     libraryReference, publishedSpaceReference}}
      * @throws XWikiException In case a getDocument method or a check of type (isBook, ...) has an issue
-     * @throws QueryException If any exception occurs while querying the database for the used libraries in the book.
+     * @throws QueryException If any exception occurs while querying the database for the used libraries in the
+     *     book.
      */
     private Map<String, Map<DocumentReference, DocumentReference>> getUsedPublishedLibrariesWithInheritance(
         DocumentReference bookReference, DocumentReference versionReference) throws XWikiException, QueryException
@@ -1700,7 +1715,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         String behaviour =
             configurationObject.getStringValue(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR);
         if (sourceReferenceString == null || sourceReferenceString.isBlank() || destinationReferenceString == null
-            || behaviour == null || destinationReferenceString.isBlank() || versionReferenceString.isBlank()) {
+            || behaviour == null || destinationReferenceString.isBlank() || versionReferenceString.isBlank())
+        {
             logger.error(
                 "One of the mandatory element in the configuration (source, destination, version or behaviour) is " +
                     "missing.");
@@ -1709,11 +1725,13 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
         try {
             configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE,
-                    currentExplicitReferenceResolver.resolve(sourceReferenceString, configurationReference.getWikiReference()));
+                currentExplicitReferenceResolver.resolve(sourceReferenceString,
+                    configurationReference.getWikiReference()));
         } catch (Exception e) {
             sourceReferenceString = sourceReferenceString + ".WebHome";
             configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE,
-                    currentExplicitReferenceResolver.resolve(sourceReferenceString, configurationReference.getWikiReference()));
+                currentExplicitReferenceResolver.resolve(sourceReferenceString,
+                    configurationReference.getWikiReference()));
         }
         configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE,
             spaceReferenceResolver.resolve(destinationReferenceString, configurationReference.getWikiReference()));
@@ -1911,7 +1929,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             logger.debug("[publishInternal] End working on page [{}].", pageStringReference);
             logger.info("End page publication [{}].", pageStringReference);
             progressManager.endStep(this);
-
         }
 
         // Remove the pages marked as deleted
@@ -1942,6 +1959,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     /**
      * Remove the given documents
+     *
      * @param documentReferencesString the documents to remove
      * @param referenceParameter the reference used as a parameter to resolve the document references
      * @param userReference the reference of the user who removes the documents
@@ -1963,6 +1981,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     /**
      * Remove the given documents
+     *
      * @param documentReferences the documents to remove
      * @param userReference the reference of the user who removes the documents
      * @throws XWikiException happens if there is an issue with the document deletion or checking its existence
@@ -2001,7 +2020,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     {
         if (masterDocument == null || publishedDocument == null || language == null) {
             logger.error("[mergeTranslatedContent] A parameter is null: masterDocument [{}], publishedDocument [{}], "
-                + "language [{}]", masterDocument.getDocumentReference(), publishedDocument.getDocumentReference(),
+                    + "language [{}]", masterDocument.getDocumentReference(), publishedDocument.getDocumentReference(),
                 language);
             return;
         }
@@ -2022,7 +2041,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         Block toPublishBlock = null;
         if (xwiki.exists(publishedDocument.getDocumentReference(), xcontext)) {
             logger.debug("[mergeTranslatedContent] Searching for existing translated content of [{}] in already "
-                    + "existing published document.", language);
+                + "existing published document.", language);
             XDOM publishedXdom = publishedDocument.getXDOM();
             MacroBlock publishedBlock = getTranslatedMacroBlock(publishedXdom, language);
             if (publishedBlock == null) {
@@ -2046,20 +2065,21 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     /**
      * Get the first XDOM block of content translation macro for the given language, with the status "Translated", in
      * the given document
+     *
      * @param xdom the xdom of the document to get the macro block from
      * @param language the language of the macro
      * @return the macro block found, or null if none
      */
     private MacroBlock getTranslatedMacroBlock(XDOM xdom, String language)
     {
-        if (xdom == null ||  language == null) {
+        if (xdom == null || language == null) {
             logger.error("[mergeTranslatedContent] A parameter is null: xdom [{}], language [{}]", xdom,
                 language);
             return null;
         }
 
         logger.debug("[getTranslatedMacroBlock] Looking for the first [{}] macro, with the [{}] status, for language "
-            + "[{}].", BookVersionsConstants.CONTENTTRANSLATION_MACRO_ID,
+                + "[{}].", BookVersionsConstants.CONTENTTRANSLATION_MACRO_ID,
             PageTranslationStatus.TRANSLATED, language);
         List<MacroBlock> listBlock = xdom.getBlocks(new ClassBlockMatcher(
             new MacroBlock(BookVersionsConstants.CONTENTTRANSLATION_MACRO_ID, Collections.emptyMap(),
@@ -2095,6 +2115,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     /**
      * Return if the given space is empty, except for his WebHome and WebPreferences pages
+     *
      * @param subTargetDocumentsString list of pages under the target space
      * @param targetDocumentReference WebHome document of the target space
      * @return true if space is empty, except for his WebHome and WebPreferences pages. False if any parameter is null
@@ -2265,7 +2286,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             String objectId = XObject.getStringValue(BookVersionsConstants.PUBLICATION_PROP_ID);
             String objectSource = XObject.getStringValue(BookVersionsConstants.PUBLICATION_PROP_SOURCE);
             if (publicationId != null && publicationId.equals(objectId) && objectSource != null
-                && sourceReference.toString().equals(objectSource)) {
+                && sourceReference.toString().equals(objectSource))
+            {
                 // Previous publication of the same space, with same version and variant found
                 logger.debug("[addMasterPublicationData] An object already exists.");
                 publicationObject = XObject;
@@ -2290,6 +2312,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     /**
      * Get the published space of a given collection for a given publication ID and source.
+     *
      * @param collectionReference the collection
      * @param publicationId the publication ID
      * @param sourceReference the source
@@ -2300,7 +2323,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         DocumentReference sourceReference) throws XWikiException
     {
         if (publicationId == null || collectionReference == null || sourceReference == null
-            || (!isBook(collectionReference) && !isLibrary(collectionReference))) {
+            || (!isBook(collectionReference) && !isLibrary(collectionReference)))
+        {
             return null;
         }
 
@@ -2314,7 +2338,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             String objectId = XObject.getStringValue(BookVersionsConstants.PUBLICATION_PROP_ID);
             String objectSource = XObject.getStringValue(BookVersionsConstants.PUBLICATION_PROP_SOURCE);
             if (objectId != null && publicationId.equals(objectId) && objectSource != null
-                && sourceReference.toString().equals(objectSource)) {
+                && sourceReference.toString().equals(objectSource))
+            {
                 publishedSpaceReference = referenceResolver
                     .resolve(XObject.getStringValue(BookVersionsConstants.PUBLICATION_PROP_PUBLISHEDSPACE));
                 logger.debug("[getCollectionPublishedSpace] The collection was published in [{}]",
@@ -2341,7 +2366,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     private XWikiDocument removeObjectsForPublication(XWikiDocument publishedPage)
     {
-        if(publishedPage == null) {
+        if (publishedPage == null) {
             return null;
         }
 
@@ -2423,7 +2448,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             }
 
             if (id.equals(BookVersionsConstants.VARIANT_MACRO_ID) && ((publishedVariantReference == null)
-                || (publishedVariantReference != null && !variantReferences.contains(publishedVariantReference)))) {
+                || (publishedVariantReference != null && !variantReferences.contains(publishedVariantReference))))
+            {
                 // The macro is removed if it's a macro variant AND ((no variant is published)) OR (variant is
                 // published but macro is not for the published variant)
                 logger.debug("[transformXDOM] Variant macro is for [{}], it is removed from content.",
@@ -2431,7 +2457,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 block.getParent().removeBlock(block);
             } else if (contentDescriptor != null && contentDescriptor.getType() != null
                 && contentDescriptor.getType().equals(Block.LIST_BLOCK_TYPE) && content != null
-                && StringUtils.isNotEmpty(content)) {
+                && StringUtils.isNotEmpty(content))
+            {
                 // We will take a quick shortcut here and directly parse the macro content with the syntax of the
                 // document
                 logger.debug("[transformXDOM] Calling parse on [{}] with syntax [{}]", id, syntaxId);
@@ -2480,7 +2507,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             BookVersionsConstants.CONTENTTRANSLATION_MACRO_ID, PageTranslationStatus.TRANSLATED);
         if (StringUtils.isNotEmpty(language)) {
             logger.debug("[transformTranslation] Removing canceled as only [{}] are part of the publication of "
-                    + "language [{}].", PageTranslationStatus.TRANSLATED, language);
+                + "language [{}].", PageTranslationStatus.TRANSLATED, language);
         }
 
         boolean hasChanged = false;
@@ -2683,7 +2710,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             logger.info("Page is [{}] ignored because it is marked as deleted.", pageReference);
             return false;
         } else if (publishOnlyComplete && status != null
-            && !status.equals(BookVersionsConstants.PAGESTATUS_PROP_STATUS_COMPLETE)) {
+            && !status.equals(BookVersionsConstants.PAGESTATUS_PROP_STATUS_COMPLETE))
+        {
             // Page doesn't have a "complete" status but only those are published
             logger.debug("[isToBePublished] Page is [{}] ignored because its status is [{}] and only complete page are "
                 + "published.", pageReference, status);
@@ -2697,7 +2725,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             logger.info("Page is [{}] ignored because it is associated with variants.", pageReference);
             return false;
         } else if (variant != null && variants != null && !variants.contains(variant.getDocumentReference())
-            && (excludePagesOutsideVariant || (!excludePagesOutsideVariant && !variants.isEmpty()))) {
+            && (excludePagesOutsideVariant || (!excludePagesOutsideVariant && !variants.isEmpty())))
+        {
             // A variant is to be published AND the page is associated with other variant(s) AND
             // (pages outside the variant are excluded
             // OR pages outside the variant are excluded but the page is associated to the published variant)
@@ -2707,8 +2736,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             return false;
         } else if (StringUtils.isNotEmpty(language)) {
             Map<String, Map<String, Object>> languageData = getLanguageData(page);
-            if (languageData.get(language) == null)
-            {
+            if (languageData.get(language) == null) {
                 // The page has no translation
                 logger.debug("[isToBePublished] Page is [{}] ignored because it is not associated with the "
                     + "published language.", pageReference);
@@ -2793,11 +2821,13 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     String statusParameterValue = macroBlock.getParameter(BookVersionsConstants.PAGETRANSLATION_STATUS);
                     PageTranslationStatus status = PageTranslationStatus.NOT_TRANSLATED;
                     if (statusParameterValue != null && !statusParameterValue.isEmpty()
-                        && statusParameterValue.toLowerCase().equals("translated")) {
+                        && statusParameterValue.toLowerCase().equals("translated"))
+                    {
                         status = PageTranslationStatus.TRANSLATED;
                     }
                     if (statusParameterValue != null && !statusParameterValue.isEmpty()
-                        && statusParameterValue.toLowerCase().equals("outdated")) {
+                        && statusParameterValue.toLowerCase().equals("outdated"))
+                    {
                         status = PageTranslationStatus.OUTDATED;
                     }
 
@@ -2812,7 +2842,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     if (languageData.get(language) != null
                         && languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED) != null
                         && (boolean) languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED)
-                    ) {
+                    )
+                    {
                         // the current language already has a Translated status which should be kept
                         currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED, true);
                     } else {
@@ -2855,11 +2886,13 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     String statusParameterValue = macroBlock.getParameter(BookVersionsConstants.PAGETRANSLATION_STATUS);
                     PageTranslationStatus status = PageTranslationStatus.NOT_TRANSLATED;
                     if (statusParameterValue != null && !statusParameterValue.isEmpty()
-                        && statusParameterValue.toLowerCase().equals("translated")) {
+                        && statusParameterValue.toLowerCase().equals("translated"))
+                    {
                         status = PageTranslationStatus.TRANSLATED;
                     }
                     if (statusParameterValue != null && !statusParameterValue.isEmpty()
-                        && statusParameterValue.toLowerCase().equals("outdated")) {
+                        && statusParameterValue.toLowerCase().equals("outdated"))
+                    {
                         status = PageTranslationStatus.OUTDATED;
                     }
 
@@ -2874,7 +2907,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     if (languageData.get(language) != null
                         && languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED) != null
                         && (boolean) languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED)
-                    ) {
+                    )
+                    {
                         // the current language already has a Translated status which should be kept
                         currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED, true);
                     } else {
@@ -2952,7 +2986,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     @Override
     public void resetTranslations(XWikiDocument document)
     {
-        if(document == null) {
+        if (document == null) {
             return;
         }
 
@@ -2995,7 +3029,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     @Override
     public void addLibraryReferenceClassObject(DocumentReference versionReference) throws XWikiException
     {
-        if(versionReference == null) {
+        if (versionReference == null) {
             return;
         }
 

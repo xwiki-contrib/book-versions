@@ -36,7 +36,7 @@ import com.xpn.xwiki.doc.XWikiDocument;
 
 /**
  * Book versions manager.
- * 
+ *
  * @version $Id$
  * @since 0.1
  */
@@ -45,7 +45,7 @@ public interface BookVersionsManager
 {
     /**
      * Check if the given reference is a book.
-     * 
+     *
      * @param documentReference The document reference.
      * @return True, if the given reference is a book.
      * @throws XWikiException In case the system can't provide an answer.
@@ -54,7 +54,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the given document is a book.
-     * 
+     *
      * @param document The document.
      * @return True, if the given document is a book.
      * @throws XWikiException In case the system can't provide an answer.
@@ -63,7 +63,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the given reference is a book page.
-     * 
+     *
      * @param documentReference The document reference.
      * @return True, if the given reference is a book page.
      * @throws XWikiException In case the system can't provide an answer.
@@ -72,7 +72,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the given document is a book page.
-     * 
+     *
      * @param document The XWiki document.
      * @return True, if the given reference is a book page.
      * @throws XWikiException In case the system can't provide an answer.
@@ -81,7 +81,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the given reference is a versioned book page.
-     * 
+     *
      * @param documentReference The document reference.
      * @return True, if the given reference is a versioned book page.
      * @throws XWikiException In case the system can't provide an answer.
@@ -90,7 +90,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the given document is a versioned book page.
-     * 
+     *
      * @param document The XWiki document.
      * @return True, if the given document is a versioned book page.
      * @throws XWikiException In case the system can't provide an answer.
@@ -99,7 +99,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the given reference is a versioned content document.
-     * 
+     *
      * @param documentReference The document reference.
      * @return true if the given reference is a versioned content document.
      * @throws XWikiException In case the system can't provide an answer.
@@ -108,7 +108,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the given document is a versioned content one.
-     * 
+     *
      * @param document The XWiki document.
      * @return true if the given document is a versioned content one.
      * @throws XWikiException In case the system can't provide an answer.
@@ -129,7 +129,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the given reference is a version.
-     * 
+     *
      * @param documentReference The document reference.
      * @return True, if the given reference is a version.
      * @throws XWikiException In case the system can't provide an answer.
@@ -138,7 +138,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the given document is a version.
-     * 
+     *
      * @param document The document.
      * @return True, if the given document is a version.
      * @throws XWikiException In case the system can't provide an answer.
@@ -147,7 +147,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the given reference is a variant.
-     * 
+     *
      * @param documentReference The document reference.
      * @return True, if the given reference is a variant.
      * @throws XWikiException In case the system can't provide an answer.
@@ -156,7 +156,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the given reference is a library.
-     * 
+     *
      * @param documentReference The document reference.
      * @return True, if the given reference is a library.
      * @throws XWikiException In case the system can't provide an answer.
@@ -165,7 +165,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the given library version belongs to the given library.
-     * 
+     *
      * @param libraryReference The library reference
      * @param libraryVersionReference The library version reference
      * @return True if the library version belongs to the library
@@ -177,7 +177,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the given library version belongs to the qiven library.
-     * 
+     *
      * @param library The library document
      * @param libraryVersion The library version document
      * @return True if the library version belongs to the library
@@ -188,7 +188,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the given document is marked as deleted.
-     * 
+     *
      * @param documentReference The document reference
      * @return True if the document is marked as deleted
      * @throws XWikiException could occur if getDocument has an issue
@@ -197,7 +197,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the given document is marked as deleted.
-     * 
+     *
      * @param document The document
      * @return True if the document is marked as deleted
      */
@@ -213,7 +213,7 @@ public interface BookVersionsManager
 
     /**
      * Get the selected version that is stored in the session for the given collection (book / library).
-     * 
+     *
      * @param documentReference the document reference.
      * @return the selected version.
      * @throws QueryException If any exception occurs while querying the database.
@@ -223,7 +223,7 @@ public interface BookVersionsManager
 
     /**
      * Set the selected version in the session for the given collection (book / library).
-     * 
+     *
      * @param documentReference the document reference.
      * @param version the version to be stored for the given collection.
      */
@@ -231,7 +231,7 @@ public interface BookVersionsManager
 
     /**
      * Get the selected variant that is stored in the session for the given collection (book / library).
-     * 
+     *
      * @param documentReference the document reference.
      * @return the selected variant.
      * @throws QueryException If any exception occurs while querying the database.
@@ -241,6 +241,7 @@ public interface BookVersionsManager
 
     /**
      * Get the variants the page belongs to.
+     *
      * @param page the page document
      * @return the variants which the page belongs to
      */
@@ -248,7 +249,7 @@ public interface BookVersionsManager
 
     /**
      * Set the selected variant in the session for the given collection (book / library).
-     * 
+     *
      * @param documentReference the document reference of the collection.
      * @param variant the variant to be stored for the given collection.
      */
@@ -256,7 +257,7 @@ public interface BookVersionsManager
 
     /**
      * Get the selected language that is stored in the session for the given collection (book / library).
-     * 
+     *
      * @param documentReference the document reference.
      * @return the selected variant.
      * @throws QueryException If any exception occurs while querying the database.
@@ -266,7 +267,7 @@ public interface BookVersionsManager
 
     /**
      * Set the selected language in the session for the given collection (book / library).
-     * 
+     *
      * @param documentReference the document reference of the collection.
      * @param language the language to be stored for the given collection.
      */
@@ -284,7 +285,7 @@ public interface BookVersionsManager
 
     /**
      * Get the translated title for a document based on the selected language.
-     * 
+     *
      * @param document The document to get the translated title for
      * @return The translated title if found, null otherwise
      * @throws XWikiException In case the system can't provide an answer.
@@ -337,7 +338,7 @@ public interface BookVersionsManager
 
     /**
      * Get the translation status for the given document.
-     * 
+     *
      * @param document The translated document.
      * @return The translation status for the given document.
      * @throws XWikiException In case the system can't provide an answer.
@@ -370,7 +371,7 @@ public interface BookVersionsManager
 
     /**
      * Check if a page is a nested page of another one, recursively.
-     * 
+     *
      * @param documentReference the reference of the supposed space
      * @param nestedReference the reference of the supposed nested page
      * @return true if the space contains the nested space in one of its sub-spaces.
@@ -390,7 +391,7 @@ public interface BookVersionsManager
 
     /**
      * Get the versioned collection (book or library) reference of a given page.
-     * 
+     *
      * @param document the page from which to take the collection reference
      * @return the versioned collection reference, or null if the page is not part of a collection
      * @throws XWikiException In case the system can't provide an answer.
@@ -400,7 +401,7 @@ public interface BookVersionsManager
 
     /**
      * Get the name of the referenced version.
-     * 
+     *
      * @param versionReference The version reference.
      * @return the name of the referenced version.
      */
@@ -408,7 +409,7 @@ public interface BookVersionsManager
 
     /**
      * Get the name of the referenced variant.
-     * 
+     *
      * @param variantReference The version reference.
      * @return the name of the referenced version.
      */
@@ -416,7 +417,7 @@ public interface BookVersionsManager
 
     /**
      * Get the reference of a given version id, in the given referenced collection.
-     * 
+     *
      * @param collectionReference The reference of the collection (book / library).
      * @param version The version id.
      * @return the reference of a given version id, in the given referenced collection.
@@ -426,7 +427,7 @@ public interface BookVersionsManager
 
     /**
      * Get the reference of a given variant id, in the given referenced collection.
-     * 
+     *
      * @param collectionReference The reference of the collection (book / library).
      * @param variant The variant id.
      * @return the reference of a given version id, in the given referenced collection.
@@ -436,10 +437,10 @@ public interface BookVersionsManager
 
     /**
      * Get the version references from a versioned collection (book or library.
-     * 
+     *
      * @param documentReference the reference of the collection to get versions from
      * @return a list of versions references declared in the versioned collection, ordered by descending date. Returns
-     *         an empty list if none are found.
+     *     an empty list if none are found.
      * @throws QueryException If any exception occurs while querying the database.
      * @throws XWikiException In case the system can't provide an answer.
      */
@@ -447,10 +448,10 @@ public interface BookVersionsManager
 
     /**
      * Get the variant references from a versioned collection (book or library.
-     * 
+     *
      * @param documentReference the reference of the collection to get variants from
      * @return a list of variants references declared in the versioned collection, ordered by descending date. Returns
-     *         an empty list if none are found.
+     *     an empty list if none are found.
      * @throws QueryException If any exception occurs while querying the database.
      * @throws XWikiException In case the system can't provide an answer.
      */
@@ -459,7 +460,7 @@ public interface BookVersionsManager
     /**
      * Get the reference of the page content corresponding to the given version. No inheritance is used for this
      * computation.
-     * 
+     *
      * @param documentReference The page reference.
      * @param version The version id.
      * @return the reference of the page content corresponding to the given version.
@@ -471,7 +472,7 @@ public interface BookVersionsManager
 
     /**
      * Check if the page has content corresponding to the given version.
-     * 
+     *
      * @param documentReference The page reference.
      * @param version The version id.
      * @return true if the page has content corresponding to the given version.
@@ -483,7 +484,7 @@ public interface BookVersionsManager
 
     /**
      * Get versioned content reference. The method is used at page content creation.
-     * 
+     *
      * @param documentReference the reference of the book page
      * @return the versioned content reference
      * @throws XWikiException In case the system can't provide an answer.
@@ -494,7 +495,7 @@ public interface BookVersionsManager
 
     /**
      * Get versioned content reference for the given document.
-     * 
+     *
      * @param document The XWiki document
      * @return the versioned content reference
      * @throws XWikiException In case the system can't provide an answer.
@@ -504,7 +505,7 @@ public interface BookVersionsManager
 
     /**
      * Get the reference of a versioned page content. This does not check existence or page class.
-     * 
+     *
      * @param documentReference the reference of the (versioned content) page
      * @return the reference of the versioned page content
      * @throws XWikiException In case the system can't provide an answer.
@@ -515,7 +516,7 @@ public interface BookVersionsManager
 
     /**
      * Get the reference of a versioned page content. This does not check existence or page class.
-     * 
+     *
      * @param documentReference the reference of the (versioned content) page
      * @param versionReference the reference of the version page
      * @return the reference of the versioned page content
@@ -525,11 +526,11 @@ public interface BookVersionsManager
 
     /**
      * Get the reference of the version of the content to be displayed, be it the required version, or inherited one.
-     * 
+     *
      * @param documentReference the reference of the page to get the content from
      * @param versionReference the reference of the version from which to get the content from, or inherit
      * @return the reference of the version of the content to be displayed. Null if there's no versioned content for the
-     *         page, neither to inherit.
+     *     page, neither to inherit.
      * @throws QueryException If any exception occurs while querying the database.
      * @throws XWikiException In case the system can't provide an answer.
      */
@@ -539,11 +540,11 @@ public interface BookVersionsManager
     /**
      * Get the reference of the content to be displayed, be it corresponding to the required version, or inherited from
      * another version.
-     * 
+     *
      * @param documentReference the reference of the page to get the content from
      * @param versionReference the reference of the version from which to get the content from, or inherit
      * @return the reference of the content to be displayed. Null if there's no versioned content for the page, neither
-     *         to inherit.
+     *     to inherit.
      * @throws QueryException If any exception occurs while querying the database.
      * @throws XWikiException In case the system can't provide an answer.
      */
@@ -552,7 +553,7 @@ public interface BookVersionsManager
 
     /**
      * Set a library configuration to a book if it doesn't exit yet. The last version of the library is set as default.
-     * 
+     *
      * @param bookReference the reference of the book
      * @param libraryReference the reference of the library to add
      * @throws QueryException If any exception occurs while querying the database.
@@ -563,7 +564,7 @@ public interface BookVersionsManager
 
     /**
      * Set a library configuration to a book if it doesn't exit yet.
-     * 
+     *
      * @param bookReference the reference of the book
      * @param libraryReference the reference of the library to add
      * @param libraryVersionReference the reference of the version of the library to add
@@ -576,7 +577,7 @@ public interface BookVersionsManager
     /**
      * Get the library version reference which is configured in the given book, for the given library, with the current
      * selected book version.
-     * 
+     *
      * @param bookReference the reference of the book
      * @param libraryReference the reference of the library
      * @return the reference of the library version configured in the book for the library
@@ -589,7 +590,7 @@ public interface BookVersionsManager
     /**
      * Get the reference of the library content for the given key, depending on the configured library version in the
      * given book and the current selected book version.
-     * 
+     *
      * @param documentReference the reference of the book or the page
      * @param keyReference the reference of the key (library page)
      * @return the reference of the content of the library
@@ -601,6 +602,7 @@ public interface BookVersionsManager
 
     /**
      * Get a list of used libraries in the given book.
+     *
      * @param bookReference the reference of the book
      * @return the list of used library references
      * @throws XWikiException In case the isBook method has an issue.
@@ -610,12 +612,14 @@ public interface BookVersionsManager
 
     /**
      * Get the published space for each of the libraries used in the given book.
+     *
      * @param bookReference the reference of the book
      * @param versionReference the version of the book, which corresponds to a library's version in the book
-     * configuration
+     *     configuration
      * @return the published space reference of each library used in the book
      * @throws XWikiException In case a getDocument method or a check of type (isBook, ...) has an issue
-     * @throws QueryException If any exception occurs while querying the database for the used libraries in the book.
+     * @throws QueryException If any exception occurs while querying the database for the used libraries in the
+     *     book.
      */
     Map<DocumentReference, DocumentReference> getUsedPublishedLibraries(DocumentReference bookReference,
         DocumentReference versionReference)
@@ -623,7 +627,7 @@ public interface BookVersionsManager
 
     /**
      * Switch the document between "Marked as Deleted" or not.
-     * 
+     *
      * @param documentReference The document reference
      * @throws XWikiException could occur if getDocument, newXObject or save have an issue
      */
@@ -640,6 +644,7 @@ public interface BookVersionsManager
 
     /**
      * Load the configuration for the publication saved in a document.
+     *
      * @param configurationReference The document containing the configuration for the publication.
      * @return a map containing the configuration for the publication.
      * @throws XWikiException if an error occurs while getting the document.
@@ -649,7 +654,7 @@ public interface BookVersionsManager
 
     /**
      * Execute the publication process with the provided configuration.
-     * 
+     *
      * @param configurationReference The configuration reference
      * @param userReference the user executing the job
      * @throws XWikiException could occur if loadPublicationConfiguration has an issue
@@ -660,6 +665,7 @@ public interface BookVersionsManager
 
     /**
      * Get the page status.
+     *
      * @param page the page document
      * @return the status of the page
      */
