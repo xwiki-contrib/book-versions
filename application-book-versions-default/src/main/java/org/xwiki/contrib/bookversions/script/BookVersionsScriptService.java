@@ -31,10 +31,13 @@ import javax.inject.Singleton;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.bookversions.BookVersionsManager;
 import org.xwiki.job.JobException;
+import org.xwiki.livedata.LiveDataConfiguration;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.query.QueryException;
 import org.xwiki.script.service.ScriptService;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.api.Document;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -727,5 +730,25 @@ public class BookVersionsScriptService implements ScriptService
         throws XWikiException
     {
         bookVersionsManagerProvider.get().removeLibraryReferenceClassObject(versionReference, objectNumber);
+    }
+
+    /**
+     * Start a job to change page status on a list of page specified by reference.
+     *
+     * @param pageReferences pages references to set the news status.
+     * @param namespaces namespace of the livedata
+     * @param liveDataConfiguration the livedata configuration serialized in JSOn.
+     * @param newStatus new status to set to the pages.
+     * @return the job ID
+     * @throws JobException the error in case of the job fail to start.
+     * @throws JsonProcessingException in case of the livedataconfiguration is invalid
+     */
+    public String setPagesStatus(List<String> pageReferences, String namespaces,
+        String liveDataConfiguration, String newStatus) throws JobException, JsonProcessingException
+    {
+        LiveDataConfiguration ldConfig =
+            new ObjectMapper().readValue(liveDataConfiguration, LiveDataConfiguration.class);
+        return bookVersionsManagerProvider.get()
+            .setPagesStatus(pageReferences, namespaces, ldConfig, newStatus);
     }
 }

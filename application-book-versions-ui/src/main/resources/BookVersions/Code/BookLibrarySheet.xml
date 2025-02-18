@@ -96,6 +96,7 @@
 #set ($versionsFullName = $escapetool.xml("${currentSpace}.Versions.WebHome"))
 #set ($languagesFullName = $escapetool.xml("${currentSpace}.Languages.WebHome"))
 #set ($publicationFullName = $escapetool.xml("${currentSpace}.Publication.WebHome"))
+#set ($overviewFullName = $escapetool.xml("${currentSpace}.Overview.WebHome"))
 #if (!$isLibrary)
   ## Libraries don't use Variants and Libraries
   #set ($variantsFullName = $escapetool.xml("${currentSpace}.Variants.WebHome"))
@@ -123,6 +124,14 @@
 #if (!$xwiki.exists($publicationFullName))
     #set ($publicationDoc = $xwiki.getDocument($publicationFullName))
     #set ($discard = $publicationDoc.setContent('{{admin-interface type="PublicationConfiguration" /}}'))
+    #set ($discard = $publicationDoc.setHidden(true))
+    #set ($discard = $publicationDoc.save())
+#end
+
+## Create Overview WebHome if it doesn't exist
+#if (!$xwiki.exists($overviewFullName))
+    #set ($publicationDoc = $xwiki.getDocument($overviewFullName))
+    #set ($discard = $publicationDoc.setContent('{{admin-interface type="Overview" /}}'))
     #set ($discard = $publicationDoc.setHidden(true))
     #set ($discard = $publicationDoc.save())
 #end

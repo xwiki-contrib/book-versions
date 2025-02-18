@@ -149,6 +149,7 @@ BookVersions.adminMenu.manageVariants=Variants
 BookVersions.adminMenu.manageLibraries=Libraries
 BookVersions.adminMenu.manageLanguages=Languages
 BookVersions.adminMenu.pageActions=Page Actions
+BookVersions.adminMenu.overview=Overview
 BookVersions.adminMenu.addPageToVariant=Link page to variant {0}
 BookVersions.adminMenu.removePageFromVariant=Unlink page from variant {0}
 BookVersions.adminMenu.publishLable=Publishing
@@ -226,6 +227,15 @@ BookVersions.versions.LD.doc.title=Page title
 BookVersions.versions.LD.doc.creationDate=Creation date
 BookVersions.versions.LD.emptyvalue=
 
+# Overview Admin UI
+BookVersions.overview.LD.status=Status
+BookVersions.overview.LD.doc.date=Last edit
+BookVersions.overview.LD.doc.name=Version
+BookVersions.overview.LD.doc.title=Page title
+BookVersions.overview.LD.doc.creationDate=Creation date
+BookVersions.overview.LD.emptyvalue=
+BookVersions.overview.LD.variantsList=Variants list
+
 # Multilingual
 BookVersions.languages.warning=There is no translation for the selected language.
 BookVersions.languages.title.missing=There is no translated title for the selected language.
@@ -245,7 +255,18 @@ BookVersions.Code.PublicationProgress.title=Publication Progress
 BookVersions.Code.PublicationProgress.back=Back
 BookVersions.Code.PublicationProgress.goToPublished=Go to target space
 BookVersions.Code.PublicationActionHandler.error.jobCreation=Failed to create publication job
-BookVersions.Code.PublicationActionHandler.error.permission=Permission denied</content>
+BookVersions.Code.PublicationActionHandler.error.permission=Permission denied
+
+# Set status progress
+BookVersions.Code.BookOverview.statusMissing=Please set a status value to set on the pages
+BookVersions.Code.BookOverview.changeStatusFailed=Change status batch job failed
+BookVersions.Code.BookOverview.changeStatus=Change status
+BookVersions.Code.BookOverview.changeStatusProgress=Change status progress
+BookVersions.Code.BookOverview.statusField=New status
+BookVersions.Code.BookOverview.statusFieldHint=The new status to set on the selected pages
+BookVersions.Code.BookOverview.statusPlaceHolder=Select the new status
+BookVersions.Code.BookOverview.changeStatusBtn=Change status on selected pages
+</content>
   <object>
     <name>BookVersions.Code.Translations</name>
     <number>0</number>

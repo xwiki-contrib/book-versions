@@ -471,4 +471,19 @@ public interface BookVersionsConstants
      * The reference property of an include macro.
      */
     String INCLUDE_MACRO_PROP_REFERENCE = "reference";
+
+    /**
+     * The dedicated job to change pages status.
+     */
+    String SET_PAGE_STATUS_JOBID = "SetPageStatusJob";
+
+    /**
+     * The job prefix to set pages status.
+     */
+    String SET_PAGE_STATUS_JOBID_PREFIX = "SetPageStatus";
+
+    /**
+     * The job name separator to set pages status.
+     */
+    String SET_PAGE_STATUS_JOBID_SEPARATOR = "_";
 }

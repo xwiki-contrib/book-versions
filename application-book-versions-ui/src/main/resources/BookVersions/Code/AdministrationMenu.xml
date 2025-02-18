@@ -481,12 +481,14 @@
   #set ($librariesRef = $services.model.resolveDocument('Libraries', $bookRef.parent))
   #set ($languagesRef = $services.model.resolveDocument('Languages', $bookRef.parent))
   #set ($publicationRef = $services.model.resolveDocument('Publication', $bookRef.parent))
+  #set ($batchOperationRef = $services.model.resolveDocument('Overview', $bookRef.parent))
   ## Create URLs using xwiki URL service
   #set ($versionsUrl = $xwiki.getURL($versionsRef))
   #set ($variantsUrl = $xwiki.getURL($variantsRef))
   #set ($librariesUrl = $xwiki.getURL($librariesRef))
   #set ($languagesUrl = $xwiki.getURL($languagesRef))
   #set ($publicationUrl = $xwiki.getURL($publicationRef))
+  #set ($batchOperationUrl = $xwiki.getURL($batchOperationRef))
   #set ($currentSpace = $escapetool.xml($doc.space))
   #set ($docRef = $doc.getDocumentReference())
   ## Check if the document is a page in a versioned book
@@ -531,6 +533,11 @@
                 &lt;/a&gt;
               &lt;/li&gt;
             #end
+            &lt;li&gt;
+              &lt;a href="$batchOperationUrl"&gt;
+                $services.localization.render('BookVersions.adminMenu.overview', 'html/5.0')
+              &lt;/a&gt;
+            &lt;/li&gt;
           &lt;/ul&gt;
         &lt;/dd&gt;
         #if($services.bookversions.isPage($docRef) || $isVersionedContent)

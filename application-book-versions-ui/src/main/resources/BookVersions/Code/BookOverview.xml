@@ -1,0 +1,275 @@
+<?xml version="1.1" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.5" reference="BookVersions.Code.BookOverview" locale="">
+  <web>BookVersions.Code</web>
+  <name>BookOverview</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <parent>BookVersions.Code.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <version>1.1</version>
+  <title>BookOverview</title>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>{{velocity}}
+## Handle batch request
+#if ($request.action == 'setPageStatus' &amp;&amp; $services.csrf.isTokenValid($!request.form_token))
+  #if ("$!{request.status}" == '')
+    {{error}}
+    {{translation key="BookVersions.Code.BookOverview.statusMissing" /}}
+    {{/error}}
+  #else
+    #set ($documentReferenceList = $jsontool.fromString($request.get('document-reference-list')))
+    #try()
+      #set ($jobId = $services.bookversions.setPagesStatus($documentReferenceList, $request.get('livedata-namespace'), $request.get('livedata-configuration'), $request.status))
+    #end
+    #if ($jobId)
+      #set ($redirectParams = $escapetool.url({'jobId': $jobId}))
+      $response.sendRedirect($doc.getURL('view', $redirectParams))
+    #else
+      #if ("$!exception" != '')
+
+        {{html clean="false"}}
+        #displayException($services.localization.render('BookVersions.Code.BookOverview.changeStatusFailed', 'html/5.0'), $exception)
+        {{/html}}
+
+      #else
+
+        {{error}}
+        {{translation key="BookVersions.Code.BookOverview.changeStatusFailed" /}}
+        {{/error}}
+
+      #end
+    #end
+  #end
+#end
+## Check if we have a job ID parameter and should display progress
+#if ("$!{request.jobId}" != '')
+  == {{translation key="BookVersions.Code.BookOverview.changeStatusProgress" /}} ==
+
+  {{jobprogress jobid="$!request.jobId"/}}
+#end
+##
+#set($bookMainSpace = $doc.space.replace('Overview',''))
+== {{translation key="BookVersions.Code.BookOverview.changeStatus"/}}  ==
+
+{{liveData
+  id="bookVersionsOverview"
+  properties="doc.title,doc.location,doc.name,status,variantsList"
+  source="liveTable"
+  sourceParameters="className=BookVersions.Code.PageStatusClass&amp;translationPrefix=BookVersions.overview.LD.&amp;variantsList_class=BookVersions.Code.VariantsListClass&amp;queryFilters=currentlanguage"
+  sort="doc.creationDate:desc"
+  filters="doc.location=${bookMainSpace}"
+}}{
+    "meta": {
+        "propertyDescriptors": [
+        {
+            "id": "doc.location",
+            "visible": false
+        },
+        {
+            "id": "description",
+            "displayer": {
+            "id": "html"
+            }
+        },
+        {
+            "id": "variantsList",
+            "displayer": {
+            "id": "text"
+            },
+            "sortable": false, ## For now disabled because it's not supported, cf: https://jira.xwiki.org/browse/XWIKI-22400
+            "filterable": false ## For now disabled because it's not supported, cf: https://jira.xwiki.org/browse/XWIKI-22400
+        },
+        {
+            "id": "_actions",
+            "sortable": false,
+            "filterable": false,
+            "displayer": {
+            "id": "actions",
+            "actions": ["edit", "delete"]
+            }
+        }
+        ],
+        "selection": {
+        "enabled": true
+        }
+    }
+}}{{/liveData}}
+
+#set ($discard = $xwiki.linkx.use($services.webjars.url('selectize.js', 'css/selectize.bootstrap3.css'), {'type': 'text/css', 'rel': 'stylesheet'}))
+#set ($discard = $xwiki.ssfx.use('uicomponents/suggest/xwiki.selectize.css', true))
+#set ($discard = $xwiki.jsfx.use('uicomponents/suggest/xwiki.selectize.js', true))
+#set ($discard = $xwiki.jsx.use('BookVersions.Code.BookOverview'))
+{{html clean="false"}}
+&lt;form action="#" method="post" class="xform"&gt;
+  &lt;input type="hidden" name="action" value="setPageStatus" /&gt;
+  &lt;input type="hidden" name="form_token" value="$!services.csrf.getToken()" /&gt;
+  &lt;input type="hidden" id="livedata-configuration" name="livedata-configuration" value="" /&gt;
+  &lt;input type="hidden" id="document-reference-list" name="document-reference-list" value="" /&gt;
+  &lt;input type="hidden" name="livedata-namespace" value="wiki:$escapetool.xml($services.wiki.currentWikiDescriptor.id)" /&gt;
+  &lt;dl&gt;
+    &lt;dt&gt;
+      &lt;label&gt;$services.localization.render('BookVersions.Code.BookOverview.statusField', 'html/5.0')&lt;/label&gt;
+      &lt;span class="xHint"&gt;$services.localization.render('BookVersions.Code.BookOverview.statusFieldHint', 'html/5.0')&lt;/span&gt;
+    &lt;/dt&gt;
+    &lt;dd&gt;
+      &lt;select class="xwiki-selectize" name="status"&gt;
+        &lt;option value=""&gt;$services.localization.render('BookVersions.Code.BookOverview.statusPlaceHolder', 'html/5.0')&lt;/option&gt;
+        #set($class = $xwiki.getClass("BookVersions.Code.PageStatusClass"))
+        #set($list = $class.status.getListValues())
+        #foreach($listitem in $list)
+            &lt;option value="$escapetool.xml($listitem)"&gt;$services.localization.render("BookVersions.Code.PageStatusClass_status_$listitem", 'html/5.0')&lt;/option&gt;
+        #end
+      &lt;/select&gt;
+    &lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;button type="submit" class="btn btn-primary" id="change-status-batch"&gt;
+          $services.localization.render('BookVersions.Code.BookOverview.changeStatusBtn', 'html/5.0')&lt;/button&gt;
+&lt;/form&gt;
+{{/html}}
+{{/velocity}}</content>
+  <object>
+    <name>BookVersions.Code.BookOverview</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>9bb493e1-5824-4d63-adc4-5d503781e4df</guid>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <defaultValue>long</defaultValue>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <contenttype>PureText</contenttype>
+        <disabled>0</disabled>
+        <editor>PureText</editor>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <restricted>0</restricted>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>require(['jquery'], function ($) {
+  document.getElementById('change-status-batch').addEventListener('click', () =&gt; {
+    const livedataElements = $.data(document.getElementById('bookVersionsOverview')).liveData
+    let allSelectedCheckboxRefs = []
+    let allElementQuery = {}
+    if (livedataElements.entrySelection.isGlobal) {
+      allElementQuery = {
+        meta: livedataElements.data.meta,
+        query: livedataElements.data.query,
+        id: livedataElements.data.id,
+        data: { count: livedataElements.data.data.count }
+      }
+    } else {
+      allSelectedCheckboxRefs = livedataElements.entrySelection.selected
+    }
+    document.getElementById('livedata-configuration').value = JSON.stringify(allElementQuery)
+    document.getElementById('document-reference-list').value = JSON.stringify(allSelectedCheckboxRefs)
+  })
+})</code>
+    </property>
+    <property>
+      <name/>
+    </property>
+    <property>
+      <parse/>
+    </property>
+    <property>
+      <use/>
+    </property>
+  </object>
+</xwikidoc>

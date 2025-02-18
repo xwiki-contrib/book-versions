@@ -271,7 +271,7 @@
     #set ($LDproperties = "doc.location,doc.title,description,doc.date,_actions")
     #set ($LDfilter = $doc.space)
 #end
-#if ($type != "Libraries")
+#if ($type != "Libraries" &amp;&amp; $type != "Overview")
   #set ($createFormTranslation = $services.localization.render("BookVersions.creationForm.new${typeSingular}"))
   #if ($services.security.authorization.hasAccess("edit", $doc.space) &amp;&amp; $xcontext.action == 'view')
     #set ($BOOK_CODE = 'BookVersions.Code')
@@ -346,6 +346,10 @@
       ]
     }
   }}{{/liveData}}
+#elseif ($type == 'Overview')
+
+  {{include reference="BookVersions.Code.BookOverview"}}
+
 #else
   #set ($versionAdminPageRef = $services.model.serialize($services.model.createDocumentReference("Versions", $doc.documentReference.lastSpaceReference)))
   $services.localization.render('BookVersions.adminMenu.librariesText', ['[[', "&gt;&gt;$versionAdminPageRef]]"])
@@ -381,29 +385,6 @@
     {{/html}}
 
   #end
-#end
-
-#if ($type == "Versions")
-  #set($bookMainSpace = $LDfilter.replace('Versions',''))
-  == Status ==
-
-  {{liveData
-    id="statuses"
-    properties="doc.title,doc.location,doc.name,status,doc.creationDate,doc.date"
-    source="liveTable"
-    sourceParameters="className=BookVersions.Code.PageStatusClass&amp;translationPrefix=BookVersions.versions.LD."
-    filters="doc.location=${bookMainSpace}"
-  }}{
-    "meta": {
-      "propertyDescriptors": [
-        {
-          "id": "doc.location",
-          "visible": false
-        }
-      ]
-    }
-  }{{/liveData}}
-
 #end
 
 #macro(displayAssociatedPage $result)
@@ -528,7 +509,7 @@
     <property>
       <description>The type of UI to be inserted into the template.
 
-Available options: Versions, Variants, Libraries and PublicationConfiguration</description>
+Available options: Versions, Variants, Libraries, PublicationConfiguration and Overview</description>
     </property>
     <property>
       <mandatory>1</mandatory>

@@ -70,6 +70,16 @@
       <artifactId>xwiki-commons-properties</artifactId>
       <version>${commons.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-livedata-api</artifactId>
+      <version>${platform.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-rest-api</artifactId>
+      <version>${platform.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -81,7 +91,8 @@
         <configuration>
           <excludes>
               org/xwiki/contrib/bookversions/internal/BookVersionsConstants.java,
-              org/xwiki/contrib/bookversions/internal/DefaultBookVersionsManager.java
+              org/xwiki/contrib/bookversions/internal/DefaultBookVersionsManager.java,
+              org/xwiki/contrib/bookversions/internal/batch/BatchChangeStatusJob.java
           </excludes>
         </configuration>
       </plugin>

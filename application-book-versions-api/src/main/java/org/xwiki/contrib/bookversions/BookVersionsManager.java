@@ -26,6 +26,7 @@ import java.util.Map;
 import org.xwiki.component.annotation.Role;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.job.JobException;
+import org.xwiki.livedata.LiveDataConfiguration;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.query.QueryException;
@@ -754,4 +755,17 @@ public interface BookVersionsManager
      * @throws XWikiException could occur if we can't load the referenced document.
      */
     void removeLibraryReferenceClassObject(DocumentReference versionReference, int objectNumber) throws XWikiException;
+
+    /**
+     * Start a job to change page status on a list of page specified by reference.
+     *
+     * @param pageReferences pages references to set the news status.
+     * @param namespaces namespace of the livedata
+     * @param liveDataConfiguration the livedata configuration
+     * @param newStatus new status to set to the pages.
+     * @return the job ID
+     * @throws JobException the error in case of the job fail to start.
+     */
+    String setPagesStatus(List<String> pageReferences, String namespaces,
+        LiveDataConfiguration liveDataConfiguration, String newStatus) throws JobException;
 }

@@ -46,10 +46,12 @@ import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.contrib.bookversions.BookVersionsManager;
 import org.xwiki.contrib.bookversions.PageTranslationStatus;
+import org.xwiki.contrib.bookversions.internal.batch.LiveDataBatchRequest;
 import org.xwiki.job.DefaultRequest;
 import org.xwiki.job.JobException;
 import org.xwiki.job.JobExecutor;
 import org.xwiki.job.event.status.JobProgressManager;
+import org.xwiki.livedata.LiveDataConfiguration;
 import org.xwiki.logging.LogLevel;
 import org.xwiki.logging.event.LogEvent;
 import org.xwiki.model.EntityType;
@@ -3047,6 +3049,24 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             versionDocument.getAuthors().setOriginalMetadataAuthor(userReference);
             xcontext.getWiki().saveDocument(versionDocument, xcontext);
         }
+    }
+
+    @Override
+    public String setPagesStatus(List<String> pageReferences, String namespaces,
+        LiveDataConfiguration liveDataConfiguration, String newStatus) throws JobException
+    {
+        LiveDataBatchRequest jobRequest =
+            new LiveDataBatchRequest(namespaces, liveDataConfiguration, pageReferences, newStatus);
+        String jobId = BookVersionsConstants.SET_PAGE_STATUS_JOBID_PREFIX
+            + BookVersionsConstants.SET_PAGE_STATUS_JOBID_SEPARATOR + Instant.now().toString();
+        if (jobId != null) {
+            jobRequest.setId(jobId);
+            // The context won't be full in setPagesStatusInternal as it is executed by a job, so the user executing the
+            // status change has to be passed as a parameter.
+            jobRequest.setProperty("userReference", this.getXWikiContext().getUserReference());
+            jobExecutor.execute(BookVersionsConstants.SET_PAGE_STATUS_JOBID, jobRequest);
+        }
+        return jobId;
     }
 
     /**

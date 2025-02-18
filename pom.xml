@@ -325,6 +325,12 @@
                 <new>method java.util.List&lt;java.lang.String&gt; org.xwiki.contrib.bookversions.BookVersionsManager::queryPages(org.xwiki.model.reference.DocumentReference, org.xwiki.model.reference.EntityReference) throws org.xwiki.query.QueryException</new>
                 <justification>Needed for new features</justification>
               </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.addedToInterface</code>
+                <new>method java.lang.String org.xwiki.contrib.bookversions.BookVersionsManager::setPagesStatus(java.util.List&lt;java.lang.String&gt;, java.lang.String, org.xwiki.livedata.LiveDataConfiguration, java.lang.String) throws org.xwiki.job.JobException</new>
+                <justification>Needed for new features.</justification>
+              </item>
             </differences>
           </revapi.differences>
         </analysisConfiguration>
