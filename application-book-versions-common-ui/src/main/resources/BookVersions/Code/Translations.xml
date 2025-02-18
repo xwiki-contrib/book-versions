@@ -191,7 +191,7 @@ BookVersions.variants.macrosPagesListHeading=Pages containing variant macro
 BookVersions.variants.noLinkedPage=No pages linked to this variant.
 BookVersions.variants.noMacroUsingPage=No pages use this variant macro.
 BookVersions.variants.showPagesForVariant=Show linked pages for variant: 
-BookVersions.variants.loadPagesBtn=Load associated pages
+BookVersions.variants.loadPagesBtn=Show associated pages
 
 # Library include macro
 rendering.macro.includeLibrary.name=Include Library (Book Versions)
