@@ -2399,6 +2399,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         throws ComponentLookupException, ParseException, QueryException, XWikiException
     {
         if (xdom == null || syntaxId == null || originalDocumentReference == null || configuration == null) {
+            logger.error("[transformXDOM] Can't execute because one input is null.");
             return false;
         }
 
@@ -2417,6 +2418,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
             // Should never happen.
             if (id == null) {
+                logger.error("[transformXDOM] Can't find macro block id.");
                 continue;
             }
 
@@ -2424,6 +2426,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             logger.debug("[transformXDOM] Checking macro [{}] - [{}]", id, block.getClass());
             ComponentManager componentManager = contextrootComponentManagerProvider.get();
             if (!componentManager.hasComponent(Macro.class, id)) {
+                logger.error("[transformXDOM] Macro [{}] isn't registered.", id);
                 continue;
             }
 
