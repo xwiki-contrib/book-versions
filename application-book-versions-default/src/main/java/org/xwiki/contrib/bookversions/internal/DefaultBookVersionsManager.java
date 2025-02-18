@@ -889,15 +889,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         return queryPages(documentReference, null);
     }
 
-    /**
-     * Query pages under a given document, having a given class, ordered by descending creation date
-     *
-     * @param documentReference the root document for the query
-     * @param classReference the class to select pages from
-     * @return the list of pages with the class, under the document, ordered by descending creation date
-     * @throws QueryException happens when the query creation or execution has an issue.
-     */
-    private List<String> queryPages(DocumentReference documentReference, EntityReference classReference)
+    @Override
+    public List<String> queryPages(DocumentReference documentReference, EntityReference classReference)
         throws QueryException
     {
         if (documentReference == null) {

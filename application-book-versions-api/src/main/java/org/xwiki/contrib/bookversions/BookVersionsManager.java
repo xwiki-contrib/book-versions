@@ -27,6 +27,7 @@ import org.xwiki.component.annotation.Role;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.job.JobException;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReference;
 import org.xwiki.query.QueryException;
 import org.xwiki.rendering.parser.ParseException;
 
@@ -388,6 +389,17 @@ public interface BookVersionsManager
      */
     DocumentReference getVersionedCollectionReference(DocumentReference documentReference)
         throws XWikiException, QueryException;
+
+    /**
+     * Query pages under a given document, having a given class, ordered by descending creation date.
+     *
+     * @param documentReference the root document for the query
+     * @param classReference the class to select pages from
+     * @return the list of pages with the class, under the document, ordered by descending creation date
+     * @throws QueryException happens when the query creation or execution has an issue.
+     */
+    List<String> queryPages(DocumentReference documentReference, EntityReference classReference)
+        throws QueryException;
 
     /**
      * Get the versioned collection (book or library) reference of a given page.
