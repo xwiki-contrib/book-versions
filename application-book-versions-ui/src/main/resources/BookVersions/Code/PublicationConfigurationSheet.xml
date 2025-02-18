@@ -37,6 +37,10 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
   <content>{{velocity}}
+## Stop if on PublicationConfigurationSheet
+#if($doc.documentReference.name == 'PublicationConfigurationSheet')
+  #stop
+#end
 ## Handle publication request first, before any output
 #if ("$!request.action" == 'publish' &amp;&amp; $services.csrf.isTokenValid($!request.form_token))
   #set ($configReference = $!request.configReference)
@@ -66,6 +70,10 @@
 ## The class that describes the object properties.
 #set ($xclass = $xobject.xWikiClass)
 #set ($discard = $doc.use($xobject))
+## Adapt display if is a library
+#set ($collectionReference = $services.bookversions.getVersionedCollectionReference($doc.getDocumentReference()))
+#set ($isLibrary = $services.bookversions.isLibrary($collectionReference))
+#set ($propertyHidden = ['variant','language'])
 
 ## Check if we have a job ID parameter and should display progress
 #if ("$!{request.jobId}" != '')
@@ -90,23 +98,25 @@
   &lt;div class="xform"&gt;
     &lt;dl&gt;
     #foreach ($property in $xclass.properties)
-      &lt;dt #if (!$editing &amp;&amp; $hasEdit)
-            #if ($property.name != 'destinationSpace' &amp;&amp; $property.name != 'source')
-            class="editableProperty"
-            #end
-            #set ($xobjectPropertyReference = $xobject.getPropertyReference($property.name))
-            data-property="$escapetool.xml($services.model.serialize($xobjectPropertyReference))"
-            data-property-type="object"
-          #end&gt;
-        #set ($propertyId = "${xclass.name}_${xobject.number}_$property.name")
-        &lt;label#if ($editing) for="$escapetool.xml($propertyId)"#end&gt;
-          $escapetool.xml($property.translatedPrettyName)
-        &lt;/label&gt;
-        &lt;span class="xHint"&gt;$!escapetool.xml($services.localization.render($property.hint))&lt;/span&gt;
-      &lt;/dt&gt;
-      &lt;dd&gt;
-          $doc.display($property.name)
-      &lt;/dd&gt;
+       #if (!($isLibrary &amp;&amp; $propertyHidden.contains($property.name)))
+        &lt;dt #if (!$editing &amp;&amp; $hasEdit)
+              #if ($property.name != 'destinationSpace' &amp;&amp; $property.name != 'source')
+              class="editableProperty"
+              #end
+              #set ($xobjectPropertyReference = $xobject.getPropertyReference($property.name))
+              data-property="$escapetool.xml($services.model.serialize($xobjectPropertyReference))"
+              data-property-type="object"
+            #end&gt;
+          #set ($propertyId = "${xclass.name}_${xobject.number}_$property.name")
+          &lt;label#if ($editing) for="$escapetool.xml($propertyId)"#end&gt;
+            $escapetool.xml($property.translatedPrettyName)
+          &lt;/label&gt;
+          &lt;span class="xHint"&gt;$!escapetool.xml($services.localization.render($property.hint))&lt;/span&gt;
+        &lt;/dt&gt;
+        &lt;dd&gt;
+            $doc.display($property.name)
+        &lt;/dd&gt;
+      #end
     #end
     #if (!$xclass.properties || $xclass.properties.size() == 0)
       &lt;dt&gt;&lt;/dt&gt;
