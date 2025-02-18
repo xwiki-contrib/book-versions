@@ -167,6 +167,9 @@ BookVersions.navMenu.translationStatus.not_translated=Translation needed.
 BookVersions.navMenu.translationStatus.outdated=Outdated translation.
 BookVersions.navMenu.translationStatus.translated=Translation done.
 BookVersions.adminMenu.librariesText=The following libraries are configured to be used in the current book. To edit the configuration, go to the {0}Versions administration page of the book{1} and edit the version pages.
+BookVersions.adminMenu.libraries.showPagesBtn=Show associated pages
+BookVersions.adminMenu.libraries.macrosPagesListHeading=Pages containing library macro
+BookVersions.adminMenu.libraries.noMacroUsingPage=No pages use this library macro.
 
 # PageSheet content
 BookVersion.pageSheet.nocontent=There is no content for this version

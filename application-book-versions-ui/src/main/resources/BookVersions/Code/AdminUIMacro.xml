@@ -350,9 +350,36 @@
   #set ($versionAdminPageRef = $services.model.serialize($services.model.createDocumentReference("Versions", $doc.documentReference.lastSpaceReference)))
   $services.localization.render('BookVersions.adminMenu.librariesText', ['[[', "&gt;&gt;$versionAdminPageRef]]"])
   #set ($spaceReference = $services.bookversions.getVersionedCollectionReference($doc.getDocumentReference()))
-    #set ($libReferencesList = $services.bookversions.getUsedLibraries($spaceReference))
+  #set ($libReferencesList = $services.bookversions.getUsedLibraries($spaceReference))
+  #if($request.showAssociated == 'true')
+    === $services.localization.render("BookVersions.adminMenu.libraries.macrosPagesListHeading") ===
+  #foreach ($libRef in $libReferencesList)
+    #set ($libReference = $services.bookversions.getVersionedCollectionReference($libRef))
+    #set ($libSpaceName = $libReference.getLastSpaceReference().getName())
+    #set ($queryForVariantMacroPages = "where doc.content like :pattern and doc.fullName &lt;&gt; 'BookVersions.Code.AdminUIMacro'")
+    #set ($resultsMacroPages = $services.query.xwql($queryForVariantMacroPages).bindValue('pattern',"%{{includeLibrary keyReference=_%${libSpaceName}%").execute())
+    [[$libRef]]
+
+    {{box}}
+    #foreach($result in $resultsMacroPages)
+      #displayAssociatedPage($result)
+    #end
+    #if ($resultsMacroPages.size() == 0 )
+      $services.localization.render("BookVersions.adminMenu.libraries.noMacroUsingPage")
+    #end
+    {{/box}}
+
+  #end
+
+  #else
   #foreach ($libRef in $libReferencesList)
     * [[$libRef]]
+  #end
+
+    {{html wiki="true" clean="false"}}
+      &lt;a href='?showAssociated=true' class='btn btn-primary'&gt;$services.localization.render("BookVersions.adminMenu.libraries.showPagesBtn")&lt;/a&gt;
+    {{/html}}
+
   #end
 #end
 
@@ -377,6 +404,16 @@
     }
   }{{/liveData}}
 
+#end
+
+#macro(displayAssociatedPage $result)
+  #set ($versionedContentDocRef = $services.model.resolveDocument($result))
+  #if ($services.bookversions.isVersionedContent($versionedContentDocRef))
+    #set($parentReference = $versionedContentDocRef.getParent())
+    [[$xwiki.getDocument($parentReference).title&gt;&gt;$result]]
+  #else
+    [[$xwiki.getDocument($result).title&gt;&gt;$result]]
+  #end
 #end
 {{/velocity}}</code>
     </property>
