@@ -68,8 +68,6 @@ import org.xwiki.rendering.block.Block;
 import org.xwiki.rendering.block.MacroBlock;
 import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.block.match.ClassBlockMatcher;
-import org.xwiki.rendering.macro.Macro;
-import org.xwiki.rendering.macro.descriptor.ContentDescriptor;
 import org.xwiki.rendering.parser.ParseException;
 import org.xwiki.rendering.parser.Parser;
 import org.xwiki.rendering.renderer.BlockRenderer;
@@ -140,10 +138,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     @Inject
     private JobProgressManager progressManager;
-
-    @Inject
-    @Named("context/root")
-    private Provider<ComponentManager> contextrootComponentManagerProvider;
 
     @Inject
     @Named("context")
@@ -2424,15 +2418,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
             String content = block.getContent();
             logger.debug("[transformXDOM] Checking macro [{}] - [{}]", id, block.getClass());
-            ComponentManager componentManager = contextrootComponentManagerProvider.get();
-            if (!componentManager.hasComponent(Macro.class, id)) {
-                logger.error("[transformXDOM] Macro [{}] isn't registered.", id);
-                continue;
-            }
-
-            // Check if the macro content is wiki syntax, in which case we'll also verify the contents of the macro
-            Macro<?> macro = componentManager.getInstance(Macro.class, id);
-            ContentDescriptor contentDescriptor = macro.getDescriptor().getContentDescriptor();
 
             // Get the possible variants from the variant macro
             String variants = block.getParameter(BookVersionsConstants.VARIANT_MACRO_PROP_NAME);
@@ -2451,10 +2436,11 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 logger.debug("[transformXDOM] Variant macro is for [{}], it is removed from content.",
                     variantReferences);
                 block.getParent().removeBlock(block);
-            } else if (contentDescriptor != null && contentDescriptor.getType() != null
-                && contentDescriptor.getType().equals(Block.LIST_BLOCK_TYPE) && content != null
-                && StringUtils.isNotEmpty(content))
-            {
+            } else {
+                if (content == null || StringUtils.isEmpty(content)) {
+                    continue;
+                }
+
                 // We will take a quick shortcut here and directly parse the macro content with the syntax of the
                 // document
                 logger.debug("[transformXDOM] Calling parse on [{}] with syntax [{}]", id, syntaxId);
