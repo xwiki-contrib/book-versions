@@ -450,17 +450,7 @@
 ## Initialize language-related variables
 ##
 #macro(initializeLanguageVariables)
-  #set ($languagesRef = $services.model.resolveDocument('Languages', $bookRef.parent))
-  #set ($languagesDoc = $xwiki.getDocument("${languagesRef}.WebHome"))
-  #set ($languagesObj = $languagesDoc.getObject('BookVersions.Code.MultilingualClass'))
-  #if ($languagesObj)
-    #set ($multilingualEnabled = $languagesObj.getProperty('enabled').getValue())
-    #set ($languages = $languagesObj.getProperty('supportedLanguages').getValue())
-  #elseif ($isPublishedPage)
-    #set ($languages = $xwiki.getDocument($collectionRef).getObject('BookVersions.Code.PublishedBookClass').getValue('languages'))
-  #else
-    #set ($languages = [])
-  #end
+  #set ($languages = $xwiki.getDocument($collectionRef).getObject('BookVersions.Code.PublishedBookClass').getValue('languages'))
   #set ($selectedLanguage = $services.bookversions.getSelectedLanguage($collectionRef))
 #end
 
@@ -477,24 +467,10 @@
 #end
 
 ##
-## Setup language display variables
-##
-#macro(setupLanguageDisplay)
-  #if ($selectedLanguage)
-    #set ($languageStateMessageKey = 'BookVersions.navMenu.currentLanguage')
-  #else
-    #set ($languageStateMessageKey = 'BookVersions.navMenu.noLanguageSelected')
-  #end
-#end
-
-##
 ## Render the version and variant selectors
 ##
 #macro(renderSelectors)
-  #if ($isVersionedContent || $isVersionedPage || $isUnversionedPage || $isPublishedPage)
-    #setupLanguageDisplay()
-    #renderSelectorsHTML()
-  #end
+  #renderSelectorsHTML()
 #end
 
 
@@ -502,9 +478,10 @@
 ## Render the HTML for selectors
 ##
 #macro(renderSelectorsHTML)
+
   {{html}}
   &lt;div class="book-info"&gt;
-    #if ($languages.size() &gt; 0)
+    #if ($isPublishedPage &amp;&amp; $languages.size() &gt; 0)
       #renderLanguageSelector()
     #end
   &lt;/div&gt;
@@ -515,37 +492,32 @@
 ## Render language selector HTML
 ##
 #macro(renderLanguageSelector)
-  #if (($multilingualEnabled == 1 || $isPublishedPage) &amp;&amp; $languages.size() &gt; 0)
-    #set ($translationStatus = $services.bookversions.getTranslationStatus($docRef, $selectedLanguage))
-    #set ($isDefaultLanguage = $services.bookversions.isDefaultLanguage($docRef, $selectedLanguage))
-    &lt;div class="formContainer"&gt;
-      &lt;form class="xformInline" id="changeLanguageStatus" method="post"&gt;
-        &lt;input type="hidden" id="language_form_token" name="form_token" value="$escapetool.xml("$!services.csrf.token")"/&gt;
-        &lt;input type="hidden" name="selectedLanguage" id="selectedLanguageInput" value="$!selectedLanguage"/&gt;
-        &lt;label for="collectionLanguage"&gt;$services.localization.render('BookVersions.navMenu.languageSelect')&lt;/label&gt;
-        &lt;select name="collectionLanguage" id="collectionLanguage"&gt;
-          &lt;option value="" id="" #if("$!selectedLanguage" == '')selected#end&gt;---&lt;/option&gt;
-          #set ($currentLocale = $services.localization.currentLocale)
-          #foreach($language in $languages)
-            #if ($language)
-              #set ($locale = $services.localization.toLocale($language))
-              #set ($displayvalue = $escapetool.xml($stringtool.capitalize($locale.getDisplayName($locale)) +
+  #set ($isDefaultLanguage = $services.bookversions.isDefaultLanguage($docRef, $selectedLanguage))
+  &lt;div class="formContainer"&gt;
+    &lt;form class="xformInline" id="changeLanguageStatus" method="post"&gt;
+      &lt;input type="hidden" id="language_form_token" name="form_token" value="$escapetool.xml("$!services.csrf.token")"/&gt;
+      &lt;input type="hidden" name="selectedLanguage" id="selectedLanguageInput" value="$!selectedLanguage"/&gt;
+      &lt;label for="collectionLanguage"&gt;$services.localization.render('BookVersions.navMenu.languageSelect')&lt;/label&gt;
+      &lt;select name="collectionLanguage" id="collectionLanguage"&gt;
+        &lt;option value="" id="" #if("$!selectedLanguage" == '')selected#end&gt;---&lt;/option&gt;
+        #set ($currentLocale = $services.localization.currentLocale)
+        #foreach($language in $languages)
+          #if ($language)
+            #set ($locale = $services.localization.toLocale($language))
+            #set ($displayvalue = $escapetool.xml($stringtool.capitalize($locale.getDisplayName($locale)) +
       ' (' + $stringtool.capitalize($locale.getDisplayName($currentLocale)) + ')'))
-              #set ($isSelected = $language &amp;&amp; $selectedLanguage &amp;&amp; $language.equals($selectedLanguage))
-              &lt;option value="$language" #if($isSelected)selected#end&gt;$escapetool.xml($displayvalue)&lt;/option&gt;
-            #end
+            #set ($isSelected = $language &amp;&amp; $selectedLanguage &amp;&amp; $language.equals($selectedLanguage))
+            &lt;option value="$language" #if($isSelected)selected#end&gt;$escapetool.xml($displayvalue)&lt;/option&gt;
           #end
-        &lt;/select&gt;
-        &lt;p class="noitems"&gt;
-          #if($isDefaultLanguage)
-            $services.localization.render('BookVersions.navMenu.defaultLanguage')
-          #else
-            $services.localization.render($languageStateMessageKey, [$selectedLanguage])
-          #end
-        &lt;/p&gt;
-      &lt;/form&gt;
-    &lt;/div&gt;
-  #end
+        #end
+      &lt;/select&gt;
+      &lt;p class="noitems"&gt;
+        #if($isDefaultLanguage)
+          $services.localization.render('BookVersions.navMenu.defaultLanguage')
+        #end
+      &lt;/p&gt;
+    &lt;/form&gt;
+  &lt;/div&gt;
 #end
 {{/velocity}}
 

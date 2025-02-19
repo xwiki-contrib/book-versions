@@ -1189,7 +1189,7 @@
 ## Render language selector HTML
 ##
 #macro(renderLanguageSelector)
-  #if (($multilingualEnabled == 1 || $isPublishedPage) &amp;&amp; $languages.size() &gt; 0)
+  #if ($multilingualEnabled == 1 &amp;&amp; $languages.size() &gt; 0)
     #set ($translationStatus = $services.bookversions.getTranslationStatus($docRef, $selectedLanguage))
     #set ($isDefaultLanguage = $services.bookversions.isDefaultLanguage($docRef, $selectedLanguage))
     &lt;div class="formContainer"&gt;
