@@ -443,6 +443,11 @@ public interface BookVersionsConstants
     String PUBLICATION_JOBID_SEPARATOR = "_";
 
     /**
+     * The ID of the inline macro.
+     */
+    String INLINE_MACRO_ID = "inline";
+
+    /**
      * The ID of the variant macro.
      */
     String VARIANT_MACRO_ID = "variant";

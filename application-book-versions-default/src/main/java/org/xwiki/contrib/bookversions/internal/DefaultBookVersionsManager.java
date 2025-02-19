@@ -2450,23 +2450,25 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 XDOM contentXDOM = parser.parse(new StringReader(content));
                 boolean hasMacroContentChanged =
                     transformXDOM(contentXDOM, syntaxId, originalDocumentReference, publishedLibraries, configuration);
-                if (hasMacroContentChanged) {
+                if (hasMacroContentChanged || id.equals(BookVersionsConstants.VARIANT_MACRO_ID)) {
                     logger.debug("[transformXDOM] The content of macro [{}] has changed", id);
+                    if (id.equals(BookVersionsConstants.VARIANT_MACRO_ID)) {
+                       logger.debug("[transformXDOM] Variant macro is for [{}], it is replaced by the {} macro.",
+                           variantReferences, BookVersionsConstants.INLINE_MACRO_ID);
+                    }
                     WikiPrinter printer = new DefaultWikiPrinter();
                     BlockRenderer renderer =
                         this.componentManagerProvider.get().getInstance(BlockRenderer.class, syntaxId);
-                    renderer.render(block, printer);
+                    renderer.render(contentXDOM.getChildren().get(0), printer);
                     String newMacroContent = printer.toString();
                     // Create a new macro block and swap it
                     MacroBlock newMacroBlock =
                         new MacroBlock(id, block.getParameters(), newMacroContent, block.isInline());
+                    if (id.equals(BookVersionsConstants.VARIANT_MACRO_ID)) {
+                        newMacroBlock = new MacroBlock(BookVersionsConstants.INLINE_MACRO_ID, new HashMap<>(),
+                        newMacroContent, block.isInline());
+                    }
                     block.getParent().replaceChild(newMacroBlock, block);
-                    hasXDOMChanged = true;
-                }
-                if (id.equals(BookVersionsConstants.VARIANT_MACRO_ID)) {
-                    logger.debug("[transformXDOM] Variant macro is for [{}], it is replaced by its content ",
-                        variantReferences);
-                    block.getParent().replaceChild(contentXDOM, block);
                     hasXDOMChanged = true;
                 }
             }
