@@ -499,6 +499,8 @@
   #set ($isVersionedContent = $services.bookversions.isVersionedContent($docRef))
   ## Check if the document is marked as deleted
   #set ($isMarkedDeleted = $services.bookversions.isMarkedDeleted($docRef))
+  ## Check if no content (Page is displayed (not the versioned content page) while it is versioned)
+  #set ($isNoContent = !$isUnVersionedPage &amp;&amp; $services.bookversions.isPage($docRef))
   ## Get the current selected version
   #set ($selectedVersion = $services.bookversions.getSelectedVersion($docRef))
   {{html}}
@@ -596,15 +598,17 @@
           &lt;/ul&gt;
         #end
           &lt;ul&gt;
-            &lt;li&gt;
-              &lt;a id="switch-as-deleted" href="#" data-page="$doc"&gt;
-                #if($isMarkedDeleted)
-                  $services.localization.render('BookVersions.navMenu.unmarkDeleted')
-                #else
-                  $services.localization.render('BookVersions.navMenu.markDeleted')
-                #end
-              &lt;/a&gt;
-            &lt;/li&gt;
+            #if(!$isNoContent)
+              &lt;li&gt;
+                &lt;a id="switch-as-deleted" href="#" data-page="$doc"&gt;
+                  #if($isMarkedDeleted)
+                    $services.localization.render('BookVersions.navMenu.unmarkDeleted')
+                  #else
+                    $services.localization.render('BookVersions.navMenu.markDeleted')
+                  #end
+                &lt;/a&gt;
+              &lt;/li&gt;
+            #end
             #if($isVersionedContent)
               &lt;li&gt;
                 &lt;a href="$xwiki.getURL($docRef, 'delete', '')"&gt;
