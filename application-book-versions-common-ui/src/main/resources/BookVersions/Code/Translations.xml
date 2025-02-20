@@ -96,9 +96,29 @@ BookVersions.Code.DeletedContentClassSheet.warning=This content has been marked 
 BookVersions.Code.PublicationConfigurationSheet.nextButton=Publish
 
 # Publication Preview
+BookVersions.Code.PublicationConfigurationSheet.previewTitle=Preview
 BookVersions.Code.PublicationConfigurationSheet.previewContinueButton=Continue
 BookVersions.Code.PublicationConfigurationSheet.isCancel=The publication behavior chosen is "Cancel" and the target is already populated, publication will be aborted.
-
+BookVersions.Code.PublicationConfigurationSheet.copiedFrom=Page to be copied from {0} to {1}
+BookVersions.Code.PublicationConfigurationSheet.pageNo=Page {0} of {1} from {2}
+BookVersions.Code.PublicationConfigurationSheet.warningMsg=Library {0} (version {1}) not yet published.
+BookVersions.Code.PublicationConfigurationSheet.configurationReference=Configuration reference
+BookVersions.Code.PublicationConfigurationSheet.destinationSpace=Destination space
+BookVersions.Code.PublicationConfigurationSheet.configText=Publication based on of configuration page:
+BookVersions.Code.PublicationConfigurationSheet.RepublishSpaceNotEmpty=The publications space is not empty.
+BookVersions.Code.PublicationConfigurationSheet.CancelPublicationSpaceNotEmpty=The publications space is not empty.
+BookVersions.Code.PublicationConfigurationSheet.StartPagePublication=Start page publication
+BookVersions.Code.PublicationConfigurationSheet.CopyPage=Copy page
+BookVersions.Code.PublicationConfigurationSheet.EndPagePublication=End page publication
+BookVersions.Code.PublicationConfigurationSheet.StartPublicationJob=Start publication job
+BookVersions.Code.PublicationConfigurationSheet.libraryReference=Library
+BookVersions.Code.PublicationConfigurationSheet.bookReference=Book reference
+BookVersions.Code.PublicationConfigurationSheet.bookVersion=Book version
+BookVersions.Code.PublicationConfigurationSheet.libraryVersion=Library version
+BookVersions.Code.PublicationConfigurationSheet.LibraryPublishedOK=Library publication OK
+BookVersions.Code.PublicationConfigurationSheet.publishedSpace=Published space
+BookVersions.Code.PublicationConfigurationSheet.LibraryNoVersionConfigured=No library version configured.
+BookVersions.Code.PublicationConfigurationSheet.LibraryNotPublished=Library not published.
 
 # Creation templates
 BookVersions.template.newBook=Create a new book.
