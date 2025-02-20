@@ -546,12 +546,6 @@
 ##
   #renderSelectors()
 #end
-
-#if($displaySpecialWarning)
-{{warning}}
-$services.localization.render('BookVersion.pageSheet.nocontent')
-{{/warning}}
-#end
 {{/velocity}}</content>
     </property>
     <property>
