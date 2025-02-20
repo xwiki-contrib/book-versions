@@ -2695,7 +2695,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     WikiPrinter printer = new DefaultWikiPrinter();
                     BlockRenderer renderer =
                         this.componentManagerProvider.get().getInstance(BlockRenderer.class, syntaxId);
-                    renderer.render(contentXDOM.getChildren().get(0), printer);
+                    renderer.render(contentXDOM, printer);
                     String newMacroContent = printer.toString();
                     // Create a new macro block and swap it
                     MacroBlock newMacroBlock =
