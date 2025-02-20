@@ -2111,7 +2111,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             if (contentPageReference == null) {
                 logger.debug("[publishInternal] Page publication cancelled because the content to be published can't "
                     + "be found by getContentPage. One input is probably null.");
-                logger.error("Page publication cancelled because the content to be published can't be found.");
+                logger.warn("Page publication cancelled because the content to be published can't be found.");
                 continue;
             }
 
