@@ -1764,7 +1764,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             return previewLines;
         }
     
-        // logger.info("Starting publication job with configuration [{}].", configurationReference);
         previewLines.add(createLine(
             "StartPublicationJob",
             "configurationReference", configurationReference
@@ -1792,9 +1791,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         if (publicationBehaviour == null) {
             return previewLines;
         }
-    
-        String language = (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_LANGUAGE);
-    
+        
         DocumentReference targetDocumentReference = new DocumentReference(
             new EntityReference("WebHome", EntityType.DOCUMENT, targetReference)
         );
@@ -1805,7 +1802,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_CANCEL)
             && !isEmptyTargetSpace(subTargetDocumentsString, targetDocumentReference))
         {
-            // logger.info("Publication is canceled because destination space [{}] is not empty.", targetReference);
             previewLines.add(createLine(
                 "CancelPublicationSpaceNotEmpty",
                 "destinationSpace", targetReference
@@ -1815,7 +1811,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         else if (publicationBehaviour.equals(
             BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_REPUBLISH))
         {
-            // logger.info("Destination space [{}] is not empty. Removing all documents.", targetReference);
             previewLines.add(createLine(
                 "RepublishSpaceNotEmpty",
                 "destinationSpace", targetReference
@@ -1823,22 +1818,13 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         }
     
         // 3. Identify "collection" and "version"
-        //    (Same as your actual code)
         DocumentReference collectionReference = getVersionedCollectionReference(sourceReference);
         XWikiDocument collection =
             collectionReference != null ? xwiki.getDocument(collectionReference, xcontext) : null;
         DocumentReference versionReference = (DocumentReference)
             configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VERSION);
-        XWikiDocument version =
-            versionReference != null ? xwiki.getDocument(versionReference, xcontext) : null;
-    
-        DocumentReference variantReference = (DocumentReference)
-            configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VARIANT);
-        XWikiDocument variant =
-            variantReference != null ? xwiki.getDocument(variantReference, xcontext) : null;
-    
+
         // 4. Check for any libraries that might not be published
-        //    Only do this if collection != null, versionReference != null, and the collection is recognized as a "book".
         Map<String, Map<DocumentReference, DocumentReference>> publishedLibraries = null;
         if (collection != null && versionReference != null && isBook(collectionReference)) {
             // Here we do a "preview" version of getUsedPublishedLibrariesWithInheritance
@@ -1857,11 +1843,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     
         for (String pageStringReference : pageReferenceTree) {
             if (pageStringReference == null) {
-                // logger.error("Page publication cancelled...") - no placeholders
                 continue;
             }
     
-            // logger.info("Start page publication {}/{}: [{}]", i, pageQuantity, pageStringReference);
             previewLines.add(createLine(
                 "StartPagePublication",
                 "pageIndex", i,
@@ -1871,14 +1855,12 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     
             DocumentReference pageReference = referenceResolver.resolve(pageStringReference, configurationReference);
             if (!isPage(pageReference)) {
-                // logger.error("Page is not recognized as a book/library page.") - no placeholders
                 continue;
             }
     
             XWikiDocument page = xwiki.getDocument(pageReference, xcontext);
             DocumentReference contentPageReference = getContentPage(page, configuration);
             if (contentPageReference == null) {
-                // logger.error("Page publication cancelled... content is null") - no placeholders
                 continue;
             }
     
@@ -1887,18 +1869,15 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 getPublishedReference(pageReference, collectionReference != null
                     ? collectionReference : sourceReference, targetReference);
             if (publishedReference == null) {
-                // logger.error("Page publication cancelled because the published reference can't be computed.") - no placeholders
                 continue;
             }
     
-            // logger.info("Copying page [{}] to [{}].", contentPageReference, publishedReference);
             previewLines.add(createLine(
                 "CopyPage",
                 "copyFrom", contentPageReference,
                 "copyTo", publishedReference
             ));
     
-            // logger.info("End page publication [{}].", pageStringReference);
             previewLines.add(createLine(
                 "EndPagePublication",
                 "pageStringReference", pageStringReference
