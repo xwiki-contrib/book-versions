@@ -63,7 +63,7 @@
 {{box}}
 #if("$!{previewData}" != '')
   #foreach($line in $previewData)
-    #if($doc.get('publishBehaviour') == 'Cancel' &amp;&amp; !$xwiki.getDocument($line.copyTo).isNew() )
+    #if($line.action == 'CancelPublicationSpaceNotEmpty')
       #set($abort = "true")
     #end
     #if($line.action == 'StartPublicationJob')

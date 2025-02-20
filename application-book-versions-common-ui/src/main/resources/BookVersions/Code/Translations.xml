@@ -97,7 +97,7 @@ BookVersions.Code.PublicationConfigurationSheet.nextButton=Publish
 
 # Publication Preview
 BookVersions.Code.PublicationConfigurationSheet.previewContinueButton=Continue
-BookVersions.Code.PublicationConfigurationSheet.isCancel=The publication behavior chosen is "Cancel" and the target is already populated, publication will be aborted
+BookVersions.Code.PublicationConfigurationSheet.isCancel=The publication behavior chosen is "Cancel" and the target is already populated, publication will be aborted.
 
 
 # Creation templates
