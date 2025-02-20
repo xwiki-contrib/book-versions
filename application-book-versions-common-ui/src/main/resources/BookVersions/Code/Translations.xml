@@ -95,6 +95,11 @@ BookVersions.Code.DeletedContentClassSheet.titlePrefix=DELETED:
 BookVersions.Code.DeletedContentClassSheet.warning=This content has been marked as deleted. It won't be published.
 BookVersions.Code.PublicationConfigurationSheet.nextButton=Publish
 
+# Publication Preview
+BookVersions.Code.PublicationConfigurationSheet.previewContinueButton=Continue
+BookVersions.Code.PublicationConfigurationSheet.isCancel=The publication behavior chosen is "Cancel" and the target is already populated, publication will be aborted
+
+
 # Creation templates
 BookVersions.template.newBook=Create a new book.
 BookVersions.template.newLibrary=Create a new library.

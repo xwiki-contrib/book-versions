@@ -37,6 +37,8 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
   <content>{{velocity}}
+#set ($collectionReference = $services.bookversions.getVersionedCollectionReference($doc.getDocumentReference()))
+#set ($isLibrary = $services.bookversions.isLibrary($collectionReference))
 ## Stop if on PublicationConfigurationSheet
 #if($doc.documentReference.name == 'PublicationConfigurationSheet')
   #stop
@@ -54,6 +56,66 @@
       #stop
     #end
   #end
+#elseif ("$!request.action" == 'preview' &amp;&amp; $services.csrf.isTokenValid($!request.form_token))
+== Preview ==
+#set($previewData = $services.bookversions.previewPublication($doc.documentReference, $xcontext.getUserReference()))
+
+{{box}}
+#if("$!{previewData}" != '')
+  #foreach($line in $previewData)
+    #if($doc.get('publishBehaviour') == 'Cancel' &amp;&amp; !$xwiki.getDocument($line.copyTo).isNew() )
+      #set($abort = "true")
+    #end
+    #if($line.action == 'StartPublicationJob')
+      * Publication based on of configuration page: [[$line.configurationReference&gt;&gt;$line.configurationReference]]
+    #elseif($line.action == 'LibraryNotPublished')
+      * {{warning}}! Library [[$line.libraryReference&gt;&gt;$line.libraryReference]] (version [[$line.libraryVersion&gt;&gt;$line.libraryVersion]]) not yet published.{{/warning}}
+    #elseif($line.action == 'StartPagePublication')
+      * Page $line.pageIndex of $line.totalPages from [[$line.pageStringReference&gt;&gt;$line.pageStringReference]]
+    #elseif($line.action == 'CopyPage')
+      * Page to be coppied from [[$line.copyFrom&gt;&gt;$line.copyFrom]] to [[$line.copyTo&gt;&gt;$line.copyTo]]
+    #elseif($line.action == 'EndPagePublication')
+      ##
+    #else
+      * $line.action
+      #foreach($key in $line.keySet())
+        #if($key != 'action')
+          #if (!$xwiki.getDocument($line.get($key)).isNew())
+            * $key = [[$line.get($key)&gt;&gt;$line.get($key)]]
+          #else
+            * $key = $line.get($key)
+          #end
+        #end
+      #end
+    #end
+  #end
+#end
+{{/box}}
+
+#if("$!{abort}" == "true" &amp;&amp; "$!{previewData}" != '')
+{{warning}}
+  $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.isCancel')
+{{/warning}}
+#end
+
+  {{html wiki="true" clean="false"}}
+  &lt;form action="$doc.getURL()" method="post" class="publication-form"&gt;
+    &lt;input type="hidden" name="action" value="publish" /&gt;
+    &lt;input type="hidden" name="form_token" value="$!services.csrf.getToken()" /&gt;
+    &lt;input type="hidden" name="configReference" value="$services.model.serialize($doc.documentReference, 'local')" /&gt;
+      #set ($sourceValue = $xobject.getProperty('source').value)
+      &lt;a href="$xwiki.getURL($doc)" class="btn btn-default"&gt;
+        $services.localization.render('BookVersions.Code.PublicationProgress.back')
+      &lt;/a&gt;
+    &lt;div class="btn-group" id="tmCreateResource"&gt;
+      &lt;button type="submit" class="btn btn-primary" title="$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.nextButton')"&gt;
+        &lt;span class="fa fa-print" aria-hidden="true"&gt;&lt;/span&gt;
+        &lt;span class="btn-label"&gt;$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.previewContinueButton')&lt;/span&gt;
+      &lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/form&gt;
+  {{/html}}
+  #stop
 #end
 
 
@@ -126,7 +188,7 @@
   &lt;/div&gt;
   #if (!$editing)
   &lt;form action="$doc.getURL()" method="post" class="publication-form"&gt;
-    &lt;input type="hidden" name="action" value="publish" /&gt;
+    &lt;input type="hidden" name="action" value="preview" /&gt;
     &lt;input type="hidden" name="form_token" value="$!services.csrf.getToken()" /&gt;
     &lt;input type="hidden" name="configReference" value="$services.model.serialize($doc.documentReference, 'local')" /&gt;
     &lt;div class="btn-group" id="tmCreateResource"&gt;
