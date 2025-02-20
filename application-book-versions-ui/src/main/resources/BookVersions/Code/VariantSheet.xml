@@ -113,7 +113,9 @@
     #end
     {{/box}}
   #else
-    &lt;a href='?showAssociated=true' class='btn btn-primary'&gt;$services.localization.render("BookVersions.variants.loadPagesBtn")&lt;/a&gt;
+    #if($context.action == 'view')
+      &lt;a href='?showAssociated=true' class='btn btn-primary'&gt;$services.localization.render("BookVersions.variants.loadPagesBtn")&lt;/a&gt;
+    #end
   #end
 
 #macro(displayAssociatedPage $result)
