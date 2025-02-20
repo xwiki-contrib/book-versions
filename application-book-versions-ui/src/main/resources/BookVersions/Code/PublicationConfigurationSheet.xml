@@ -39,13 +39,17 @@
   <content>{{velocity}}
 #set ($collectionReference = $services.bookversions.getVersionedCollectionReference($doc.getDocumentReference()))
 #set ($isLibrary = $services.bookversions.isLibrary($collectionReference))
+#set ($configReference = $!request.configReference)
+#set ($configObj = $xwiki.getDocument($configReference).getObject('BookVersions.Code.PublicationConfigurationClass'))
+#set ($publishedVersion = $configObj.getProperty('version').value)
+#set ($publishedVersionNameStr = $xwiki.getDocument($publishedVersion).name)
+
 ## Stop if on PublicationConfigurationSheet
 #if($doc.documentReference.name == 'PublicationConfigurationSheet')
   #stop
 #end
 ## Handle publication request first, before any output
 #if ("$!request.action" == 'publish' &amp;&amp; $services.csrf.isTokenValid($!request.form_token))
-  #set ($configReference = $!request.configReference)
   #if ($configReference)
     #set ($jobId = $services.bookversions.publish($services.model.resolveDocument($configReference)))
     #if ($jobId)
@@ -71,7 +75,12 @@
     #elseif($line.action == 'LibraryNotPublished')
       * {{warning}}$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.warningMsg',["[[$line.libraryReference&gt;&gt;$line.libraryReference]]","[[$line.libraryVersion&gt;&gt;$line.libraryVersion]]"]){{/warning}}
     #elseif($line.action == 'StartPagePublication')
-      * $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.pageNo',["${line.pageIndex}","${line.totalPages}","[[$line.pageStringReference&gt;&gt;$line.pageStringReference]]"])
+      #set($rPage = $services.model.resolveDocument($line.pageStringReference))
+      #if($services.bookversions.isVersionedPage($rPage) &amp;&amp; !$services.bookversions.hasContentForVersion($rPage, $publishedVersionNameStr))
+       * {{warning}} $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.pageHasNoContent',["[[$line.pageStringReference&gt;&gt;$line.pageStringReference]]","${publishedVersionNameStr}"]){{/warning}}
+      #else
+        * $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.pageNo',["${line.pageIndex}","${line.totalPages}","[[$line.pageStringReference&gt;&gt;$line.pageStringReference]]"])
+      #end
     #elseif($line.action == 'CopyPage')
       ** $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.copiedFrom',["[[$line.copyFrom&gt;&gt;$line.copyFrom]]","[[$line.copyTo&gt;&gt;$line.copyTo]]"])
     #elseif($line.action == 'EndPagePublication')

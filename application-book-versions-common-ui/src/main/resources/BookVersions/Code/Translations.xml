@@ -119,6 +119,7 @@ BookVersions.Code.PublicationConfigurationSheet.LibraryPublishedOK=Library publi
 BookVersions.Code.PublicationConfigurationSheet.publishedSpace=Published space
 BookVersions.Code.PublicationConfigurationSheet.LibraryNoVersionConfigured=No library version configured.
 BookVersions.Code.PublicationConfigurationSheet.LibraryNotPublished=Library not published.
+BookVersions.Code.PublicationConfigurationSheet.pageHasNoContent=The page {0} has no content for version {1}.
 
 # Creation templates
 BookVersions.template.newBook=Create a new book.
