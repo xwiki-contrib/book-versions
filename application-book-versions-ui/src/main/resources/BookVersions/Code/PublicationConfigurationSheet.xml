@@ -80,7 +80,7 @@
       * $line.action
       #foreach($key in $line.keySet())
         #if($key != 'action')
-          #if (!$xwiki.getDocument($line.get($key)).isNew())
+          #if (!$xwiki.getDocument($line.get($key)).isNew() &amp;&amp; $key != "destinationSpace")
             * $key = [[$line.get($key)&gt;&gt;$line.get($key)]]
           #else
             * $key = $line.get($key)
