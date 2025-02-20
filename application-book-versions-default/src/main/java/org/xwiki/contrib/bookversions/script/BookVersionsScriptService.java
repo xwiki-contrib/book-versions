@@ -29,11 +29,13 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.contrib.bookversions.BookVersionsManager;
 import org.xwiki.job.JobException;
 import org.xwiki.livedata.LiveDataConfiguration;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.query.QueryException;
+import org.xwiki.rendering.parser.ParseException;
 import org.xwiki.script.service.ScriptService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -657,6 +659,24 @@ public class BookVersionsScriptService implements ScriptService
     public void switchDeletedMark(DocumentReference documentReference) throws XWikiException
     {
         bookVersionsManagerProvider.get().switchDeletedMark(documentReference);
+    }
+
+    /**
+     * Get the information for the publication preview.
+     * @param configurationReference
+     * @param userDocumentReference
+     * @return the information for the publication preview
+     * @throws XWikiException
+     * @throws QueryException
+     * @throws ComponentLookupException
+     * @throws ParseException
+     */
+    public List<Map<String, Object>> previewPublication(DocumentReference configurationReference,
+                                           DocumentReference userDocumentReference)
+            throws XWikiException, QueryException, ComponentLookupException, ParseException
+    {
+        return bookVersionsManagerProvider.get().previewPublication(configurationReference,
+            userDocumentReference);
     }
 
     /**

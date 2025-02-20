@@ -666,6 +666,20 @@ public interface BookVersionsManager
         throws XWikiException;
 
     /**
+     * Get the information for the publication preview.
+     * @param configurationReference
+     * @param userDocumentReference
+     * @return the information for the publication preview
+     * @throws XWikiException
+     * @throws QueryException
+     * @throws ComponentLookupException
+     * @throws ParseException
+     */
+    List<Map<String, Object>> previewPublication(DocumentReference configurationReference,
+                                           DocumentReference userDocumentReference)
+            throws XWikiException, QueryException, ComponentLookupException, ParseException;
+
+    /**
      * Execute the publication process with the provided configuration.
      *
      * @param configurationReference The configuration reference

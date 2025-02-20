@@ -148,6 +148,12 @@
               <item>
                 <ignore>true</ignore>
                 <code>java.method.addedToInterface</code>
+                <new>method java.util.List&lt;java.util.Map&lt;java.lang.String, java.lang.Object&gt;&gt; org.xwiki.contrib.bookversions.BookVersionsManager::previewPublication(org.xwiki.model.reference.DocumentReference, org.xwiki.model.reference.DocumentReference) throws com.xpn.xwiki.XWikiException, org.xwiki.query.QueryException, org.xwiki.component.manager.ComponentLookupException, org.xwiki.rendering.parser.ParseException</new>
+                <justification>Added new method in order to handle the publication preview step.</justification>
+              </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.addedToInterface</code>
                 <new>method java.lang.String org.xwiki.contrib.bookversions.BookVersionsManager::getTranslationStatus(com.xpn.xwiki.doc.XWikiDocument) throws com.xpn.xwiki.XWikiException, org.xwiki.query.QueryException</new>
                 <justification>Added new method in order to handle the status of a translations.</justification>
               </item>
