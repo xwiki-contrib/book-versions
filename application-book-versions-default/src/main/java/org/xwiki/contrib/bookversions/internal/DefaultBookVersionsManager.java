@@ -1280,7 +1280,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         }
     }
 
-    private DocumentReference getPreviousVersion(DocumentReference versionReference) throws XWikiException
+    @Override
+    public DocumentReference getPreviousVersion(DocumentReference versionReference) throws XWikiException
     {
         XWikiContext xcontext = this.getXWikiContext();
 

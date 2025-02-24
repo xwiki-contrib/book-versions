@@ -552,6 +552,15 @@ public interface BookVersionsManager
         DocumentReference versionReference) throws QueryException, XWikiException;
 
     /**
+     * Get the preceding version of a given version.
+     * @param versionReference the reference of the version to get the preceding version from.
+     * @return the reference of preceding version. Can be null in case of error or if the given version is the first
+     *      version.
+     * @throws XWikiException In case if the document of versionReference can't be reached.
+     */
+    DocumentReference getPreviousVersion(DocumentReference versionReference) throws XWikiException;
+
+    /**
      * Get the reference of the content to be displayed, be it corresponding to the required version, or inherited from
      * another version.
      *
