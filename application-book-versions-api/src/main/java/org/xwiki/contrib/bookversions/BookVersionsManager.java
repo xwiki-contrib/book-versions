@@ -21,6 +21,7 @@
 package org.xwiki.contrib.bookversions;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.xwiki.component.annotation.Role;
@@ -684,10 +685,11 @@ public interface BookVersionsManager
      *
      * @param configurationReference The configuration reference
      * @param userReference the user executing the job
+     * @param userLocale the user's locale
      * @throws XWikiException could occur if loadPublicationConfiguration has an issue
      * @throws QueryException If any exception occurs while querying the database.
      */
-    void publishInternal(DocumentReference configurationReference, DocumentReference userReference)
+    void publishInternal(DocumentReference configurationReference, DocumentReference userReference, Locale userLocale)
         throws XWikiException, QueryException, ComponentLookupException, ParseException;
 
     /**

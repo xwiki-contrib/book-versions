@@ -121,6 +121,37 @@ BookVersions.Code.PublicationConfigurationSheet.LibraryNoVersionConfigured=No li
 BookVersions.Code.PublicationConfigurationSheet.LibraryNotPublished=Library not published.
 BookVersions.Code.PublicationConfigurationSheet.pageHasNoContent=The page {0} has no content for version {1}.
 
+# Publication process
+BookVersions.DefaultBookVersionsManager.publishInternal.nullParameter=One of the provided parameters is null.
+BookVersions.DefaultBookVersionsManager.publishInternal.start=Starting publication job with configuration [{0}].
+BookVersions.DefaultBookVersionsManager.publishInternal.loadConfiguration=Loading configuration.
+BookVersions.DefaultBookVersionsManager.publishInternal.noConfig=No configuration provided (null or empty).
+BookVersions.DefaultBookVersionsManager.publishInternal.noSource=Could not read the source from [{0}].
+BookVersions.DefaultBookVersionsManager.publishInternal.noTarget=Could not read the target from [{0}].
+BookVersions.DefaultBookVersionsManager.publishInternal.noBehaviour=Could not read the behavior from [{0}].
+BookVersions.DefaultBookVersionsManager.publishInternal.targetNotEmpty=Publication is canceled because destination space [{0}] is not empty.
+BookVersions.DefaultBookVersionsManager.publishInternal.targetEmptying=Destination space [{}] is not empty. Removing all documents.
+BookVersions.DefaultBookVersionsManager.publishInternal.sourceNotExist=The provided source reference [{}] does not exist.
+BookVersions.DefaultBookVersionsManager.publishInternal.startPublication=Start publication.
+BookVersions.DefaultBookVersionsManager.publishInternal.refNotFound=Page publication cancelled because the reference can''t be found.
+BookVersions.DefaultBookVersionsManager.publishInternal.startPagePublication=Start page publication {0}/{1}: [{2}]
+BookVersions.DefaultBookVersionsManager.publishInternal.notCollection=Page is not recognized as a book/library page.
+BookVersions.DefaultBookVersionsManager.publishInternal.noContent=Page publication cancelled because the content to be published can''t be found.
+BookVersions.DefaultBookVersionsManager.publishInternal.targetRefNotComputed=Page publication cancelled because the published reference can''t be computed.
+BookVersions.DefaultBookVersionsManager.publishInternal.copyPage=Copying page [{0}] to [{1}].
+BookVersions.DefaultBookVersionsManager.publishInternal.transformContent=Transforming content for publication.
+BookVersions.DefaultBookVersionsManager.publishInternal.endPagePublication=End publication of page [{0}].
+BookVersions.DefaultBookVersionsManager.publishInternal.removeMarkedAsDeleted=Removing the pages marked as deleted from the target space.
+BookVersions.DefaultBookVersionsManager.publishInternal.updatePageOrder=Updating page ordering.
+BookVersions.DefaultBookVersionsManager.publishInternal.endPublication=Publication finished in space [{0}].
+
+BookVersions.DefaultBookVersionsManager.isToBePublished.markedAsDeleted=Page is [{0}] ignored because it is marked as deleted.
+BookVersions.DefaultBookVersionsManager.isToBePublished.status=Page [{0}] is ignored because its status is [{1}] and only [{2}] page are published.
+BookVersions.DefaultBookVersionsManager.isToBePublished.variantPage=Page [{0}] is ignored because it is associated with variants.
+BookVersions.DefaultBookVersionsManager.isToBePublished.otherVariant=Page [{0}] is ignored because it is not associated with the published variant [{1}].
+BookVersions.DefaultBookVersionsManager.isToBePublished.noTranslation=Page [{0}] is ignored because it is not associated with the published language [{1}].
+BookVersions.DefaultBookVersionsManager.isToBePublished.noCompleteTranslation=Page is [{0}] ignored because the translation doesn''t have a [{1}] status.
+
 # Creation templates
 BookVersions.template.newBook=Create a new book.
 BookVersions.template.newLibrary=Create a new library.

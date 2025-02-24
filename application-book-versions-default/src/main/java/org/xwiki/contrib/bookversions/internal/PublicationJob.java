@@ -19,6 +19,7 @@
  */
 package org.xwiki.contrib.bookversions.internal;
 
+import java.util.Locale;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -64,6 +65,7 @@ public class PublicationJob extends AbstractJob<DefaultRequest, DefaultJobStatus
     {
         DocumentReference configurationReference = this.request.getProperty("configurationReference");
         DocumentReference userReference = this.request.getProperty("userReference");
+        Locale userLocale = this.request.getProperty("userLocale");
 
         // Verify that the user has the rights needed to execute the publication before actually publishing
         BookVersionsManager bookVersionsManager = bookVersionsManagerProvider.get();
@@ -72,7 +74,8 @@ public class PublicationJob extends AbstractJob<DefaultRequest, DefaultJobStatus
 
         if (publicationConfiguration.containsKey(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE)
             && publicationConfiguration.containsKey(
-                BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE)) {
+                BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE))
+        {
             DocumentReference sourceReference = (DocumentReference) publicationConfiguration.get(
                 BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE);
             EntityReference destinationReference = (EntityReference) publicationConfiguration.get(
@@ -80,8 +83,9 @@ public class PublicationJob extends AbstractJob<DefaultRequest, DefaultJobStatus
 
             if (authorizationManager.hasAccess(PublishBookRight.getRight(), userReference,
                 sourceReference.getLastSpaceReference())
-                && authorizationManager.hasAccess(PublishBookRight.getRight(), userReference, destinationReference)) {
-                bookVersionsManager.publishInternal(configurationReference, userReference);
+                && authorizationManager.hasAccess(PublishBookRight.getRight(), userReference, destinationReference))
+            {
+                bookVersionsManager.publishInternal(configurationReference, userReference, userLocale);
             } else if (!authorizationManager.hasAccess(PublishBookRight.getRight(), userReference, sourceReference)) {
                 logger.error("User [{}] is missing book publication right on source book [{}]", userReference,
                     sourceReference);

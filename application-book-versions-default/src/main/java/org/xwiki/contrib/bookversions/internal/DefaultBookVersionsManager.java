@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -53,6 +54,7 @@ import org.xwiki.job.JobException;
 import org.xwiki.job.JobExecutor;
 import org.xwiki.job.event.status.JobProgressManager;
 import org.xwiki.livedata.LiveDataConfiguration;
+import org.xwiki.localization.LocalizationManager;
 import org.xwiki.logging.LogLevel;
 import org.xwiki.logging.event.LogEvent;
 import org.xwiki.model.EntityType;
@@ -148,6 +150,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     @Inject
     private BookPublicationReferencesTransformationHelper publicationReferencesTransformationHelper;
+
+    @Inject
+    private LocalizationManager localization;
 
     @Override
     public boolean isBook(DocumentReference documentReference) throws XWikiException
@@ -1663,8 +1668,10 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             jobRequest.setId(jobId);
             jobRequest.setProperty("configurationReference", configurationReference);
             // The context won't be full in publishInternal as it is executed by a job, so the user executing the
-            // publication has to be passed as a parameter.
-            jobRequest.setProperty("userReference", this.getXWikiContext().getUserReference());
+            // publication and locale have to be passed as parameters.
+            XWikiContext xcontext = this.getXWikiContext();
+            jobRequest.setProperty("userReference", xcontext.getUserReference());
+            jobRequest.setProperty("userLocale", xcontext.getLocale());
             jobExecutor.execute(BookVersionsConstants.PUBLICATIONJOB_TYPE, jobRequest);
         }
         return jobId;
@@ -1694,8 +1701,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             return configuration;
         }
 
-        logger.info("Loading configuration.");
-
         String sourceReferenceString =
             configurationObject.getStringValue(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE);
         String destinationReferenceString =
@@ -1707,9 +1712,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         if (sourceReferenceString == null || sourceReferenceString.isBlank() || destinationReferenceString == null
             || behaviour == null || destinationReferenceString.isBlank() || versionReferenceString.isBlank())
         {
-            logger.error(
-                "One of the mandatory element in the configuration (source, destination, version or behaviour) is " +
-                    "missing.");
+            logger.error("One of the mandatory element in the configuration (source, destination, version or behaviour) "
+                + "is missing.");
             return configuration;
         }
 
@@ -1743,7 +1747,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             configurationObject.getIntValue(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHPAGEORDER) != 0);
 
         logger.debug("[loadPublicationConfiguration] Configuration loaded: [{}].", configuration);
-        logger.info("Configuration loaded.");
 
         return configuration;
     }
@@ -1984,41 +1987,54 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     
 
     @Override
-    public void publishInternal(DocumentReference configurationReference, DocumentReference userDocumentReference)
+    public void publishInternal(DocumentReference configurationReference, DocumentReference userDocumentReference,
+        Locale userLocale)
         throws XWikiException, QueryException, ComponentLookupException, ParseException
     {
-        if (configurationReference == null) {
+        if (configurationReference == null || userDocumentReference == null) {
+            logger.error(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal."
+                + "nullParameter", userLocale));
             return;
+        }
+        if (userLocale == null) {
+            userLocale = new Locale(BookVersionsConstants.DEFAULT_LOCALE);
         }
 
         logger.debug("[publishInternal] Publication required with configuration [{}]", configurationReference);
-        logger.info("Starting publication job with configuration [{}].", configurationReference);
+        logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal.start",
+            userLocale, configurationReference));
         XWikiContext xcontext = this.getXWikiContext();
         XWiki xwiki = xcontext.getWiki();
 
         // Load Publication
+        logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
+                + ".loadConfiguration", userLocale));
         Map<String, Object> configuration = loadPublicationConfiguration(configurationReference);
         if (configuration == null || configuration.isEmpty()) {
-            logger.error("[publishInternal] No configuration provided (null or empty).");
+            logger.error(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal."
+                    + "noConfig", userLocale));
             return;
         }
         DocumentReference sourceReference =
             (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE);
         if (sourceReference == null) {
-            logger.error("[publishInternal] Could not read the source from [{}]", configurationReference);
+            logger.error(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal."
+                + "noSource", userLocale, configurationReference));
             return;
         }
         SpaceReference targetReference =
             (SpaceReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
         if (targetReference == null) {
-            logger.error("[publishInternal] Could not read the target from [{}].", configurationReference);
+            logger.error(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal."
+                + "noTarget", userLocale, configurationReference));
             return;
         }
 
         String publicationBehaviour =
             (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR);
         if (publicationBehaviour == null) {
-            logger.error("[publishInternal] Could not read the behaviour from [{}].", configurationReference);
+            logger.error(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal."
+                + "noBehaviour", userLocale, configurationReference));
             return;
         }
         String language = (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_LANGUAGE);
@@ -2029,13 +2045,15 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         if (publicationBehaviour.equals(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_CANCEL)
             && !isEmptyTargetSpace(subTargetDocumentsString, targetDocumentReference))
         {
-            logger.info("Publication is canceled because destination space [{}] is not empty.", targetReference);
+            logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal."
+                + "targetNotEmpty", userLocale, targetReference));
             return;
         } else if (publicationBehaviour.equals(
             BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_REPUBLISH))
         {
             // Clear the destination space
-            logger.info("Destination space [{}] is not empty. Removing all documents.", targetReference);
+            logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal."
+                + "targetEmptying", userLocale, targetReference));
             if (xwiki.exists(targetDocumentReference, xcontext)) {
                 // also removing the top page
                 subTargetDocumentsString.add(localSerializer.serialize(targetDocumentReference));
@@ -2054,7 +2072,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                             EntityType.DOCUMENT, sourceParentSpaceReference));
         }
         if (!xwiki.exists(sourceReference, xcontext)) {
-            logger.error("[publishInternal] The provided source reference [{}] does not exist.", sourceReference);
+            logger.error(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal."
+                + "sourceNotExist", userLocale, sourceReference));
             return;
         }
         DocumentReference collectionReference = getVersionedCollectionReference(sourceReference);
@@ -2078,7 +2097,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         UserReference userReference = userReferenceResolver.resolve(userDocumentReference);
 
         // Execute publication job
-        logger.info("Start publication.");
+        logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
+                + ".startPublication", userLocale));
         List<String> pageReferenceTree = getPageReferenceTree(sourceReference);
         List<DocumentReference> markedAsDeletedReferences = new ArrayList<>();
         int i = 1;
@@ -2087,19 +2107,22 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         for (String pageStringReference : pageReferenceTree) {
             if (pageStringReference == null) {
                 logger.debug("[publishInternal] Page publication cancelled because the page reference is null.");
-                logger.error("Page publication cancelled because the reference can't be found.");
+                logger.error(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
+                    + ".refNotFound", userLocale));
                 continue;
             }
 
             progressManager.startStep(this, pageStringReference);
-            logger.info("Start page publication {}/{}: [{}]", i, pageQuantity, pageStringReference);
+            logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
+                + ".startPagePublication", userLocale, i, pageQuantity, pageStringReference));
             i++;
             DocumentReference pageReference = referenceResolver.resolve(pageStringReference, configurationReference);
 
             if (!isPage(pageReference)) {
                 logger.debug("[publishInternal] Page does not have a [{}] object.",
                     BookVersionsConstants.BOOKPAGE_CLASS_REFERENCE);
-                logger.error("Page is not recognized as a book/library page.");
+                logger.error(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
+                    + ".notCollection", userLocale));
                 continue;
             }
             XWikiDocument page = xwiki.getDocument(pageReference, xcontext);
@@ -2111,7 +2134,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             if (contentPageReference == null) {
                 logger.debug("[publishInternal] Page publication cancelled because the content to be published can't "
                     + "be found by getContentPage. One input is probably null.");
-                logger.warn("Page publication cancelled because the content to be published can't be found.");
+                logger.warn(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
+                    + ".noContent", userLocale));
                 continue;
             }
 
@@ -2121,13 +2145,14 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             if (publishedReference == null) {
                 logger.debug("[publishInternal] Page publication cancelled because the published reference can't be "
                     + "computed by getPublishedReference. One input is null.");
-                logger.error("Page publication cancelled because the published reference can't be computed.");
+                logger.error(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
+                    + ".targetRefNotComputed", userLocale));
                 continue;
             }
 
             // Check if the content should be published
             XWikiDocument contentPage = xwiki.getDocument(contentPageReference, xcontext).clone();
-            if (!isToBePublished(contentPage, variant, configuration)) {
+            if (!isToBePublished(contentPage, variant, configuration, userLocale)) {
                 if (isMarkedDeleted(contentPage)) {
                     // The original document is marked as deleted, add the published copy to be deleted from target
                     markedAsDeletedReferences.add(publishedReference);
@@ -2136,7 +2161,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             }
 
             // Create the published document
-            logger.info("Copying page [{}] to [{}].", contentPage.getDocumentReference(), publishedReference);
+            logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
+                + ".copyPage", userLocale, contentPage.getDocumentReference(), publishedReference));
             XWikiDocument publishedDocument = xwiki.getDocument(publishedReference, xcontext);
             if (StringUtils.isNotEmpty(language)) {
                 // Change the original content if a translation is to be published
@@ -2144,7 +2170,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             }
             copyContentsToNewVersion(contentPage, publishedDocument, xcontext);
 
-            logger.info("Transforming content for publication.");
+            logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
+                + ".transformContent", userLocale));
             prepareForPublication(contentPage, publishedDocument, publishedLibraries, configuration);
 
             logger.debug("[publishInternal] Publish page.");
@@ -2152,7 +2179,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             publishedDocument.getAuthors().setOriginalMetadataAuthor(userReference);
             xwiki.saveDocument(publishedDocument, publicationComment, xcontext);
             logger.debug("[publishInternal] End working on page [{}].", pageStringReference);
-            logger.info("End page publication [{}].", pageStringReference);
+            logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
+                + ".endPagePublication", userLocale, pageStringReference));
             progressManager.endStep(this);
         }
 
@@ -2160,13 +2188,16 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         if (publicationBehaviour.equals(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_UPDATE)
             && markedAsDeletedReferences.size() > 0)
         {
-            logger.info("Removing the pages marked as deleted from the target space.");
+            logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
+                + ".removeMarkedAsDeleted", userLocale));
             logger.debug("[publishInternal] Removing the following marked as deleted pages [{}].",
                 markedAsDeletedReferences);
             removeDocuments(markedAsDeletedReferences, userDocumentReference);
         }
 
         if ((boolean) configuration.get("publishPageOrder")) {
+            logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
+                + ".updatePageOrder", userLocale));
             copyPinnedPagesInfo(sourceReference, collectionReference, targetReference, publicationComment,
                 configurationReference, userReference);
         }
@@ -2178,7 +2209,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             collectionReference);
 
         logger.debug("[publishInternal] Publication ended.");
-        logger.info("Publication finished in [{}].", targetDocumentReference);
+        logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
+            + ".endPublication", userLocale, targetDocumentReference));
         progressManager.popLevelProgress(this);
     }
 
@@ -2829,8 +2861,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         XWikiContext xcontext = getXWikiContext();
         XWiki xwiki = xcontext.getWiki();
 
-        logger.info("Updating pinned pages");
-
         SpaceReference spaceReference = sourceReference.getLastSpaceReference();
         String spaceSerialized = localSerializer.serialize(spaceReference);
         String hql = "SELECT doc.fullName FROM XWikiDocument as doc "
@@ -2909,10 +2939,14 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VERSION));
     }
 
-    private boolean isToBePublished(XWikiDocument page, XWikiDocument variant, Map<String, Object> configuration)
+    private boolean isToBePublished(XWikiDocument page, XWikiDocument variant, Map<String, Object> configuration,
+        Locale userLocale)
     {
         if (page == null || configuration == null) {
             return false;
+        }
+        if (userLocale == null) {
+            userLocale = new Locale(BookVersionsConstants.DEFAULT_LOCALE);
         }
 
         DocumentReference pageReference = page.getDocumentReference();
@@ -2928,23 +2962,26 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         String language = (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_LANGUAGE);
         if (isMarkedDeleted(page)) {
             // Page is marked as deleted
-            logger.debug("[isToBePublished] Page is [{}] ignored because it is marked as deleted.", pageReference);
-            logger.info("Page is [{}] ignored because it is marked as deleted.", pageReference);
+            logger.debug("[isToBePublished] Page [{}] is ignored because it is marked as deleted.", pageReference);
+            logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.isToBePublished."
+                + "markedAsDeleted", userLocale, pageReference));
             return false;
         } else if (publishOnlyComplete && status != null
             && !status.equals(BookVersionsConstants.PAGESTATUS_PROP_STATUS_COMPLETE))
         {
             // Page doesn't have a "complete" status but only those are published
-            logger.debug("[isToBePublished] Page is [{}] ignored because its status is [{}] and only complete page are "
-                + "published.", pageReference, status);
-            logger.info("Page  [{}] is ignored because its status is [{}] and only complete page are published.",
-                pageReference, status);
+            logger.debug("[isToBePublished] Page [{}] is ignored because its status is [{}] and only [{}] page are "
+                + "published.", pageReference, status, BookVersionsConstants.PAGESTATUS_PROP_STATUS_COMPLETE);
+            logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.isToBePublished."
+                + "status", userLocale, pageReference, status,
+                BookVersionsConstants.PAGESTATUS_PROP_STATUS_COMPLETE));
             return false;
         } else if (variant == null && variants != null && !variants.isEmpty()) {
             // No variant to be published AND page is associated with variant(s)
-            logger.debug("[isToBePublished] Page is [{}] ignored because it is associated with variants.",
+            logger.debug("[isToBePublished] Page [{}] is ignored because it is associated with variants.",
                 pageReference);
-            logger.info("Page is [{}] ignored because it is associated with variants.", pageReference);
+            logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.isToBePublished."
+                + "variantPage", userLocale, pageReference));
             return false;
         } else if (variant != null && variants != null && !variants.contains(variant.getDocumentReference())
             && (excludePagesOutsideVariant || (!excludePagesOutsideVariant && !variants.isEmpty())))
@@ -2952,27 +2989,28 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             // A variant is to be published AND the page is associated with other variant(s) AND
             // (pages outside the variant are excluded
             // OR pages outside the variant are excluded but the page is associated to the published variant)
-            logger.debug("[isToBePublished] Page is [{}] ignored because it is not associated with the published "
-                + "variant.", pageReference);
-            logger.info("Page is [{}] ignored because it is not associated with the published variant.", pageReference);
+            logger.debug("[isToBePublished] Page [{}] is ignored because it is not associated with the published "
+                + "variant [{}].", pageReference, variant);
+            logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.isToBePublished."
+                    + "otherVariant", userLocale, pageReference, variant));
             return false;
         } else if (StringUtils.isNotEmpty(language)) {
             Map<String, Map<String, Object>> languageData = getLanguageData(page);
             if (languageData.get(language) == null) {
                 // The page has no translation
-                logger.debug("[isToBePublished] Page is [{}] ignored because it is not associated with the "
-                    + "published language.", pageReference);
-                logger.info("Page is [{}] ignored because it is not associated with the published language.",
-                    pageReference);
+                logger.debug("[isToBePublished] Page [{}] is ignored because it is not associated with the "
+                    + "published language [{}].", pageReference, language);
+                logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.isToBePublished."
+                        + "noTranslation", userLocale, pageReference, language));
                 return false;
             } else if (languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED) == null
                 || !((boolean) languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED)))
             {
                 // The page has no "Translated" translation
-                logger.debug("[isToBePublished] Page is [{}] ignored because the translation doesn't have a [{}] "
+                logger.debug("[isToBePublished] Page [{}] is ignored because the translation doesn't have a [{}] "
                     + "status.", pageReference, PageTranslationStatus.TRANSLATED);
-                logger.error("Page is [{}] ignored because the translation doesn't have a [{}] status.",
-                    pageReference, PageTranslationStatus.TRANSLATED);
+                logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.isToBePublished."
+                        + "noCompleteTranslation", userLocale, pageReference, PageTranslationStatus.TRANSLATED));
                 return false;
             }
         }

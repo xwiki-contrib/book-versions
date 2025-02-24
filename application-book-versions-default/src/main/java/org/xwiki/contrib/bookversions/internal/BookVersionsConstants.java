@@ -491,4 +491,8 @@ public interface BookVersionsConstants
      * The job name separator to set pages status.
      */
     String SET_PAGE_STATUS_JOBID_SEPARATOR = "_";
+    /**
+     * The default locale used for logging.
+     */
+    String DEFAULT_LOCALE = "en";
 }
