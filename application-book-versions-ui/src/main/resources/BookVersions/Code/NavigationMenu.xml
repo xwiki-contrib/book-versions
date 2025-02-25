@@ -801,10 +801,26 @@
 ## Setup language display variables
 ##
 #macro(setupLanguageDisplay)
-  #if ($selectedLanguage)
-    #set ($languageStateMessageKey = 'BookVersions.navMenu.currentLanguage')
+  #set ($languageStatusInfoMsg = '')
+  #set ($languageStatusTooltip = '')
+  #if ("$!selectedLanguage" != '')
+    #set ($macro.isDefaultLanguage = $services.bookversions.isDefaultLanguage($docRef, $selectedLanguage))
+    #if ($macro.isDefaultLanguage)
+      #set ($languageInfoMsg = $services.localization.render('BookVersions.navMenu.languageDefaultSelected', [$selectedLanguage]))
+      #set ($languageTooltip = $services.localization.render('BookVersions.navMenu.languageSelect.tooltip.languageDefaultSelected', [$selectedLanguage]))
+    #else
+      #set ($languageInfoMsg = $services.localization.render('BookVersions.navMenu.languageSelected', [$selectedLanguage]))
+      #set ($languageTooltip = $services.localization.render('BookVersions.navMenu.languageSelect.tooltip.languageSelected', [$selectedLanguage]))
+    #end
+
+    #set ($macro.translationStatus = $services.bookversions.getTranslationStatus($docRef, $selectedLanguage))
+    #if("$!macro.translationStatus" != '')
+      #set ($languageStatusInfoMsg = $services.localization.render("BookVersions.navMenu.translationStatus.${macro.translationStatus}"))
+      #set ($languageStatusTooltip = $services.localization.render("BookVersions.navMenu.translationStatus.tooltip.${macro.translationStatus}"))
+    #end
   #else
-    #set ($languageStateMessageKey = 'BookVersions.navMenu.noLanguageSelected')
+    #set ($languageInfoMsg = $services.localization.render('BookVersions.navMenu.noLanguageSelected'))
+    #set ($languageTooltip = $services.localization.render('BookVersions.navMenu.languageSelect.tooltip.noLanguageSelected'))
   #end
 #end
 
@@ -961,8 +977,9 @@
   #else
     #set ($discard = $debuglogger.debug('Found NO versioned content for page[{}]', ${docRef}))
     #set ($displaySpecialWarning = true)
+    ## Should not happen (I wasn't able to end in this case because if no version is available we just don't ) !!
     {{warning}}
-      {{html}}$services.localization.render('BookVersions.navMenu.warning.noversion'){{/html}}
+    No version available
     {{/warning}}
   #end
 #end
@@ -1015,22 +1032,30 @@
 #macro(setupVersionDisplay)
   #set ($currentDocName = $docRef.getName())
   #set ($selectedVersionName = $services.bookversions.getVersionName($services.model.resolveDocument($selectedVersion)))
-  #set ($stateMessageKey = '')
+  #set ($selectVersionInfoMsg = '')
   #set ($selectedVersionTitle = '')
-  #set ($versionTitle = '')
+  #set ($selectedVersionToolip = '')
   #if ($isUnversionedPage)
     ## Unversioned page
-    #set ($stateMessageKey = 'BookVersions.navMenu.unversioned')
-    #set ($versionTitle = $services.localization.render('BookVersions.navMenu.unversionedTitle'))
+    #set ($selectVersionInfoMsg = $services.localization.render('BookVersions.navMenu.versionSelect.hint', [$services.localization.render('BookVersions.navMenu.versionSelect.unversioned')]))
+    #set ($selectedVersionToolip = $services.localization.render('BookVersions.navMenu.versionSelect.tooltip.noVersion'))
   #else
     ## Versioned page
-    #if ($selectedVersionName.equals($currentDocName))
-      #set ($stateMessageKey = 'BookVersions.navMenu.versioned')
-    #else
-      #set ($stateMessageKey = 'BookVersions.navMenu.inherited')
-    #end
-    #set ($selectedVersionTitle = $xwiki.getDocument($services.bookversions.getVersionReference($collectionRef,$selectedVersionName)).displayTitle)
     #set ($versionTitle = $xwiki.getDocument($services.bookversions.getVersionReference($collectionRef,$docRef.getName())).displayTitle)
+    #set ($selectedVersionTitle = $xwiki.getDocument($services.bookversions.getVersionReference($collectionRef,$selectedVersionName)).displayTitle)
+    ##
+    #if ($versionTitle)
+      #set ($selectVersionInfoMsg = $services.localization.render('BookVersions.navMenu.versionSelect.hint', [$versionTitle]))
+      #if ($versionTitle == $selectedVersionTitle)
+        #set ($selectedVersionToolip = $services.localization.render('BookVersions.navMenu.versionSelect.tooltip.versionned', [$versionTitle]))
+      #else
+        #set ($selectedVersionToolip = $services.localization.render('BookVersions.navMenu.versionSelect.tooltip.inherited', [$selectedVersionTitle, $versionTitle]))
+      #end
+    #else
+      #set ($selectVersionInfoMsg = $services.localization.render('BookVersions.navMenu.versionSelect.hint', [$services.localization.render('BookVersions.navMenu.versionSelect.noContent')]))
+      #set($selectedVersionToolip = $services.localization.render('BookVersions.navMenu.versionSelect.tooltip.noContent', [$selectedVersionTitle]))
+      #set($displaySpecialWarning = true)
+    #end
   #end
 #end
 
@@ -1057,13 +1082,20 @@
     #end
   #end
   #if ($associatedVariants &amp;&amp; $associatedVariants.size() &gt; 0 )
-    #set ($variantStateMessageKey = 'BookVersions.navMenu.pageRestrictedTo')
     #foreach($assocVariant in $associatedVariants)
        #set ($assocVariantTitle = $services.bookversions.getVariantName($services.model.resolveDocument($assocVariant)))
        #set ($ok = $associatedVariantsTitle.add($assocVariantTitle))
     #end
+    #set($associatedVariantsTitleS = $stringtool.join($associatedVariantsTitle, " "))
+    #set ($variantInfoMsg = $services.localization.render('BookVersions.navMenu.pageRestrictedTo', [$associatedVariantsTitleS]))
+    #set ($variantTooltip = $services.localization.render('BookVersions.navMenu.variantSelect.tooltip.restricted', [$associatedVariantsTitleS]))
   #else
-    #set ($variantStateMessageKey = 'BookVersions.navMenu.pageIsNotAssociated')
+    #set ($variantInfoMsg = $services.localization.render('BookVersions.navMenu.pageIsNotAssociated'))
+    #if("$!selectedVariant" != "")
+      #set ($variantTooltip = $services.localization.render('BookVersions.navMenu.variantSelect.tooltip.notAssociatedVariantSelect', [$variantTitle]))
+    #else
+      #set ($variantTooltip = $services.localization.render('BookVersions.navMenu.variantSelect.tooltip.notAssociatedNoVariantSelected'))
+    #end
   #end
 #end
 
@@ -1072,7 +1104,7 @@
 ##
 #macro(renderSelectorsHTML)
   {{html}}
-  &lt;div class="book-info"&gt;
+  &lt;div class="book-info breadcrumb"&gt;
     #if ($versions.size() &gt; 0)
       #renderVersionSelector()
     #end
@@ -1112,13 +1144,8 @@
           #end
         #end
       &lt;/select&gt;
-      &lt;p class="noitems"&gt;
-        #if($versionTitle)
-        $services.localization.render($stateMessageKey, [$versionTitle])
-        #else
-         #set($displaySpecialWarning = true)
-        $services.localization.render('BookVersions.navMenu.warning.noversion', [$selectedVersionTitle])
-        #end
+      &lt;p class="noitems" title="$escapetool.xml($selectedVersionToolip)"&gt;
+        $escapetool.xml($selectVersionInfoMsg)
       &lt;/p&gt;
     &lt;/form&gt;
   &lt;/div&gt;
@@ -1149,9 +1176,8 @@
           #end
         #end
       &lt;/select&gt;
-      &lt;p class="noitems"&gt;
-        #set($associatedVariantsTitleS = $stringtool.join($associatedVariantsTitle, " "))
-        $services.localization.render($variantStateMessageKey, [$associatedVariantsTitleS])
+      &lt;p class="noitems" title="$escapetool.xml($variantTooltip)"&gt;
+        $escapetool.xml($variantInfoMsg)
       &lt;/p&gt;
     &lt;/form&gt;
   &lt;/div&gt;
@@ -1190,8 +1216,6 @@
 ##
 #macro(renderLanguageSelector)
   #if ($multilingualEnabled == 1 &amp;&amp; $languages.size() &gt; 0)
-    #set ($translationStatus = $services.bookversions.getTranslationStatus($docRef, $selectedLanguage))
-    #set ($isDefaultLanguage = $services.bookversions.isDefaultLanguage($docRef, $selectedLanguage))
     &lt;div class="formContainer"&gt;
       &lt;form class="xformInline" id="changeLanguageStatus" method="post"&gt;
         &lt;input type="hidden" id="language_form_token" name="form_token" value="$escapetool.xml("$!services.csrf.token")"/&gt;
@@ -1210,15 +1234,11 @@
             #end
           #end
         &lt;/select&gt;
-        &lt;p class="noitems"&gt;
-          #if($isDefaultLanguage)
-            $services.localization.render('BookVersions.navMenu.defaultLanguage')
-          #else
-            $services.localization.render($languageStateMessageKey, [$selectedLanguage])
-          #end
-          #if("$!translationStatus" != '')
-            $services.localization.render("BookVersions.navMenu.translationStatus.${translationStatus}")&lt;br /&gt;
-          #end
+        &lt;p class="noitems" title="$escapetool.xml($languageTooltip)"&gt;
+          $escapetool.xml($languageInfoMsg)
+        &lt;/p&gt;
+        &lt;p class="noitems" title="$escapetool.xml($languageStatusTooltip)"&gt;
+          $escapetool.xml($languageStatusInfoMsg)
         &lt;/p&gt;
       &lt;/form&gt;
     &lt;/div&gt;

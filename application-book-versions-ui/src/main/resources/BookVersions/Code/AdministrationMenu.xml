@@ -508,6 +508,8 @@
       &lt;button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"&gt;
         &lt;span class="fa fa-bars" aria-hidden="true"&gt;&lt;/span&gt;
         $services.localization.render('BookVersions.adminMenu.title')
+        &amp;nbsp;
+        &lt;span class="fa fa-caret-down" aria-hidden="true"&gt;&lt;/span&gt;
       &lt;/button&gt;
       &lt;dl class="dropdown-menu dropdown-menu-right"&gt;
         &lt;dt class="dropdown-header"&gt;$services.localization.render('BookVersions.adminMenu.manage')&lt;/dt&gt;
