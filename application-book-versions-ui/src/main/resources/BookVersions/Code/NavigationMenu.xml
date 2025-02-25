@@ -789,7 +789,7 @@
 ## Handle language selection from request
 ##
 #macro(handleLanguageSelection)
-  #if ("$!request.selectedLanguage" != '')
+  #if ($request.selectedLanguage)
     #set ($newLanguage = $request.selectedLanguage)
     $services.bookversions.setSelectedLanguage($collectionRef, $newLanguage)
     #set ($selectedLanguage = $newLanguage)
