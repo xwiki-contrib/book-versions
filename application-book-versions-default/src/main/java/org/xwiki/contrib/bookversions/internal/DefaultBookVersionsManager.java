@@ -1754,238 +1754,528 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     @Override
     public List<Map<String, Object>> previewPublication(
-        DocumentReference configurationReference,
-        DocumentReference userDocumentReference)
-        throws XWikiException, QueryException, ComponentLookupException, ParseException
+            DocumentReference configurationReference,
+            DocumentReference userDocumentReference)
+            throws XWikiException, QueryException, ComponentLookupException, ParseException
     {
         List<Map<String, Object>> previewLines = new ArrayList<>();
-    
-        XWikiContext xcontext = this.getXWikiContext();
-        XWiki xwiki = xcontext.getWiki();
-    
-        // 1. If configurationReference is null, nothing to do.
-        if (configurationReference == null) {
+
+        if (configurationReference == null || userDocumentReference == null) {
+            Map<String, Object> errorLine = new HashMap<>();
+            errorLine.put("message", "Cannot preview publication: null configuration or user reference");
+            errorLine.put("variable", null);
+            previewLines.add(errorLine);
             return previewLines;
         }
-    
-        previewLines.add(createLine(
-            "StartPublicationJob",
-            "configurationReference", configurationReference
-        ));
-    
-        // Load publication config
+
+        // Load Publication Configuration
         Map<String, Object> configuration = loadPublicationConfiguration(configurationReference);
         if (configuration == null || configuration.isEmpty()) {
+            Map<String, Object> errorLine = new HashMap<>();
+            errorLine.put("message", "Incomplete publication configuration found");
+            errorLine.put("variable", configurationReference);
+            previewLines.add(errorLine);
             return previewLines;
         }
-    
-        DocumentReference sourceReference = (DocumentReference)
-            configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE);
-        if (sourceReference == null) {
-            return previewLines;
-        }
-        SpaceReference targetReference = (SpaceReference)
-            configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
-        if (targetReference == null) {
-            return previewLines;
-        }
-    
-        String publicationBehaviour = (String)
-            configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR);
-        if (publicationBehaviour == null) {
-            return previewLines;
-        }
-        
-        DocumentReference targetDocumentReference = new DocumentReference(
-            new EntityReference("WebHome", EntityType.DOCUMENT, targetReference)
-        );
-        List<String> subTargetDocumentsString = queryPages(targetDocumentReference);
-    
-        // 2. Behavior checks
-        if (publicationBehaviour.equals(
-            BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_CANCEL)
-            && !isEmptyTargetSpace(subTargetDocumentsString, targetDocumentReference))
-        {
-            previewLines.add(createLine(
-                "CancelPublicationSpaceNotEmpty",
-                "destinationSpace", targetReference
-            ));
-            return previewLines;
-        }
-        else if (publicationBehaviour.equals(
-            BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_REPUBLISH))
-        {
-            previewLines.add(createLine(
-                "RepublishSpaceNotEmpty",
-                "destinationSpace", targetReference
-            ));
-        }
-    
-        // 3. Identify "collection" and "version"
-        DocumentReference collectionReference = getVersionedCollectionReference(sourceReference);
-        XWikiDocument collection =
-            collectionReference != null ? xwiki.getDocument(collectionReference, xcontext) : null;
-        DocumentReference versionReference = (DocumentReference)
-            configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VERSION);
 
-        // 4. Check for any libraries that might not be published
-        Map<String, Map<DocumentReference, DocumentReference>> publishedLibraries = null;
-        if (collection != null && versionReference != null && isBook(collectionReference)) {
-            // Here we do a "preview" version of getUsedPublishedLibrariesWithInheritance
-            publishedLibraries = previewUsedPublishedLibrariesWithInheritance(
-                collection.getDocumentReference(), versionReference, previewLines);
-        }
-    
-        // 5. Now we do the "Start publication" lines etc. (the pages)
-        List<String> pageReferenceTree = getPageReferenceTree(sourceReference);
-        if (pageReferenceTree == null || pageReferenceTree.isEmpty()) {
+        DocumentReference sourceReference =
+                (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE);
+        if (sourceReference == null) {
+            Map<String, Object> errorLine = new HashMap<>();
+            errorLine.put("message", "No source reference found in configuration");
+            errorLine.put("variable", configurationReference);
+            previewLines.add(errorLine);
             return previewLines;
         }
-    
-        int i = 1;
-        int pageQuantity = pageReferenceTree.size();
-    
+
+        SpaceReference targetReference =
+                (SpaceReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
+        if (targetReference == null) {
+            Map<String, Object> errorLine = new HashMap<>();
+            errorLine.put("message", "No target reference found in configuration");
+            errorLine.put("variable", configurationReference);
+            previewLines.add(errorLine);
+            return previewLines;
+        }
+
+        String publicationBehaviour =
+                (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR);
+        if (publicationBehaviour == null) {
+            Map<String, Object> errorLine = new HashMap<>();
+            errorLine.put("message", "No publication behaviour found in configuration");
+            errorLine.put("variable", configurationReference);
+            previewLines.add(errorLine);
+            return previewLines;
+        }
+
+        XWikiContext xcontext = this.getXWikiContext();
+        XWiki xwiki = xcontext.getWiki();
+
+        // Check if the source exists
+        if (!xwiki.exists(sourceReference, xcontext)) {
+            Map<String, Object> errorLine = new HashMap<>();
+            errorLine.put("message", "Source reference does not exist");
+            errorLine.put("variable", sourceReference);
+            previewLines.add(errorLine);
+            return previewLines;
+        }
+
+        // Get target documents
+        DocumentReference targetDocumentReference =
+                new DocumentReference(new EntityReference(xwiki.DEFAULT_SPACE_HOMEPAGE,
+                        EntityType.DOCUMENT, targetReference));
+        List<String> subTargetDocumentsString = queryPages(targetDocumentReference);
+
+        // Add info about target space status
+        if (publicationBehaviour.equals(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_CANCEL)
+                && !isEmptyTargetSpace(subTargetDocumentsString, targetDocumentReference)) {
+            Map<String, Object> infoLine = new HashMap<>();
+            infoLine.put("message", "Publication will be canceled because target is not empty");
+
+            // Include both the target reference and the list of existing documents
+            Map<String, Object> cancelInfo = new HashMap<>();
+            cancelInfo.put("targetSpace", targetReference);
+            cancelInfo.put("existingDocs", new ArrayList<>(subTargetDocumentsString));
+            infoLine.put("variable", cancelInfo);
+
+            previewLines.add(infoLine);
+            return previewLines;
+        } else if (publicationBehaviour.equals(
+                BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_REPUBLISH)) {
+            Map<String, Object> infoLine = new HashMap<>();
+            infoLine.put("message", "Target space will be emptied before publication");
+            infoLine.put("variable", targetReference);
+            previewLines.add(infoLine);
+
+            // Add list of documents that would be removed
+            if (xwiki.exists(targetDocumentReference, xcontext)) {
+                subTargetDocumentsString.add(localSerializer.serialize(targetDocumentReference));
+            }
+
+            List<DocumentReference> docsToRemoveRefs = new ArrayList<>();
+            for (String docToRemove : subTargetDocumentsString) {
+                DocumentReference docRef = referenceResolver.resolve(docToRemove, configurationReference);
+                docsToRemoveRefs.add(docRef);
+
+                Map<String, Object> removeLine = new HashMap<>();
+                removeLine.put("message", "Document would be removed");
+                removeLine.put("variable", docRef);
+                previewLines.add(removeLine);
+            }
+
+            // Add a summary line with all documents to be removed
+            Map<String, Object> summaryLine = new HashMap<>();
+            summaryLine.put("message", "All documents to be removed from target space");
+            summaryLine.put("variable", docsToRemoveRefs);
+            previewLines.add(summaryLine);
+        }
+
+        // Handle the source reference format, ensuring it's a .WebHome reference if needed
+        if (!Objects.equals(sourceReference.getName(), this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE)) {
+            SpaceReference sourceParentSpaceReference = new SpaceReference(
+                    new EntityReference(sourceReference.getName(), EntityType.SPACE, sourceReference.getParent()));
+            sourceReference =
+                    new DocumentReference(new EntityReference(this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE,
+                            EntityType.DOCUMENT, sourceParentSpaceReference));
+        }
+
+        DocumentReference collectionReference = getVersionedCollectionReference(sourceReference);
+        XWikiDocument collection = collectionReference != null ? xwiki.getDocument(collectionReference, xcontext) : null;
+
+        if (collection == null) {
+            Map<String, Object> errorLine = new HashMap<>();
+            errorLine.put("message", "Could not determine collection reference");
+            errorLine.put("variable", sourceReference);
+            previewLines.add(errorLine);
+            return previewLines;
+        }
+
+        DocumentReference versionReference =
+                (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VERSION);
+        XWikiDocument version = versionReference != null ? xwiki.getDocument(versionReference, xcontext) : null;
+
+        if (version == null) {
+            Map<String, Object> errorLine = new HashMap<>();
+            errorLine.put("message", "Version reference does not exist");
+            errorLine.put("variable", versionReference);
+            previewLines.add(errorLine);
+            return previewLines;
+        }
+
+        // Add collection and version info
+        Map<String, Object> infoLine = new HashMap<>();
+        infoLine.put("message", "Publishing from collection and version");
+        infoLine.put("variable", collection.getTitle() + " - " + version.getTitle());
+        previewLines.add(infoLine);
+
+        DocumentReference variantReference =
+                (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VARIANT);
+        XWikiDocument variant = variantReference != null ? xwiki.getDocument(variantReference, xcontext) : null;
+
+        if (variantReference != null && variant == null) {
+            Map<String, Object> errorLine = new HashMap<>();
+            errorLine.put("message", "Variant reference does not exist");
+            errorLine.put("variable", variantReference);
+            previewLines.add(errorLine);
+            return previewLines;
+        }
+
+        // Add variant info if applicable
+        if (variant != null) {
+            Map<String, Object> variantLine = new HashMap<>();
+            variantLine.put("message", "Using variant");
+            variantLine.put("variable", variant.getTitle());
+            previewLines.add(variantLine);
+        }
+
+        // Check if needed libraries are published
+        Map<String, Map<DocumentReference, DocumentReference>> publishedLibraries =
+                collection != null && versionReference != null && isBook(collectionReference)
+                        ? getUsedPublishedLibrariesWithInheritance(collection.getDocumentReference(), versionReference) : null;
+
+        // Add library info
+        if (publishedLibraries != null) {
+            String versionName = getVersionName(versionReference);
+            Map<DocumentReference, DocumentReference> libsForVersion = publishedLibraries.get(versionName);
+
+            if (libsForVersion != null) {
+                for (Map.Entry<DocumentReference, DocumentReference> entry : libsForVersion.entrySet()) {
+                    DocumentReference libraryRef = entry.getKey();
+                    DocumentReference publishedRef = entry.getValue();
+
+                    Map<String, Object> libLine = new HashMap<>();
+                    // Create a map with detailed library information
+                    Map<String, Object> libraryInfo = new HashMap<>();
+                    libraryInfo.put("libraryRef", libraryRef);
+                    libraryInfo.put("publishedRef", publishedRef);
+
+                    // Get the configured library version
+                    try {
+                        DocumentReference libraryVersionRef = getConfiguredLibraryVersion(collectionReference, libraryRef, versionReference);
+                        libraryInfo.put("versionRef", libraryVersionRef);
+                    } catch (Exception e) {
+                        logger.debug("Could not get library version reference: {}", e.getMessage());
+                    }
+
+                    if (publishedRef != null) {
+                        libLine.put("message", "Library is published and will be used");
+                    } else {
+                        libLine.put("message", "WARNING: Library is not published");
+                    }
+                    libLine.put("variable", libraryInfo);
+                    previewLines.add(libLine);
+                }
+            }
+        }
+
+        // Get the page tree and preview each page
+        List<String> pageReferenceTree = getPageReferenceTree(sourceReference);
+        List<DocumentReference> markedAsDeletedReferences = new ArrayList<>();
+
+        Map<String, Object> pagesLine = new HashMap<>();
+        pagesLine.put("message", "Pages to process");
+        pagesLine.put("variable", pageReferenceTree.size());
+        previewLines.add(pagesLine);
+
+        // Process each page in the tree
         for (String pageStringReference : pageReferenceTree) {
             if (pageStringReference == null) {
+                Map<String, Object> errorLine = new HashMap<>();
+                errorLine.put("message", "Page reference is null");
+                errorLine.put("variable", null);
+                previewLines.add(errorLine);
                 continue;
             }
-    
-            previewLines.add(createLine(
-                "StartPagePublication",
-                "pageIndex", i,
-                "totalPages", pageQuantity,
-                "pageStringReference", pageStringReference
-            ));
-    
+
             DocumentReference pageReference = referenceResolver.resolve(pageStringReference, configurationReference);
+
             if (!isPage(pageReference)) {
+                Map<String, Object> errorLine = new HashMap<>();
+                errorLine.put("message", "Not a book page");
+                errorLine.put("variable", pageReference);
+                previewLines.add(errorLine);
                 continue;
             }
-    
+
             XWikiDocument page = xwiki.getDocument(pageReference, xcontext);
+
+            // Get content page
             DocumentReference contentPageReference = getContentPage(page, configuration);
             if (contentPageReference == null) {
+                Map<String, Object> errorLine = new HashMap<>();
+                errorLine.put("message", "No content found for page");
+
+                // Include full context about the page
+                Map<String, Object> pageInfo = new HashMap<>();
+                pageInfo.put("pageRef", pageReference);
+                pageInfo.put("pageTitle", page.getTitle());
+                pageInfo.put("isVersioned", !isVersionedPage(pageReference));
+
+                errorLine.put("variable", pageInfo);
+                previewLines.add(errorLine);
                 continue;
             }
-    
-            // Figure out the "published" target
+
+            // Get published reference
             DocumentReference publishedReference =
-                getPublishedReference(pageReference, collectionReference != null
-                    ? collectionReference : sourceReference, targetReference);
+                    getPublishedReference(pageReference, collectionReference, targetReference);
             if (publishedReference == null) {
+                Map<String, Object> errorLine = new HashMap<>();
+                errorLine.put("message", "Could not determine target reference");
+
+                // Include page info
+                Map<String, Object> pageInfo = new HashMap<>();
+                pageInfo.put("pageRef", pageReference);
+                pageInfo.put("collectionRef", collectionReference);
+                pageInfo.put("targetRef", targetReference);
+
+                errorLine.put("variable", pageInfo);
+                previewLines.add(errorLine);
                 continue;
             }
-    
-            previewLines.add(createLine(
-                "CopyPage",
-                "copyFrom", contentPageReference,
-                "copyTo", publishedReference
-            ));
-    
-            previewLines.add(createLine(
-                "EndPagePublication",
-                "pageStringReference", pageStringReference
-            ));
-    
-            i++;
+
+            // Check if content should be published
+            XWikiDocument contentPage = xwiki.getDocument(contentPageReference, xcontext);
+            Locale userLocale = xcontext.getLocale();
+
+            // Add detailed page processing information
+            Map<String, Object> processLine = new HashMap<>();
+            processLine.put("message", "Processing page");
+
+            Map<String, Object> processInfo = new HashMap<>();
+            processInfo.put("pageRef", pageReference);
+            processInfo.put("contentRef", contentPageReference);
+            processInfo.put("targetRef", publishedReference);
+            processInfo.put("title", page.getTitle());
+
+            // Check if page exists at target already
+            processInfo.put("targetExists", xwiki.exists(publishedReference, xcontext));
+
+            // Add status and variant info
+            processInfo.put("status", getPageStatus(page));
+            processInfo.put("variants", getPageVariants(page));
+
+            // Add language info if applicable
+            String language = (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_LANGUAGE);
+            if (StringUtils.isNotEmpty(language)) {
+                processInfo.put("language", language);
+                Map<String, Map<String, Object>> languageData = getLanguageData(contentPage);
+                processInfo.put("languageData", languageData);
+            }
+
+            processLine.put("variable", processInfo);
+            previewLines.add(processLine);
+
+            // Preview publication status for this page
+            if (!previewIsToBePublished(contentPage, variant, configuration, userLocale, previewLines, pageReference)) {
+                if (isMarkedDeleted(contentPage)) {
+                    // The original document is marked as deleted
+                    markedAsDeletedReferences.add(publishedReference);
+
+                    Map<String, Object> deleteLine = new HashMap<>();
+                    deleteLine.put("message", "Page is marked as deleted and will be removed from target if exists");
+
+                    // Include both source and target reference
+                    Map<String, DocumentReference> deleteInfo = new HashMap<>();
+                    deleteInfo.put("sourceMarkedDeleted", pageReference);
+                    deleteInfo.put("targetToDelete", publishedReference);
+
+                    deleteLine.put("variable", deleteInfo);
+                    previewLines.add(deleteLine);
+                }
+                continue;
+            }
+
+            // This page will be published - include both source and destination in a single message
+            Map<String, Object> publishLine = new HashMap<>();
+            publishLine.put("message", "Page will be published");
+            // Create a Map for source and destination to provide complete context
+            Map<String, DocumentReference> publishInfo = new HashMap<>();
+            publishInfo.put("source", pageReference);
+            publishInfo.put("destination", publishedReference);
+            publishInfo.put("content", contentPageReference);
+            publishLine.put("variable", publishInfo);
+            previewLines.add(publishLine);
         }
-    
-        return previewLines;
-    }
-    
-    /**
-     * This "preview" version replicates the logic in getUsedPublishedLibrariesWithInheritance, 
-     * but instead of actually returning the final result for usage, it also logs warnings as 
-     * "preview lines" if the library or its version is missing.
-     */
-    private Map<String, Map<DocumentReference, DocumentReference>> previewUsedPublishedLibrariesWithInheritance(
-        DocumentReference bookReference,
-        DocumentReference versionReference,
-        List<Map<String, Object>> previewLines)
-        throws XWikiException, QueryException
-    {
-        Map<String, Map<DocumentReference, DocumentReference>> result = new HashMap<>();
-    
-        if (bookReference != null && isBook(bookReference)) {
-            // getVersionsAscending/book's version references
-            List<DocumentReference> versions = getVersionsAscending(bookReference, versionReference);
-            // getUsedLibraries() - the libraries used by the book
-            List<DocumentReference> usedLibraries = getUsedLibraries(bookReference);
-    
-            for (DocumentReference ascendingVersionReference : versions) {
-                Map<DocumentReference, DocumentReference> libResult = new HashMap<>();
-                String versionName = getVersionName(ascendingVersionReference);
-    
-                for (DocumentReference libraryReference : usedLibraries) {
-                    if (libraryReference == null) {
-                        continue;
-                    }
-                    // The library version used by this book version
-                    DocumentReference libraryVersionReference =
-                        getConfiguredLibraryVersion(bookReference, libraryReference, ascendingVersionReference);
-    
-                    if (libraryVersionReference == null) {
-                        // logger.warn("Library [{}] is used in book [{}] but no library's version configured...")
-                        previewLines.add(createLine(
-                            "LibraryNoVersionConfigured",
-                            "libraryReference", libraryReference,
-                            "bookReference", bookReference,
-                            "bookVersion", ascendingVersionReference
-                        ));
-                        libResult.put(libraryReference, null);
-                        continue;
-                    }
-    
-                    // The published space for that library version
-                    DocumentReference publishedSpace = getCollectionPublishedSpace(
-                        libraryReference,
-                        libraryVersionReference.getName(),
-                        libraryReference
-                    );
-                    if (publishedSpace == null) {
-                        // logger.warn("Library [{}], configured in book [{}] to use version [{}] doesn't seem published.")
-                        previewLines.add(createLine(
-                            "LibraryNotPublished",
-                            "libraryReference", libraryReference,
-                            "bookReference", bookReference,
-                            "libraryVersion", libraryVersionReference
-                        ));
-                        libResult.put(libraryReference, null);
-                    } else {
-                        // If you want to also record success, you can do so:
-                        // (This is optional; remove if you only want "missing" warnings.)
-                        previewLines.add(createLine(
-                            "LibraryPublishedOK",
-                            "libraryReference", libraryReference,
-                            "bookReference", bookReference,
-                            "libraryVersion", libraryVersionReference,
-                            "publishedSpace", publishedSpace
-                        ));
-                        libResult.put(libraryReference, publishedSpace);
+
+        // Add info about pages marked for deletion
+        if (publicationBehaviour.equals(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_UPDATE)
+                && markedAsDeletedReferences.size() > 0) {
+
+            Map<String, Object> deletedLine = new HashMap<>();
+            deletedLine.put("message", "Pages marked as deleted that will be removed from target");
+
+            // Include both count and the actual references
+            Map<String, Object> deletionInfo = new HashMap<>();
+            deletionInfo.put("count", markedAsDeletedReferences.size());
+            deletionInfo.put("references", new ArrayList<>(markedAsDeletedReferences));
+            deletedLine.put("variable", deletionInfo);
+
+            previewLines.add(deletedLine);
+
+            for (DocumentReference deletedRef : markedAsDeletedReferences) {
+                // Try to find the source document that was marked as deleted
+                DocumentReference sourceDocRef = null;
+                for (String pageStringRef : pageReferenceTree) {
+                    DocumentReference pageRef = referenceResolver.resolve(pageStringRef, configurationReference);
+                    DocumentReference pubRef = getPublishedReference(pageRef, collectionReference, targetReference);
+                    if (pubRef != null && pubRef.equals(deletedRef)) {
+                        sourceDocRef = pageRef;
+                        break;
                     }
                 }
-                result.put(versionName, libResult);
+
+                Map<String, Object> deleteLine = new HashMap<>();
+                deleteLine.put("message", "Will be deleted from target");
+
+                Map<String, DocumentReference> deleteInfo = new HashMap<>();
+                deleteInfo.put("targetToDelete", deletedRef);
+                deleteInfo.put("sourceMarkedDeleted", sourceDocRef);
+
+                deleteLine.put("variable", deleteInfo);
+                previewLines.add(deleteLine);
             }
         }
-        return result;
-    }
-    
-    /**
-     * Small helper to create a structured map describing a single log event.
-     */
-    private Map<String, Object> createLine(String action, Object... kvPairs)
-    {
-        Map<String, Object> line = new LinkedHashMap<>();
-        line.put("action", action);
-    
-        for (int i = 0; i < kvPairs.length; i += 2) {
-            String key = String.valueOf(kvPairs[i]);
-            Object value = i + 1 < kvPairs.length ? kvPairs[i + 1] : null;
-            line.put(key, value);
+
+        // Add page order info if applicable
+        if ((boolean) configuration.get("publishPageOrder")) {
+            Map<String, Object> orderLine = new HashMap<>();
+            orderLine.put("message", "Page order will be preserved");
+            orderLine.put("variable", null);
+            previewLines.add(orderLine);
         }
-        return line;
+
+        return previewLines;
     }
-    
+
+    /**
+     * Preview version of isToBePublished that collects information about why pages would or wouldn't be published
+     * without affecting the actual publication logic.
+     */
+    private boolean previewIsToBePublished(XWikiDocument page, XWikiDocument variant,
+                                           Map<String, Object> configuration, Locale userLocale, List<Map<String, Object>> previewLines,
+                                           DocumentReference pageReference)
+    {
+        if (page == null || configuration == null) {
+            return false;
+        }
+        if (userLocale == null) {
+            userLocale = new Locale(BookVersionsConstants.DEFAULT_LOCALE);
+        }
+
+        List<DocumentReference> variants = getPageVariants(page);
+        String status = getPageStatus(page);
+        boolean publishOnlyComplete =
+                (boolean) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHONLYCOMPLETE);
+        boolean excludePagesOutsideVariant = false;
+        if (variant != null) {
+            excludePagesOutsideVariant = (variant.getXObject(BookVersionsConstants.VARIANT_CLASS_REFERENCE)
+                    .getIntValue(BookVersionsConstants.VARIANT_PROP_EXCLUDE) == 1);
+        }
+        String language = (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_LANGUAGE);
+
+        // Add detailed info for all checks
+        Map<String, Object> reasonLine = new HashMap<>();
+        Map<String, Object> reasonInfo = new HashMap<>();
+
+        if (isMarkedDeleted(page)) {
+            // Page is marked as deleted
+            reasonInfo.put("pageRef", pageReference);
+            reasonInfo.put("reason", "marked_deleted");
+            reasonInfo.put("status", status);
+
+            reasonLine.put("message", "Page is marked as deleted");
+            reasonLine.put("variable", reasonInfo);
+            previewLines.add(reasonLine);
+            return false;
+        } else if (publishOnlyComplete && status != null
+                && !status.equals(BookVersionsConstants.PAGESTATUS_PROP_STATUS_COMPLETE)) {
+            // Page doesn't have a "complete" status but only those are published
+            reasonInfo.put("pageRef", pageReference);
+            reasonInfo.put("reason", "incomplete_status");
+            reasonInfo.put("status", status);
+            reasonInfo.put("requiredStatus", BookVersionsConstants.PAGESTATUS_PROP_STATUS_COMPLETE);
+
+            reasonLine.put("message", "Page has status " + status + " but only COMPLETE pages are being published");
+            reasonLine.put("variable", reasonInfo);
+            previewLines.add(reasonLine);
+            return false;
+        } else if (variant == null && variants != null && !variants.isEmpty()) {
+            // No variant to be published AND page is associated with variant(s)
+            reasonInfo.put("pageRef", pageReference);
+            reasonInfo.put("reason", "variant_page_no_variant_selected");
+            reasonInfo.put("associatedVariants", variants);
+
+            reasonLine.put("message", "Page is associated with variants but no variant is being published");
+            reasonLine.put("variable", reasonInfo);
+            previewLines.add(reasonLine);
+            return false;
+        } else if (variant != null && variants != null && !variants.contains(variant.getDocumentReference())
+                && (excludePagesOutsideVariant || (!excludePagesOutsideVariant && !variants.isEmpty()))) {
+            // A variant is to be published AND the page is associated with other variant(s)
+            reasonInfo.put("pageRef", pageReference);
+            reasonInfo.put("reason", "wrong_variant");
+            reasonInfo.put("publishedVariant", variant.getDocumentReference());
+            reasonInfo.put("associatedVariants", variants);
+            reasonInfo.put("excludePagesOutsideVariant", excludePagesOutsideVariant);
+
+            reasonLine.put("message", "Page is not associated with the published variant");
+            reasonLine.put("variable", reasonInfo);
+            previewLines.add(reasonLine);
+            return false;
+        } else if (StringUtils.isNotEmpty(language)) {
+            Map<String, Map<String, Object>> languageData = getLanguageData(page);
+            if (languageData.get(language) == null) {
+                // The page has no translation
+                reasonInfo.put("pageRef", pageReference);
+                reasonInfo.put("reason", "no_translation");
+                reasonInfo.put("language", language);
+                reasonInfo.put("availableLanguages", languageData.keySet());
+
+                reasonLine.put("message", "Page has no translation for language");
+                reasonLine.put("variable", reasonInfo);
+                previewLines.add(reasonLine);
+                return false;
+            } else if (languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED) == null
+                    || !((boolean) languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED))) {
+                // The page has no "Translated" translation
+                reasonInfo.put("pageRef", pageReference);
+                reasonInfo.put("reason", "not_translated_status");
+                reasonInfo.put("language", language);
+                reasonInfo.put("translationStatus", languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_STATUS));
+                reasonInfo.put("requiredStatus", PageTranslationStatus.TRANSLATED);
+
+                reasonLine.put("message", "Page's translation doesn't have TRANSLATED status");
+                reasonLine.put("variable", reasonInfo);
+                previewLines.add(reasonLine);
+                return false;
+            }
+        }
+
+        // If we reach here, the page will be published - add detailed info about why it's being published
+        Map<String, Object> publishReasonLine = new HashMap<>();
+        Map<String, Object> publishReasonInfo = new HashMap<>();
+
+        publishReasonInfo.put("pageRef", pageReference);
+        publishReasonInfo.put("status", status);
+
+        if (variant != null) {
+            publishReasonInfo.put("variant", variant.getDocumentReference());
+            publishReasonInfo.put("associatedVariants", variants);
+        }
+
+        if (StringUtils.isNotEmpty(language)) {
+            Map<String, Map<String, Object>> languageData = getLanguageData(page);
+            publishReasonInfo.put("language", language);
+            publishReasonInfo.put("translationStatus", languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_STATUS));
+        }
+
+        publishReasonLine.put("message", "Page meets all publication criteria");
+        publishReasonLine.put("variable", publishReasonInfo);
+        previewLines.add(publishReasonLine);
+
+        return true;
+    }
 
     @Override
     public void publishInternal(DocumentReference configurationReference, DocumentReference userDocumentReference,

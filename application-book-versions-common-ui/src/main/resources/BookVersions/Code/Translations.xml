@@ -95,31 +95,43 @@ BookVersions.Code.DeletedContentClassSheet.titlePrefix=DELETED:
 BookVersions.Code.DeletedContentClassSheet.warning=This content has been marked as deleted. It won't be published.
 BookVersions.Code.PublicationConfigurationSheet.nextButton=Publish
 
-# Publication Preview
-BookVersions.Code.PublicationConfigurationSheet.previewTitle=Preview
+# -- Publication canceled messages
+BookVersions.Code.PublicationConfigurationSheet.publicationCanceledBecauseTargetIsNotEmpty=Publication will be canceled because target space **{0}** is not empty.
+BookVersions.Code.PublicationConfigurationSheet.existingDocuments=**Existing documents:**
+BookVersions.Code.PublicationConfigurationSheet.existingDocumentLine=* {0}
+# -- Publication republish / removal
+BookVersions.Code.PublicationConfigurationSheet.publicationWillRepublish=Publication will republish to target space: **{0}**
+BookVersions.Code.PublicationConfigurationSheet.theFollowingDocumentsWillBeRemoved=The following documents will be removed:
+BookVersions.Code.PublicationConfigurationSheet.docWouldBeRemoved=Document to be removed: {0}
+# -- Publishing from / variant
+BookVersions.Code.PublicationConfigurationSheet.publishingFrom=Publishing from: **{0}**
+BookVersions.Code.PublicationConfigurationSheet.usingVariant=Using variant: {0}
+# -- Library usage / warnings
+BookVersions.Code.PublicationConfigurationSheet.usingLibrary=Using library: **{0}** (version: {1})
+BookVersions.Code.PublicationConfigurationSheet.publishedAt=Published at: {0}
+BookVersions.Code.PublicationConfigurationSheet.libraryIsNotPublished=Library **{0}** (version: {1}) is not published! Content including this library may not work as expected.
+# -- Pages to process
+BookVersions.Code.PublicationConfigurationSheet.pagesToProcess=Pages to process
+# -- Page publication lines
+BookVersions.Code.PublicationConfigurationSheet.pageWillBePublished=✅ **{0}** → {1}
+BookVersions.Code.PublicationConfigurationSheet.contentFrom=(content from: {0})
+# -- Deleted or skipped pages
+BookVersions.Code.PublicationConfigurationSheet.pageIsMarkedDeleted=❌ **{0}**: Page is marked as deleted
+BookVersions.Code.PublicationConfigurationSheet.pageHasSomething=❌ **{0}**: {1}
+BookVersions.Code.PublicationConfigurationSheet.pageIsMarkedDeletedRemoveFromTarget=🗑️ **{0}** is marked as deleted - Target will be removed: {1}
+BookVersions.Code.PublicationConfigurationSheet.pageWillBeDeletedFromTarget=🗑️ **{0}** will be deleted (Source: {1})
+# -- Deletion summary
+BookVersions.Code.PublicationConfigurationSheet.documentsToBeRemovedFromTarget=**Documents to be removed from target ({0}):**
+BookVersions.Code.PublicationConfigurationSheet.pageOrderWillBePreserved=**Page order will be preserved in the publication.**
+# -- Legend
+BookVersions.Code.PublicationConfigurationSheet.legend=**Legend:**
+BookVersions.Code.PublicationConfigurationSheet.legendWillBePublished=* ✅ - Page will be published
+BookVersions.Code.PublicationConfigurationSheet.legendWillBeSkipped=* ❌ - Page will be skipped
+BookVersions.Code.PublicationConfigurationSheet.legendWillBeDeleted=* 🗑️ - Page/document will be deleted
+# -- No preview data
+BookVersions.Code.PublicationConfigurationSheet.noPreviewDataAvailable=No preview data available.
 BookVersions.Code.PublicationConfigurationSheet.previewContinueButton=Continue
-BookVersions.Code.PublicationConfigurationSheet.isCancel=The publication behavior chosen is "Cancel" and the target is already populated, publication will be aborted.
-BookVersions.Code.PublicationConfigurationSheet.copiedFrom=Page to be copied from {0} to {1}
-BookVersions.Code.PublicationConfigurationSheet.pageNo=Page {0} of {1} from {2}
-BookVersions.Code.PublicationConfigurationSheet.warningMsg=Library {0} (version {1}) not yet published.
-BookVersions.Code.PublicationConfigurationSheet.configurationReference=Configuration reference
-BookVersions.Code.PublicationConfigurationSheet.destinationSpace=Destination space
-BookVersions.Code.PublicationConfigurationSheet.configText=Publication based on of configuration page:
-BookVersions.Code.PublicationConfigurationSheet.RepublishSpaceNotEmpty=The publications space is not empty.
-BookVersions.Code.PublicationConfigurationSheet.CancelPublicationSpaceNotEmpty=The publications space is not empty.
-BookVersions.Code.PublicationConfigurationSheet.StartPagePublication=Start page publication
-BookVersions.Code.PublicationConfigurationSheet.CopyPage=Copy page
-BookVersions.Code.PublicationConfigurationSheet.EndPagePublication=End page publication
-BookVersions.Code.PublicationConfigurationSheet.StartPublicationJob=Start publication job
-BookVersions.Code.PublicationConfigurationSheet.libraryReference=Library
-BookVersions.Code.PublicationConfigurationSheet.bookReference=Book reference
-BookVersions.Code.PublicationConfigurationSheet.bookVersion=Book version
-BookVersions.Code.PublicationConfigurationSheet.libraryVersion=Library version
-BookVersions.Code.PublicationConfigurationSheet.LibraryPublishedOK=Library publication OK
-BookVersions.Code.PublicationConfigurationSheet.publishedSpace=Published space
-BookVersions.Code.PublicationConfigurationSheet.LibraryNoVersionConfigured=No library version configured.
-BookVersions.Code.PublicationConfigurationSheet.LibraryNotPublished=Library not published.
-BookVersions.Code.PublicationConfigurationSheet.pageHasNoContent=The page {0} has no content for version {1}.
+BookVersions.Code.PublicationConfigurationSheet.pageNotInPublishedVariant=Page is ignored because it is not associated with the published variant.
 
 # Publication process
 BookVersions.DefaultBookVersionsManager.publishInternal.nullParameter=One of the provided parameters is null.

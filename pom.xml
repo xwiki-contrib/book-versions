@@ -148,6 +148,19 @@
               <item>
                 <ignore>true</ignore>
                 <code>java.method.addedToInterface</code>
+                <new>method org.xwiki.model.reference.DocumentReference org.xwiki.contrib.bookversions.BookVersionsManager::getPreviousVersion(org.xwiki.model.reference.DocumentReference) throws com.xpn.xwiki.XWikiException</new>
+                <justification>ADD YOUR EXPLANATION FOR THE NECESSITY OF THIS CHANGE</justification>
+              </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.numberOfParametersChanged</code>
+                <old>method void org.xwiki.contrib.bookversions.BookVersionsManager::publishInternal(org.xwiki.model.reference.DocumentReference, org.xwiki.model.reference.DocumentReference) throws com.xpn.xwiki.XWikiException, org.xwiki.query.QueryException, org.xwiki.component.manager.ComponentLookupException, org.xwiki.rendering.parser.ParseException</old>
+                <new>method void org.xwiki.contrib.bookversions.BookVersionsManager::publishInternal(org.xwiki.model.reference.DocumentReference, org.xwiki.model.reference.DocumentReference, java.util.Locale) throws com.xpn.xwiki.XWikiException, org.xwiki.query.QueryException, org.xwiki.component.manager.ComponentLookupException, org.xwiki.rendering.parser.ParseException</new>
+                <justification>ADD YOUR EXPLANATION FOR THE NECESSITY OF THIS CHANGE</justification>
+              </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.addedToInterface</code>
                 <new>method java.util.List&lt;java.util.Map&lt;java.lang.String, java.lang.Object&gt;&gt; org.xwiki.contrib.bookversions.BookVersionsManager::previewPublication(org.xwiki.model.reference.DocumentReference, org.xwiki.model.reference.DocumentReference) throws com.xpn.xwiki.XWikiException, org.xwiki.query.QueryException, org.xwiki.component.manager.ComponentLookupException, org.xwiki.rendering.parser.ParseException</new>
                 <justification>Added new method in order to handle the publication preview step.</justification>
               </item>
