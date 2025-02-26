@@ -175,6 +175,30 @@ public class BookVersionsScriptService implements ScriptService
     }
 
     /**
+     * Check if the given reference is a version.
+     *
+     * @param documentReference The document reference.
+     * @return True, if the given reference is a version.
+     * @throws XWikiException In case the system can't provide an answer.
+     */
+    public boolean isVersion(DocumentReference documentReference) throws XWikiException
+    {
+        return bookVersionsManagerProvider.get().isVersion(documentReference);
+    }
+
+    /**
+     * Check if the given document is a version.
+     *
+     * @param document The document.
+     * @return True, if the given document is a version.
+     * @throws XWikiException In case the system can't provide an answer.
+     */
+    public boolean isVersion(XWikiDocument document) throws XWikiException
+    {
+        return bookVersionsManagerProvider.get().isVersion(document);
+    }
+
+    /**
      * Transform the given name by using the slug name validation.
      *
      * @param name The name to be transformed.

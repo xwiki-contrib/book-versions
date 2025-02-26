@@ -702,6 +702,26 @@ public interface BookVersionsManager
         throws XWikiException, QueryException, ComponentLookupException, ParseException;
 
     /**
+     * Execute the removal of the given version content process.
+     *
+     * @param versionReference the version reference
+     * @return the publication job's ID
+     * @throws JobException if an error occurs while manipulating the publication job
+     */
+    String removeVersionContent(DocumentReference versionReference) throws JobException;
+
+    /**
+     * Execute the given version's content removal.
+     *
+     * @param versionReference the version to delete content of
+     * @param userReference the user executing the job
+     * @throws QueryException If any exception occurs while querying the database.
+     * @throws XWikiException If exception occurs while getting the collection or removing pages
+     */
+    void removeVersionContentInternal(DocumentReference versionReference, DocumentReference userReference)
+        throws QueryException, XWikiException;
+
+    /**
      * Get the page status.
      *
      * @param page the page document

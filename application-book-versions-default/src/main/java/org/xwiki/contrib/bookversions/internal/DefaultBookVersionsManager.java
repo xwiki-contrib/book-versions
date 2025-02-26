@@ -2505,6 +2505,52 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         progressManager.popLevelProgress(this);
     }
 
+    @Override
+    public String removeVersionContent(DocumentReference versionReference) throws JobException
+    {
+        if (versionReference == null) {
+            return null;
+        }
+
+        DefaultRequest jobRequest = new DefaultRequest();
+        String jobId = BookVersionsConstants.VERSIONCONTENTREMOVE_JOBID_PREFIX
+            + BookVersionsConstants.PUBLICATION_JOBID_SEPARATOR + versionReference.getName()
+            + BookVersionsConstants.PUBLICATION_JOBID_SEPARATOR + Instant.now().toString();
+        if (jobId != null) {
+            jobRequest.setId(jobId);
+            jobRequest.setProperty("versionReference", versionReference);
+            // The context won't be full in deleteVersionContentInternal as it is executed by a job, so the user
+            // executing the deletion have to be passed as parameter.
+            XWikiContext xcontext = this.getXWikiContext();
+            jobRequest.setProperty("userReference", xcontext.getUserReference());
+            jobExecutor.execute(BookVersionsConstants.VERSIONCONTENTREMOVEJOB_TYPE, jobRequest);
+        }
+        return jobId;
+    }
+
+    @Override
+    public void removeVersionContentInternal(DocumentReference versionReference, DocumentReference userReference)
+        throws QueryException, XWikiException
+    {
+        if (versionReference == null || userReference == null) {
+            return;
+        }
+
+        DocumentReference collectionReference = getVersionedCollectionReference(versionReference);
+        String versionName = getVersionName(versionReference);
+        List<String> contentPageRefStrings =
+            queryPages(collectionReference, BookVersionsConstants.BOOKVERSIONEDCONTENT_CLASS_REFERENCE);
+        List<DocumentReference> versionContentPageRefs = new ArrayList<>();
+        for (String contentPageRefString : contentPageRefStrings) {
+            DocumentReference contentPageRef = referenceResolver.resolve(contentPageRefString, collectionReference);
+            if (versionName.equals(getEscapedName(contentPageRef))) {
+                versionContentPageRefs.add(contentPageRef);
+            }
+        }
+        removeDocuments(versionContentPageRefs, userReference);
+    }
+
+
     /**
      * Remove the given documents
      *

@@ -32,6 +32,7 @@ import org.xwiki.bridge.event.DocumentDeletingEvent;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.bookversions.BookVersionsManager;
 import org.xwiki.contrib.bookversions.internal.BookVersionsConstants;
+import org.xwiki.job.JobException;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.observation.event.AbstractLocalEventListener;
@@ -47,7 +48,7 @@ import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
 /**
- * Updating the name of versioned content pages after a version rename.
+ * Updating the name of versioned content pages after a version rename, and removing the related content.
  * 
  * @version $Id$
  * @since 1.2
@@ -121,9 +122,13 @@ public class VersionDeletingEventListener extends AbstractLocalEventListener
                             "Update preceding version after [" + deletedVersionReference + "] removal.", context);
                     }
                 }
+                // Remove the version's content
+                bookVersionsManager.removeVersionContent(deletedVersionReference);
             }
         } catch (XWikiException | QueryException e) {
             logger.error("Could not handle the event listener.", e);
+        } catch (JobException e) {
+            logger.error("Could not handle the removal of version's content.", e);
         }
     }
 }

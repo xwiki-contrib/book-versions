@@ -6,6 +6,7 @@ org.xwiki.contrib.bookversions.listeners.VersionDeletingEventListener
 org.xwiki.contrib.bookversions.listeners.VersionRenameEventListener
 org.xwiki.contrib.bookversions.script.BookVersionsScriptService
 org.xwiki.contrib.bookversions.internal.PublicationJob
+org.xwiki.contrib.bookversions.internal.VersionContentRemoveJob
 org.xwiki.contrib.bookversions.internal.batch.BatchChangeStatusJob
 org.xwiki.contrib.bookversions.internal.displayers.LibraryReferenceConverter
 org.xwiki.contrib.bookversions.internal.displayers.PageTranslationLanguageConverter

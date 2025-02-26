@@ -350,6 +350,18 @@
                 <new>method java.lang.String org.xwiki.contrib.bookversions.BookVersionsManager::setPagesStatus(java.util.List&lt;java.lang.String&gt;, java.lang.String, org.xwiki.livedata.LiveDataConfiguration, java.lang.String) throws org.xwiki.job.JobException</new>
                 <justification>Needed for new features.</justification>
               </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.addedToInterface</code>
+                <new>method java.lang.String org.xwiki.contrib.bookversions.BookVersionsManager::removeVersionContent(org.xwiki.model.reference.DocumentReference) throws org.xwiki.job.JobException</new>
+                <justification>Needed for new features.</justification>
+              </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.addedToInterface</code>
+                <new>method void org.xwiki.contrib.bookversions.BookVersionsManager::removeVersionContentInternal(org.xwiki.model.reference.DocumentReference, org.xwiki.model.reference.DocumentReference) throws org.xwiki.query.QueryException, com.xpn.xwiki.XWikiException</new>
+                <justification>Needed for new features.</justification>
+              </item>
             </differences>
           </revapi.differences>
         </analysisConfiguration>

@@ -296,6 +296,7 @@ BookVersions.versions.LD.doc.name=Version
 BookVersions.versions.LD.doc.title=Page title
 BookVersions.versions.LD.doc.creationDate=Creation date
 BookVersions.versions.LD.emptyvalue=
+BookVersions.versions.LD.confirmDelete=Deleting this version will also trigger the deletion of content pages related to it. It requires Delete right on the whole book/library. Are you sure?
 
 # Overview Admin UI
 BookVersions.overview.LD.status=Status
@@ -319,6 +320,12 @@ BookVersions.Code.CustomEditHandler.popupDescription=The content for version {0}
 BookVersions.Code.CustomEditHandler.popupSwitchVersion=Switch to version {0}
 BookVersions.Code.CustomEditHandler.popupCreateContentForVersion=Create content for version {0}
 BookVersions.Code.CustomEditHandler.popupCancel=Cancel
+
+# Version delete
+BookVersions.Code.CustomVersionDeleteHandler.popupTitle=Delete version
+BookVersions.Code.CustomVersionDeleteHandler.popupDescription=Deleting this version will also trigger the deletion of content pages related to it. It requires Delete right on the whole book/library.
+BookVersions.Code.CustomVersionDeleteHandler.popupProceed=Delete all
+BookVersions.Code.CustomVersionDeleteHandler.popupCancel=Cancel
 
 # Publication progress
 BookVersions.Code.PublicationProgress.title=Publication Progress

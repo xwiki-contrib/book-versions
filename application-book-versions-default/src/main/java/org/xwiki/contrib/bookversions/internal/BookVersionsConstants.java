@@ -357,9 +357,14 @@ public interface BookVersionsConstants
     String BOOKLMULTILANGUAL_PROP_LANGUAGES = "supportedLanguages";
 
     /**
-     * The location of variant definitions, in a book / library.
+     * The name of the publication job.
      */
     String PUBLICATIONJOB_TYPE = "BookPublicationJob";
+
+    /**
+     * The name of the version's content removal job.
+     */
+    String VERSIONCONTENTREMOVEJOB_TYPE = "VersionContentRemoveJob";
 
     /**
      * The language property in the Page Translation class.
@@ -436,6 +441,11 @@ public interface BookVersionsConstants
      * The first part of the publication job's ID
      */
     String PUBLICATION_JOBID_PREFIX = "BookVersionsPublication";
+
+    /**
+     * The first part of the version content remove job's ID
+     */
+    String VERSIONCONTENTREMOVE_JOBID_PREFIX = "BookVersionsVersionRemove";
 
     /**
      * The separator of the publication job's ID

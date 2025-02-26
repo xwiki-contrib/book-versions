@@ -260,16 +260,19 @@
     #set ($typeClass = "VariantClass")
     #set ($LDproperties = "doc.location,doc.title,doc.creationDate,_actions")
     #set ($LDfilter = $doc.space)
+    #set ($deleteConfirmation = '')
 #elseif ($type == "Versions")
     #set ($typeSingular = "Version")
     #set ($typeClass = "VersionClass")
     #set ($LDproperties = "doc.location,doc.title,description,doc.creationDate,precedingVersionReference,_actions")
     #set ($LDfilter = $doc.space)
+    #set ($deleteConfirmation = $escapetool.xml($services.localization.render('BookVersions.versions.LD.confirmDelete')))
 #elseif ($type == "PublicationConfiguration")
     #set ($typeSingular = $type)
     #set ($typeClass = "PublicationConfigurationClass")
     #set ($LDproperties = "doc.location,doc.title,description,doc.date,_actions")
     #set ($LDfilter = $doc.space)
+    #set ($deleteConfirmation = '')
 #end
 #if ($type != "Libraries" &amp;&amp; $type != "Overview")
   #set ($createFormTranslation = $services.localization.render("BookVersions.creationForm.new${typeSingular}"))
@@ -340,7 +343,8 @@
             "body": "form_token=${services.csrf.token}&amp;confirm=1&amp;async=true",
             "headers": {
               "Content-Type": "application/x-www-form-urlencoded"
-            }
+            },
+            "confirmationMessage": "${deleteConfirmation}"
           }
         }
       ]
