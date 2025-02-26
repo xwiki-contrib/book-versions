@@ -96,6 +96,7 @@ BookVersions.Code.DeletedContentClassSheet.warning=This content has been marked 
 BookVersions.Code.PublicationConfigurationSheet.nextButton=Publish
 
 # -- Publication canceled messages
+BookVersions.Code.PublicationConfigurationSheet.previewTitle=Publication preview
 BookVersions.Code.PublicationConfigurationSheet.publicationCanceledBecauseTargetIsNotEmpty=Publication will be canceled because target space **{0}** is not empty.
 BookVersions.Code.PublicationConfigurationSheet.existingDocuments=**Existing documents:**
 BookVersions.Code.PublicationConfigurationSheet.existingDocumentLine=* {0}
