@@ -93,7 +93,7 @@ $services.localization.render(
 )
 $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.existingDocuments')
 #foreach($doc in $line.variable.existingDocs)
-* $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.existingDocumentLine', [ $escapetool.xml($doc) ])
+* $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.existingDocumentLine', [ [[$escapetool.xml($doc)]] ])
 #end
       {{/warning}}
       #break
@@ -229,12 +229,6 @@ $services.localization.render(
     #end
     ## Display skipped and deleted pages
     #foreach($line in $previewData)
-      #if("$!{line.message}" == "Page is marked as deleted")
-$services.localization.render(
-  'BookVersions.Code.PublicationConfigurationSheet.pageIsMarkedDeleted',
-  [ "#renderReference($line.variable.pageRef)" ]
-)
-      #end
       #if("$!{line.message.startsWith('Page has')}" == "true")
 $services.localization.render(
   'BookVersions.Code.PublicationConfigurationSheet.pageHasSomething',
@@ -253,15 +247,6 @@ $services.localization.render(
   [
     "#renderReference($line.variable.sourceMarkedDeleted)",
     "#renderReference($line.variable.targetToDelete)"
-  ]
-)
-      #end
-      #if("$!{line.message}" == "Will be deleted from target")
-$services.localization.render(
-  'BookVersions.Code.PublicationConfigurationSheet.pageWillBeDeletedFromTarget',
-  [
-    "#renderReference($line.variable.targetToDelete)",
-    "#renderReference($line.variable.sourceMarkedDeleted)"
   ]
 )
       #end
