@@ -75,7 +75,7 @@
       [[${ref}]]##
     #end
   #else
-    (none)
+    (none)##
   #end
 #end
 

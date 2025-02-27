@@ -1474,7 +1474,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         List<BaseObject> libRefObjects =
             selectedVersionDoc.getXObjects(BookVersionsConstants.BOOKLIBRARYREFERENCE_CLASS_REFERENCE);
         for (BaseObject libRefObject : libRefObjects) {
-            if (libraryReference.equals(referenceResolver.resolve(
+            if (libRefObject != null && libraryReference.equals(referenceResolver.resolve(
                 libRefObject.getStringValue(BookVersionsConstants.BOOKLIBRARYREFERENCE_PROP_LIBRARY),
                 libraryReference)))
             {
