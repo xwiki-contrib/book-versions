@@ -241,7 +241,7 @@ $services.localization.render(
       #if("$!{line.message}" == "Page is not associated with the published variant")
         ❌ **#renderReference($line.variable.pageRef)**: $services.localization.render("BookVersions.Code.PublicationConfigurationSheet.pageNotInPublishedVariant")
       #end
-      #if("$!{line.message}" == "Page is marked as deleted and will be removed from target if exists")
+      #if("$!{line.message}" == "Page is marked as deleted and will be removed from target if exists" &amp;&amp; $xwiki.exists($line.variable.targetToDelete))
 $services.localization.render(
   'BookVersions.Code.PublicationConfigurationSheet.pageIsMarkedDeletedRemoveFromTarget',
   [
@@ -260,7 +260,10 @@ $services.localization.render(
   [ $escapetool.xml($line.variable.count) ]
 )
 #foreach($ref in $line.variable.references)
-* #renderReference($ref)
+  #if($xwiki.exists($ref))
+  * #renderReference($ref)
+
+  #end
 #end
       #end
       #if("$!{line.message}" == "Page order will be preserved")

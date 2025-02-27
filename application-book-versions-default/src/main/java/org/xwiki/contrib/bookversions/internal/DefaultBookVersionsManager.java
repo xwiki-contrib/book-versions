@@ -1854,7 +1854,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
             List<DocumentReference> docsToRemoveRefs = new ArrayList<>();
             for (String docToRemove : subTargetDocumentsString) {
-                DocumentReference docRef = referenceResolver.resolve(docToRemove, configurationReference);
+                DocumentReference docRef = referenceResolver.resolve(docToRemove, targetReference.getWikiReference());
                 docsToRemoveRefs.add(docRef);
 
                 Map<String, Object> removeLine = new HashMap<>();
