@@ -109,7 +109,8 @@ public class VersionDeletingEventListener extends AbstractLocalEventListener
                         collectionReference);
                     DocumentReference updatePrecedingVersionRef = bookVersionsManager.getPreviousVersion(
                         updateVersionReference);
-                    if (updatePrecedingVersionRef.equals(deletedVersionReference)) {
+                    if (updatePrecedingVersionRef != null && updatePrecedingVersionRef.equals(deletedVersionReference))
+                    {
                         XWikiDocument updateVersion = xwiki.getDocument(updateVersionReference, context);
                         BaseObject xObject = updateVersion.getXObject(BookVersionsConstants.VERSION_CLASS_REFERENCE);
                         xObject.set(BookVersionsConstants.VERSION_PROP_PRECEDINGVERSION, newPrecedingVersionRef,
