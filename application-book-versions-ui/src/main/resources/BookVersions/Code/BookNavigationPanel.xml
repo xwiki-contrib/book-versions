@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc version="1.6" reference="BookVersions.Code.BookNavigationPanel" locale="">
+<xwikidoc version="1.5" reference="BookVersions.Code.BookNavigationPanel" locale="">
   <web>BookVersions.Code</web>
   <name>BookNavigationPanel</name>
   <language/>
@@ -190,8 +190,9 @@
   #navigationPanelHeader("&lt;a href=$bookDoc.getURL()&gt;$bookTitle&lt;/a&gt;")
   ## Prepare the openTo parameter to highlight current page
   #set ($openToDoc = $doc.documentReference.toString().replaceAll('([~"])', '~$1'))
+
   ## Display the document tree
-  {{documentTree
+  {{documentTreeBV
     root="document:$bookRef"
     openTo="document:$openToDoc"
     showTranslations="false"
