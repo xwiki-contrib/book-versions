@@ -38,12 +38,15 @@
   <hidden>true</hidden>
   <content># Class
 ### Missing: BookVersions.Code.VersionClass_precedingVersionReference=Preceding version reference
-### Missing: BookVersions.Code.PageStatusClass_status_review=Review
-### Missing: BookVersions.Code.PageStatusClass_status_draft=Draft
-### Missing: BookVersions.Code.PageStatusClass_status_complete=Complete
+BookVersions.Code.PageStatusClass_status_draft=Brouillon
+### Missing: BookVersions.Code.PageStatusClass_status_review=
+BookVersions.Code.PageStatusClass_status_complete=Terminé
+### Missing: BookVersions.Code.PageTranslationClass_status_not_translated=Not Translated
+### Missing: BookVersions.Code.PageTranslationClass_status_outdated=Outdated
+### Missing: BookVersions.Code.PageTranslationClass_status_translated=Translated
 
 # Library Reference Class
-### Missing: BookVersions.Code.LibraryReferenceClass_libraryReference=Library Reference
+### Missing: BookVersions.Code.LibraryReferenceClass_libraryReference=
 BookVersions.Code.LibraryReferenceClass_libraryReference.Empty=---
 ### Missing: BookVersions.Code.LibraryReferenceClass_libraryReference_=
 ### Missing: BookVersions.Code.LibraryReferenceClass_libraryVersionReference=Library Version Reference
@@ -66,12 +69,20 @@ BookVersions.Code.PublicationConfigurationClass_publishOnlyComplete=Ne publier q
 BookVersions.Code.PublicationConfigurationClass_publishPageOrder=Ordre de publication des pages
 ### Missing: BookVersions.Code.PublicationConfigurationClass_publishPageOrder_hint=Publish the page order from the source, which might overwrite the target ordering. If unchecked, the target ordering is left untouched.
 BookVersions.Code.PublicationConfigurationClass_publishBehaviour=Comportement de la publication
-### Missing: BookVersions.Code.PublicationConfigurationClass_publishBehaviour_hint=Which behaviour to adopt when the target space is already populated. "Cancel" for not publishing ; "Update" to publish update existing pages, add new pages from source but leave page deleted from source in the destination. Pages marked as deleted in source will be removed from destination. ; "Re-publish" to reset the destination space.
+BookVersions.Code.PublicationConfigurationClass_publishBehaviour_hint=Which behaviour to adopt when the target space is already populated. "Cancel" for not publishing ; "Update" to publish update existing pages, add new pages from source but leave page deleted from source in the destination. Pages marked as deleted in source will be removed from destination. ; "Re-publish" to reset the destination space.
 BookVersions.Code.PublicationConfigurationClass_publishBehaviour_cancel=Annuler
 BookVersions.Code.PublicationConfigurationClass_publishBehaviour_update=Mettre à jour
 BookVersions.Code.PublicationConfigurationClass_publishBehaviour_republish=Re-publier
 BookVersions.Code.PublicationConfigurationClass_description=Description
 BookVersions.Code.PublicationConfigurationClass_description_hint=Description de la configuration
+### Missing: BookVersions.Code.PublicationConfigurationClass.sourceLocationLabel=Location
+### Missing: BookVersions.Code.PublicationConfigurationClass.sourceLocationHint=Location in the page hierarchy which will be the source of the publication
+### Missing: BookVersions.Code.PublicationConfigurationClass.destinationSpaceLabel=Name of the space
+### Missing: BookVersions.Code.PublicationConfigurationClass.destinationSpaceHint=(optional) If you want to create a new space with the specified name.
+### Missing: BookVersions.Code.PublicationConfigurationClass.destinationLocationLabel=Destination
+### Missing: BookVersions.Code.PublicationConfigurationClass.destinationLocationHint=Location in the page hierarchy which will be the destination of the publication
+### Missing: BookVersions.Code.PublicationConfigurationClass.destinationWikiLabel=Wiki name
+### Missing: BookVersions.Code.PublicationConfigurationClass.destinationWikiHint=Name of the wiki for the publication destination
 
 # Sheet
 BookVersions.Code.VersionClassSheet.versionConfiguration=Configuration de la version
@@ -79,8 +90,9 @@ BookVersions.Code.VersionClassSheet.versionConfiguration=Configuration de la ver
 BookVersions.Code.VersionClassSheet.newConfiguration=Nouvelle configuration
 BookVersions.Code.VariantClassSheet.associatedPages=Pages associées
 ### Missing: BookVersions.Code.VariantClassSheet.variantConfiguration=Variant Configuration
-### Missing: BookVersions.Code.DeletedContentClassSheet.titlePrefix=DELETED: 
-### Missing: BookVersions.Code.DeletedContentClassSheet.warning=This content has been marked as deleted. It won't be published.
+BookVersions.Code.VersionClassSheet.deleteLibrairieConfiguration=Supprimer
+BookVersions.Code.DeletedContentClassSheet.titlePrefix=SUPPRIMÉ : 
+### Missing: BookVersions.Code.DeletedContentClassSheet.warning=
 BookVersions.Code.PublicationConfigurationSheet.nextButton=Publier
 
 # Creation templates
@@ -128,7 +140,7 @@ BookVersions.navMenu.createVersionWithLink=Créer du contenu pour la version {0}
 ### Missing: BookVersions.navMenu.associateVariantWithLink=Link page to variant {0}
 BookVersions.navMenu.languageSelect=Langue
 ### Missing: BookVersions.navMenu.currentLanguage=
-### Missing: BookVersions.navMenu.noLanguageSelected=
+### Missing: BookVersions.navMenu.noLanguageSelected=No language was selected.
 
 # Administration menu
 ### Missing: BookVersions.adminMenu.title=Versions
@@ -187,6 +199,16 @@ rendering.macro.includeLibrary.name=Inclure la librairie
 rendering.macro.includeLibrary.parameter.keyReference.name=Clé de librairie
 ### Missing: rendering.macro.includeLibrary.parameter.keyReference.description=The key of a library to get the content from
 
+# Content Translation macro
+### Missing: rendering.macro.contentTranslation.name=Content Translation (Book Versions)
+### Missing: rendering.macro.contentTranslation.description=Add translated content
+### Missing: rendering.macro.contentTranslation.parameter.language.name=Language
+### Missing: rendering.macro.contentTranslation.parameter.title.name=Title
+### Missing: rendering.macro.contentTranslation.parameter.status.name=Status
+### Missing: rendering.macro.contentTranslation.parameter.status.description=Status of the translation for the current language.
+### Missing: rendering.macro.contentTranslation.parameter.isDefault.name=Is default
+### Missing: rendering.macro.contentTranslation.parameter.isDefault.description=If true, the current language is the default language that is used when displaying the content of the page.
+
 # Versions Admin UI
 BookVersions.versions.LD.status=Statut
 BookVersions.versions.LD.doc.date=Dernière modification
@@ -199,5 +221,20 @@ BookVersions.versions.LD.doc.creationDate=Date de création
 BookVersions.languages.warning=Il n'y a aucune traduction pour la langue sélectionnée.
 BookVersions.languages.title.missing=Le titre n'est pas traduit dans la langue sélectionnée.
 BookVersions.language.select=Sélectionner la langue ...
+### Missing: BookVersions.Code.MultilingualClass_enabled=Support multiple translation languages
+### Missing: BookVersions.Code.MultilingualClass_supportedLanguages=Enabled translation languages
+
+# Edit inherited content
+### Missing: BookVersions.Code.CustomEditHandler.popupTitle=Edit inherited content from {0}
+### Missing: BookVersions.Code.CustomEditHandler.popupDescription=The content for version {0} does not exist. You have the option to either create the content for this version, or to switch to version {1}.
+### Missing: BookVersions.Code.CustomEditHandler.popupSwitchVersion=Switch to version {0}
+### Missing: BookVersions.Code.CustomEditHandler.popupCreateContentForVersion=Create content for version {0}
+BookVersions.Code.CustomEditHandler.popupCancel=Annuler
+
+# Publication progress
+### Missing: BookVersions.Code.PublicationProgress.title=Publication Progress
+### Missing: BookVersions.Code.PublicationProgress.backToBook=Back to Book
+### Missing: BookVersions.Code.PublicationActionHandler.error.jobCreation=Failed to create publication job
+### Missing: BookVersions.Code.PublicationActionHandler.error.permission=Permission denied
 </content>
 </xwikidoc>
