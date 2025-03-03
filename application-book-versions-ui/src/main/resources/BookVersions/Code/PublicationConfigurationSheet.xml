@@ -42,7 +42,6 @@
 #set ($configReference = $!request.configReference)
 #set ($configObj = $xwiki.getDocument($configReference).getObject('BookVersions.Code.PublicationConfigurationClass'))
 #set ($publishedVersion = $configObj.getProperty('version').value)
-#set ($publishedVersionNameStr = $xwiki.getDocument($publishedVersion).name)
 
 ## Stop if on PublicationConfigurationSheet
 #if($doc.documentReference.name == 'PublicationConfigurationSheet')
