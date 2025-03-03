@@ -297,7 +297,7 @@ $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.l
         $services.localization.render('BookVersions.Code.PublicationProgress.back')
       &lt;/a&gt;
     &lt;div class="btn-group" id="tmCreateResource"&gt;
-      &lt;button type="submit" class="btn btn-primary" title="$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.nextButton')"&gt;
+      &lt;button type="submit" class="btn btn-primary" title="$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.previewContinueButton')"&gt;
         &lt;span class="fa fa-print" aria-hidden="true"&gt;&lt;/span&gt;
         &lt;span class="btn-label"&gt;$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.previewContinueButton')&lt;/span&gt;
       &lt;/button&gt;

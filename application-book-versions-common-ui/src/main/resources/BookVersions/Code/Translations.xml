@@ -93,7 +93,7 @@ BookVersions.Code.VariantClassSheet.variantConfiguration=Variant Configuration
 BookVersions.Code.VersionClassSheet.deleteLibrairieConfiguration=Delete
 BookVersions.Code.DeletedContentClassSheet.titlePrefix=DELETED: 
 BookVersions.Code.DeletedContentClassSheet.warning=This content has been marked as deleted. It won't be published.
-BookVersions.Code.PublicationConfigurationSheet.nextButton=Publish
+BookVersions.Code.PublicationConfigurationSheet.nextButton=Preview
 
 # -- Publication canceled messages
 BookVersions.Code.PublicationConfigurationSheet.previewTitle=Publication preview
@@ -131,7 +131,7 @@ BookVersions.Code.PublicationConfigurationSheet.legendWillBeSkipped=* ❌ - Page
 BookVersions.Code.PublicationConfigurationSheet.legendWillBeDeleted=* 🗑️ - Page/document will be deleted
 # -- No preview data
 BookVersions.Code.PublicationConfigurationSheet.noPreviewDataAvailable=No preview data available.
-BookVersions.Code.PublicationConfigurationSheet.previewContinueButton=Continue
+BookVersions.Code.PublicationConfigurationSheet.previewContinueButton=Publish
 BookVersions.Code.PublicationConfigurationSheet.pageNotInPublishedVariant=Page is ignored because it is not associated with the published variant.
 
 # Publication process
