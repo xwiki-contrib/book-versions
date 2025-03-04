@@ -150,6 +150,10 @@ XWiki.EntryNamePopup = Class.create(XWiki.widgets.ModalPopup, {
     if($('unversionedBooKPageURL')) {
       this.urlUnversionedTemplate = $('unversionedBooKPageURL').value;
       this.unversionedInput = new Element('input', {type: 'checkbox', id: 'bookPageUnversioned'});
+      if($('numberOfVersions') &amp;&amp; $('numberOfVersions').value &lt;= 0) {
+        this.unversionedInput.disabled = 'true';
+        this.unversionedInput.checked = 'true';
+      }
       this.dUnversionedTerm = new Element('dt');
       this.dUnversionedDef = new Element('dd');
       this.dUnversionedLabel = new Element('label', {for: 'bookPageUnversioned'});

@@ -187,6 +187,8 @@
     #set ($discard = $params.put('template', "${BOOK_CODE}.BookPageUnversionedTemplate"))
     #set ($newUnversioendBookPageEditURL = $xwiki.getURL($pageReference, 'edit', $escapetool.url($params)))
     #set ($createFormTranslation = $services.localization.render('BookVersions.creationForm.newPage'))
+    #set ($collectionRef = $services.bookversions.getVersionedCollectionReference($docRef))
+    #set ($numberOfVersions = $services.bookversions.getCollectionVersions($collectionRef).size())
 
     {{html clean="false"}}
       &lt;div class="btn-group" id="tmCreateResource"&gt;
@@ -199,6 +201,7 @@
       &lt;input type="hidden" id="unversionedBooKPageURL" name="unversionedBooKPageURL" value="$escapetool.xml($newUnversioendBookPageEditURL)"/&gt;
       &lt;input type="hidden" id="bookSourceReference" name="sourceReference" value="$escapetool.xml($docRef)"/&gt;
       &lt;input type="hidden" id="typeSingular" name="sourceReference" value="Page"/&gt;
+      &lt;input type="hidden" id="numberOfVersions" name="numberOfVersions" value="$numberOfVersions"/&gt;
     {{/html}}
   #end
 {{/velocity}}</content>
