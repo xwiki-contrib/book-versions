@@ -1175,12 +1175,21 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             : null;
     }
 
+    /**
+     * Get the list of preceding versions of a given version.
+     * @param collectionReference the collection of the version
+     * @param versionReference the version to get the preceding version from
+     * @return the preceding versions of the given version, from the first previous to the root version. Empty list
+     * if null parameter or infinite loop of versions is detected
+     * @throws XWikiException
+     * @throws QueryException
+     */
     private List<DocumentReference> getVersionsAscending(DocumentReference collectionReference,
         DocumentReference versionReference)
         throws XWikiException, QueryException
     {
         List<DocumentReference> result = new ArrayList<>();
-        if (versionReference == null || !isVersion(versionReference)) {
+        if (collectionReference == null || versionReference == null || !isVersion(versionReference)) {
             return result;
         }
 
@@ -1192,7 +1201,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         result.add(versionReference);
 
         logger.debug("[getVersionsAscending] get versions before : [{}]", versionName);
-        while (i < getCollectionVersions(collectionReference).size() + 1) {
+        while (i < versionQuantity + 1) {
             previousVersionReference = getPreviousVersion(previousVersionReference);
             if (previousVersionReference == null) {
                 logger.debug("[getVersionsAscending] no more previous versions.");
