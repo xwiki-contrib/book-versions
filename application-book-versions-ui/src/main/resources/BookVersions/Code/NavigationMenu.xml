@@ -1269,7 +1269,7 @@
 ##
 ## Process version selection and handle redirections if needed
 
-#if ("$!collectionRef" != '' &amp;&amp; ($versions.size() &gt; 0 || $variants.size() &gt; 0 || $isPublishedPage) &amp;&amp; ($isVersionedPage || $isVersionedContent || $isUnexistingContent || $isUnversionedPage || $isPublishedPage))
+#if ("$!collectionRef" != '' &amp;&amp; ($versions.size() &gt; 0 || $variants.size() &gt; 0) &amp;&amp; ($isVersionedPage || $isVersionedContent || $isUnexistingContent || $isUnversionedPage))
   #set ($discard = $xwiki.ssx.use('BookVersions.Code.NavigationMenu'))
   #set ($discard = $xwiki.jsx.use('BookVersions.Code.NavigationMenu'))
 ##
