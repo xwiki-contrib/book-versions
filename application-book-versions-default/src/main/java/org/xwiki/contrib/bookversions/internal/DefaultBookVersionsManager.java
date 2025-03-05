@@ -775,7 +775,11 @@ public class DefaultBookVersionsManager implements BookVersionsManager
      */
     private String getEscapedName(DocumentReference documentReference)
     {
-        return getEscapedName(documentReference.getName());
+        if (documentReference != null) {
+            return getEscapedName(documentReference.getName());
+        } else {
+            return null;
+        }
     }
 
     /**
