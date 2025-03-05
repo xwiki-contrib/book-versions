@@ -11,7 +11,7 @@ that is:
 It aims at providing similar features as Scroll Versions extension for Confluence.
 
 * Project Lead: [Raluca Stavro](https://www.xwiki.org/xwiki/bin/view/XWiki/rstavro)
-* Documentation & Downloads: [Documentation & Download](https://extensions.xwiki.org/xwiki/bin/view/Extension/Book%20Versions/)
+* Documentation & Downloads: [Documentation & Download](https://extensions.xwiki.org/xwiki/bin/view/Extension/Book%20Versions%20Application/)
 * [Issue Tracker](https://jira.xwiki.org/browse/BVERSION)
 * Communication: [Forum](https://forum.xwiki.org/), [Chat](https://dev.xwiki.org/xwiki/bin/view/Community/Chat)
 * [Development Practices](https://dev.xwiki.org)
