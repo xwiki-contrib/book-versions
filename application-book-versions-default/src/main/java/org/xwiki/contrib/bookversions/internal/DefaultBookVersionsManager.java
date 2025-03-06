@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1179,12 +1178,78 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             : null;
     }
 
+    @Override
+    public Map<DocumentReference, List<DocumentReference>> getVersionsTree(DocumentReference collectionReference)
+        throws QueryException, XWikiException
+    {
+        if (collectionReference == null) {
+            return new HashMap<>();
+        }
+
+        List<String> versions = getCollectionVersions(collectionReference);
+        Map<DocumentReference, List<DocumentReference>> versionTree = new HashMap<>();
+        for (String versionString : versions) {
+            if (StringUtils.isEmpty(versionString)) {
+                continue;
+            }
+            DocumentReference childVersion = referenceResolver.resolve(versionString, collectionReference);
+            DocumentReference parentVersion = getPreviousVersion(childVersion);
+            List<DocumentReference> childVersions = new ArrayList<>();
+            if (versionTree.containsKey(parentVersion)) {
+                childVersions = versionTree.get(parentVersion);
+            }
+            childVersions.add(childVersion);
+            versionTree.put(parentVersion, childVersions);
+        }
+        return versionTree;
+    }
+
+    @Override
+    public List<DocumentReference> getVersionsAscending(DocumentReference versionReference, Map<DocumentReference,
+        List<DocumentReference>> versionTree) throws XWikiException
+    {
+        List<DocumentReference> result = new ArrayList<>();
+        if (versionReference == null || !isVersion(versionReference)) {
+            return result;
+        }
+
+        int mapSize = versionTree.size();
+        DocumentReference previousVersionReference = versionReference;
+        int i = 0;
+
+        while (i < mapSize + 1) {
+            // Get parent
+            for(DocumentReference parentReference : versionTree.keySet()) {
+                if (versionTree.get(parentReference).contains(previousVersionReference)) {
+                    // parentReference is the parent version of previousVersionReference
+                    previousVersionReference = parentReference;
+                    break;
+                }
+            }
+
+            if (previousVersionReference == null) {
+                break;
+            } else {
+                result.add(previousVersionReference);
+            }
+            i++;
+        }
+        if (i > mapSize) {
+            logger.error("[getVersionsAscending] Infinite loop detected in versions preceding [{}].", versionReference);
+            return Collections.emptyList();
+        }
+        return result;
+
+    }
+
     /**
-     * Get the list of preceding versions of a given version.
+     * Get the list of preceding versions of a given version. This has better performances than getVersionsTree if
+     * the need is to only know the previous versions.
+     *
      * @param collectionReference the collection of the version
      * @param versionReference the version to get the preceding version from
-     * @return the preceding versions of the given version, from the first previous to the root version. Empty list
-     * if null parameter or infinite loop of versions is detected
+     * @return the preceding versions of the given version, from the first previous to the root version, including
+     * the given one. Empty list if null parameter or infinite loop of versions is detected.
      * @throws XWikiException
      * @throws QueryException
      */

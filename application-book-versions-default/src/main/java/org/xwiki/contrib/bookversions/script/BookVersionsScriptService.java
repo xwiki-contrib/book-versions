@@ -511,6 +511,35 @@ public class BookVersionsScriptService implements ScriptService
     }
 
     /**
+     * Get the whole tree of the versions from a collection (book/library).
+     *
+     * @param collectionReference the collection reference.
+     * @return a tree of the versions as a map {parent (null for root), list of children}.
+     * @throws QueryException If any exception occurs while getting all the versions
+     * @throws XWikiException If any exception occurs while getting all the versions or the previous one
+     */
+    public Map<DocumentReference, List<DocumentReference>> getVersionsTree(DocumentReference collectionReference)
+        throws QueryException, XWikiException
+    {
+        return bookVersionsManagerProvider.get().getVersionsTree(collectionReference);
+    }
+
+    /**
+     * Get the preceding versions of a given versions, from a versions tree.
+     *
+     * @param versionReference the version to get the preceding version from
+     * @param versionTree the full versions tree as a map {parent (null for root), list of children}
+     * @returnthe preceding versions of the given version, from the first previous to the root version Empty list if
+     * null parameter or infinite loop of versions is detected.
+     * @throws XWikiException If any exception occurs while checking if the given version is a version document
+     */
+    public List<DocumentReference> getVersionsAscending(DocumentReference versionReference, Map<DocumentReference,
+        List<DocumentReference>> versionTree) throws XWikiException
+    {
+        return bookVersionsManagerProvider.get().getVersionsAscending(versionReference, versionTree);
+    }
+
+    /**
      * Get the reference of a versioned page content. This does not check existence or page class.
      *
      * @param documentReference the reference of the (versioned content) page
