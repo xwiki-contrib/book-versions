@@ -488,6 +488,26 @@ public interface BookVersionsConstants
     String INCLUDE_MACRO_PROP_REFERENCE = "reference";
 
     /**
+     * The ID of the display macro.
+     */
+    String DISPLAY_MACRO_ID = "display";
+
+    /**
+     * The reference property of a display macro.
+     */
+    String DISPLAY_MACRO_PROP_REFERENCE = "reference";
+
+    /**
+     * The ID of the include sibling book page macro.
+     */
+    String INCLUDESIBLINGBOOKPAGE_MACRO_ID = "includeSiblingBookPage";
+
+    /**
+     * The reference property of an include sibling book page macro.
+     */
+    String INCLUDESIBLINGBOOKPAGE_MACRO_PROP_REFERENCE = "reference";
+
+    /**
      * The dedicated job to change pages status.
      */
     String SET_PAGE_STATUS_JOBID = "SetPageStatusJob";
