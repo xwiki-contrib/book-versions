@@ -3226,7 +3226,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             return false;
         }
 
-        logger.debug("[transformSiblingBookPage] Starting to transform includeLibrary macro reference");
+        logger.debug("[transformSiblingBookPage] Starting to transform includeSiblingBookPage macro reference");
         boolean hasChanged = false;
         List<MacroBlock> listBlock = xdom.getBlocks(
             new ClassBlockMatcher(
