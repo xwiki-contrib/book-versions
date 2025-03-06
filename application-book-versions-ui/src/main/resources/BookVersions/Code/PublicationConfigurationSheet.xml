@@ -254,15 +254,22 @@ $services.localization.render(
     #foreach($line in $previewData)
       #if("$!{line.message}" == "Pages marked as deleted that will be removed from target")
 ----
-$services.localization.render(
-  'BookVersions.Code.PublicationConfigurationSheet.documentsToBeRemovedFromTarget',
-  [ $escapetool.xml($line.variable.count) ]
-)
+## Create a counter for existing documents
+#set($existingCount = 0)
+#set($existingRefs = [])
 #foreach($ref in $line.variable.references)
   #if($xwiki.exists($ref))
+    #set($existingCount = $existingCount + 1)
+    #set($discard = $existingRefs.add($ref))
+  #end
+#end
+$services.localization.render(
+  'BookVersions.Code.PublicationConfigurationSheet.documentsToBeRemovedFromTarget',
+  [ $escapetool.xml($existingCount) ]
+)
+#foreach($ref in $existingRefs)
   * #renderReference($ref)
 
-  #end
 #end
       #end
       #if("$!{line.message}" == "Page order will be preserved")
