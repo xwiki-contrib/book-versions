@@ -354,6 +354,10 @@ BookVersions.Code.BookOverview.statusField=New status
 BookVersions.Code.BookOverview.statusFieldHint=The new status to set on the selected pages
 BookVersions.Code.BookOverview.statusPlaceHolder=Select the new status
 BookVersions.Code.BookOverview.changeStatusBtn=Change status on selected pages
+
+# Include Sibling Page
+BookVersions.includesibling.outsidespace=The Include Sibling Page macro should reference pages from the same space.
+BookVersions.includesibling.doesnotexist=The referenced page in Include Sibling Page macro does not exist.
 </content>
   <object>
     <name>BookVersions.Code.Translations</name>

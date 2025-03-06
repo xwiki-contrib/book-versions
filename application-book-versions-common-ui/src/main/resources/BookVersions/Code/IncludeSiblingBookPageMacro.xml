@@ -262,14 +262,21 @@
     #set ($docIsBookPage = $services.bookversions.isPage($docRef) || $docIsVersionedContent)
     ## Included document reference
     #set ($contentRef = $services.model.resolveDocument($contentRefSerialized))
-    #set ($contentIsBookPage = $services.bookversions.isPage($contentRef) || $services.bookversions.isVersionedContent($contentRef))
+    #set ($contentIsVersionedContent = $services.bookversions.isVersionedContent($contentRef))
+    #set ($contentIsBookPage = $services.bookversions.isPage($contentRef) || $contentIsVersionedContent)
     #set ($docCollectionRef = $services.bookversions.getVersionedCollectionReference($docRef))
     #set ($contentCollectionRef = $services.bookversions.getVersionedCollectionReference($contentRef))
-    #if ($docIsBookPage &amp;&amp; $contentIsBookPage &amp;&amp; $docCollectionRef &amp;&amp; $contentCollectionRef &amp;&amp; $docCollectionRef.equals($contentCollectionRef))
-      #if ($docIsVersionedContent)
-        #set ($versionReference = $services.bookversions.getVersionReference($docCollectionRef, $doc.name))
-        #set ($contentRef = $services.bookversions.getVersionedContentReference($contentRef, $versionReference))
+    #if ($docCollectionRef &amp;&amp; $contentCollectionRef &amp;&amp; !$docCollectionRef.equals($contentCollectionRef))
+      {{warning}}$services.localization.render('BookVersions.includesibling.outsidespace'){{/warning}}
+    #elseif ($docIsBookPage &amp;&amp; $contentIsBookPage &amp;&amp; $docCollectionRef &amp;&amp; $contentCollectionRef &amp;&amp; $contentIsVersionedContent)
+      #set ($versionReference = $services.bookversions.getVersionReference($docCollectionRef, $doc.name))
+      #set ($contentRef = $services.bookversions.getInheritedContentReference($contentRef, $versionReference))
+    #end
+    #if(!$xwiki.exists($contentRef))
+      #if($docIsBookPage)
+        {{warning}}$services.localization.render('BookVersions.includesibling.doesnotexist'){{/warning}}
       #end
+    #else
       {{display reference="$contentRef" /}}
     #end
   #end
