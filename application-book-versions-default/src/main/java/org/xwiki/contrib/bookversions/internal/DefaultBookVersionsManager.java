@@ -2476,7 +2476,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
             logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
                 + ".transformContent", userLocale));
-            prepareForPublication(contentPage, publishedDocument, publishedLibraries, configuration);
+            prepareForPublication(contentPage, publishedDocument, publishedLibraries, configuration, userLocale);
 
             logger.debug("[publishInternal] Publish page.");
             publishedDocument.getAuthors().setEffectiveMetadataAuthor(userReference);
@@ -2958,6 +2958,14 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         return publishedSpaceReference;
     }
 
+    /**
+     * Replaces the collectionReference by the targetReference in the originalReference, to get a published reference.
+     *
+     * @param originalReference the reference of the page to be published
+     * @param collectionReference the reference of the collection which is published
+     * @param targetReference the target space where the collection is published
+     * @return the reference of the published page
+     */
     private static DocumentReference getPublishedReference(DocumentReference originalReference,
         DocumentReference collectionReference, SpaceReference targetReference)
     {
@@ -2985,7 +2993,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     private XWikiDocument prepareForPublication(XWikiDocument originalDocument, XWikiDocument publishedDocument,
-        Map<String, Map<DocumentReference, DocumentReference>> publishedLibraries, Map<String, Object> configuration)
+        Map<String, Map<DocumentReference, DocumentReference>> publishedLibraries, Map<String, Object> configuration,
+        Locale userLocale)
         throws XWikiException, ComponentLookupException, ParseException, QueryException
     {
         if (originalDocument == null || publishedDocument == null || configuration == null) {
@@ -3001,7 +3010,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         // Work on the XDOM
         XDOM xdom = publishedDocument.getXDOM();
         String syntax = publishedDocument.getSyntax().toIdString();
-        transformXDOM(xdom, syntax, originalDocument.getDocumentReference(), publishedLibraries, configuration);
+        transformXDOM(xdom, syntax, originalDocument.getDocumentReference(), publishedLibraries, configuration,
+            userLocale);
         // Set the modified XDOM
         publishedDocument.setContent(xdom);
         return publishedDocument;
@@ -3009,7 +3019,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
     // Heavily inspired from "Bulk update links according to a TSV mapping using XDOM" on https://snippets.xwiki.org
     private boolean transformXDOM(XDOM xdom, String syntaxId, DocumentReference originalDocumentReference,
-        Map<String, Map<DocumentReference, DocumentReference>> publishedLibraries, Map<String, Object> configuration)
+        Map<String, Map<DocumentReference, DocumentReference>> publishedLibraries, Map<String, Object> configuration,
+        Locale userLocale)
         throws ComponentLookupException, ParseException, QueryException, XWikiException
     {
         if (xdom == null || syntaxId == null || originalDocumentReference == null || configuration == null) {
@@ -3067,7 +3078,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 Parser parser = componentManagerProvider.get().getInstance(Parser.class, syntaxId);
                 XDOM contentXDOM = parser.parse(new StringReader(content));
                 boolean hasMacroContentChanged =
-                    transformXDOM(contentXDOM, syntaxId, originalDocumentReference, publishedLibraries, configuration);
+                    transformXDOM(contentXDOM, syntaxId, originalDocumentReference, publishedLibraries, configuration
+                        , userLocale);
                 if (hasMacroContentChanged || id.equals(BookVersionsConstants.VARIANT_MACRO_ID)) {
                     logger.debug("[transformXDOM] The content of macro [{}] has changed", id);
                     if (id.equals(BookVersionsConstants.VARIANT_MACRO_ID)) {
@@ -3097,9 +3109,12 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             transformLibrary(xdom, originalDocumentReference, publishedLibraries, versionReference);
         Map<DocumentReference, DocumentReference> currentPublishedLibraries =
             publishedLibraries != null ? publishedLibraries.get(getVersionName(versionReference)) : new HashMap<>();
+        boolean transformSiblingBookPage = transformSiblingBookPage(xdom, originalDocumentReference, configuration,
+            userLocale);
         boolean transformedReferences = publicationReferencesTransformationHelper.transform(xdom,
             originalDocumentReference, currentPublishedLibraries, configuration);
-        return hasXDOMChanged || transformedTranslation || transformedLibrary || transformedReferences;
+        return hasXDOMChanged || transformedTranslation || transformedLibrary || transformSiblingBookPage
+            || transformedReferences;
     }
 
     private boolean transformTranslation(XDOM xdom, String language)
@@ -3194,6 +3209,71 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 // Replace the macro by include macro and change to the published reference
                 MacroBlock newMacroBlock = new MacroBlock(BookVersionsConstants.INCLUDE_MACRO_ID,
                     Map.of(BookVersionsConstants.INCLUDE_MACRO_PROP_REFERENCE, publishedPageReference.toString()),
+                    macroBlock.isInline());
+                macroBlock.getParent().replaceChild(newMacroBlock, macroBlock);
+                hasChanged = true;
+            }
+        }
+
+        return hasChanged;
+    }
+
+    private boolean transformSiblingBookPage(XDOM xdom, DocumentReference originalDocumentReference,
+        Map<String, Object> configuration, Locale userLocale)
+        throws QueryException, XWikiException
+    {
+        if (xdom == null || originalDocumentReference == null || configuration == null) {
+            return false;
+        }
+
+        logger.debug("[transformSiblingBookPage] Starting to transform includeLibrary macro reference");
+        boolean hasChanged = false;
+        List<MacroBlock> listBlock = xdom.getBlocks(
+            new ClassBlockMatcher(
+                new MacroBlock(BookVersionsConstants.INCLUDESIBLINGBOOKPAGE_MACRO_ID, Collections.emptyMap(),
+                    true).getClass()), Block.Axes.DESCENDANT_OR_SELF);
+        logger.debug("[transformSiblingBookPage] [{}] '{}' macros found in the passed XDOM", listBlock.size(),
+            BookVersionsConstants.INCLUDESIBLINGBOOKPAGE_MACRO_ID);
+
+        DocumentReference collectionReference = getVersionedCollectionReference(originalDocumentReference);
+        SpaceReference destinationSpaceReference =
+            (SpaceReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
+        if (destinationSpaceReference == null) {
+            logger.error("[transformSiblingBookPage] No destination space reference found in configuration");
+        }
+
+        for (MacroBlock macroBlock : listBlock) {
+            // Get the reference
+            String refString = macroBlock.getParameter(
+                BookVersionsConstants.INCLUDESIBLINGBOOKPAGE_MACRO_PROP_REFERENCE);
+            if (refString == null || StringUtils.isEmpty(refString)) {
+                logger.debug("[transformSiblingBookPage] {} macro found without {} parameter. Macro is ignored.",
+                    BookVersionsConstants.INCLUDESIBLINGBOOKPAGE_MACRO_ID,
+                    BookVersionsConstants.INCLUDESIBLINGBOOKPAGE_MACRO_PROP_REFERENCE);
+                continue;
+            }
+
+            DocumentReference pageReference = referenceResolver.resolve(refString, originalDocumentReference);
+            logger.debug("[transformSiblingBookPage] Updating {} macro referencing [{}].",
+                BookVersionsConstants.INCLUDESIBLINGBOOKPAGE_MACRO_ID, pageReference);
+            // Get the collection reference of the referenced page
+            DocumentReference pageCollectionReference = getVersionedCollectionReference(pageReference);
+            if (!collectionReference.equals(pageCollectionReference)) {
+                logger.error(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager."
+                    + "transformSiblingBookPage.notInCollection", userLocale,
+                    BookVersionsConstants.INCLUDESIBLINGBOOKPAGE_MACRO_ID, pageReference, pageCollectionReference,
+                    collectionReference));
+                continue;
+            }
+
+            // Compute the published page reference
+            DocumentReference publishedPageReference =
+                getPublishedReference(pageReference, collectionReference, destinationSpaceReference);
+            if (publishedPageReference != null) {
+                logger.debug("[transformSiblingBookPage] Page reference is changed to [{}].", publishedPageReference);
+                // Replace the macro by display macro and change to the published reference
+                MacroBlock newMacroBlock = new MacroBlock(BookVersionsConstants.DISPLAY_MACRO_ID,
+                    Map.of(BookVersionsConstants.DISPLAY_MACRO_PROP_REFERENCE, publishedPageReference.toString()),
                     macroBlock.isInline());
                 macroBlock.getParent().replaceChild(newMacroBlock, macroBlock);
                 hasChanged = true;
