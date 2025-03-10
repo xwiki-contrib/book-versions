@@ -112,7 +112,7 @@ BookVersions.Code.PublicationConfigurationSheet.usingLibrary=Using library: **{0
 BookVersions.Code.PublicationConfigurationSheet.publishedAt=Published at: {0}
 BookVersions.Code.PublicationConfigurationSheet.libraryIsNotPublished=Library **{0}** (version: {1}) is not published! Content including this library may not work as expected.
 # -- Pages to process
-BookVersions.Code.PublicationConfigurationSheet.pagesToProcess=Pages to process:
+BookVersions.Code.PublicationConfigurationSheet.pagesToProcess=**Pages to process:**
 # -- Page publication lines
 BookVersions.Code.PublicationConfigurationSheet.pageWillBePublished=✅ **{0}** → {1}
 BookVersions.Code.PublicationConfigurationSheet.contentFrom=(content from: {0})
