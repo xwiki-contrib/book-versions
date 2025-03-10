@@ -3243,6 +3243,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         }
 
         for (MacroBlock macroBlock : listBlock) {
+            if (!BookVersionsConstants.INCLUDESIBLINGBOOKPAGE_MACRO_ID.equals(macroBlock.getId())) {
+                continue;
+            }
             // Get the reference
             String refString = macroBlock.getParameter(
                 BookVersionsConstants.INCLUDESIBLINGBOOKPAGE_MACRO_PROP_REFERENCE);
