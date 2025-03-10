@@ -156,7 +156,7 @@
           )
         #end
         #if("$!{line.message}" == "Publishing from collection and version")
-          ##
+
           $services.localization.render(
             'BookVersions.Code.PublicationConfigurationSheet.publishingFrom',
             [ $escapetool.xml($line.variable) ]
