@@ -36,35 +36,26 @@
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
-  <content>{{velocity}}
+  <content>{{velocity output=false}}
+#**
+ * Initialize common variables used throughout the sheet
+ *#
 #set ($collectionReference = $services.bookversions.getVersionedCollectionReference($doc.getDocumentReference()))
 #set ($isLibrary = $services.bookversions.isLibrary($collectionReference))
 #set ($configReference = $!request.configReference)
 #set ($configObj = $xwiki.getDocument($configReference).getObject('BookVersions.Code.PublicationConfigurationClass'))
 #set ($publishedVersion = $configObj.getProperty('version').value)
 
-## Stop if on PublicationConfigurationSheet
+#**
+ * Stop if on PublicationConfigurationSheet
+ *#
 #if($doc.documentReference.name == 'PublicationConfigurationSheet')
   #stop
 #end
-## Handle publication request first, before any output
-#if ("$!request.action" == 'publish' &amp;&amp; $services.csrf.isTokenValid($!request.form_token))
-  #if ($configReference)
-    #set ($jobId = $services.bookversions.publish($services.model.resolveDocument($configReference)))
-    #if ($jobId)
-      ## Redirect to self with jobId parameter
-      #set ($redirectParams = $escapetool.url({'jobId': $jobId}))
-      $response.sendRedirect($doc.getURL('view', $redirectParams))
-      ## Stop processing here
-      #stop
-    #end
-  #end
-#elseif ("$!request.action" == 'preview' &amp;&amp; $services.csrf.isTokenValid($!request.form_token))
-== $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.previewTitle') ==
-#set($previewData = $services.bookversions.previewPublication($doc.documentReference, $xcontext.getUserReference()))
 
-{{box}}
-## Define a macro to properly handle references
+#**
+ * Define macro to properly handle references
+ *#
 #macro(renderReference $ref)
   #if("$!ref" != "")
     #if($ref.class.name == "org.xwiki.model.reference.SpaceReference")
@@ -78,221 +69,263 @@
   #end
 #end
 
-## Process preview data if available
-#if("$!{previewData}" != '')
-  ## Check if the publication will be canceled
-  #set($canceled = false)
-  #foreach($line in $previewData)
-    #if("$!{line.message}" == "Publication will be canceled because target is not empty")
-      #set($canceled = true)
-      {{warning}}
-$services.localization.render(
-  'BookVersions.Code.PublicationConfigurationSheet.publicationCanceledBecauseTargetIsNotEmpty', 
-  [ $escapetool.xml($line.variable.targetSpace) ]
-)
-$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.existingDocuments')
-#foreach($doc in $line.variable.existingDocs)
-* $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.existingDocumentLine', [ [[$escapetool.xml($doc)]] ])
-#end
-      {{/warning}}
-      #break
-    #end
-  #end
-  #if(!$canceled)
-    ## Display initial information
-    #foreach($line in $previewData)
-      #if("$!{line.message}" == "Target space will be emptied before publication")
-$services.localization.render(
-  'BookVersions.Code.PublicationConfigurationSheet.publicationWillRepublish',
-  [ "#renderReference($line.variable)" ]
-)
-
-$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.theFollowingDocumentsWillBeRemoved')
-      #end
-      #if("$!{line.message}" == "Document would be removed")
-* $services.localization.render(
-    'BookVersions.Code.PublicationConfigurationSheet.docWouldBeRemoved',
-    [ "#renderReference($line.variable)" ]
-)
-      #end
-      #if("$!{line.message}" == "Publishing from collection and version")
-
-$services.localization.render(
-  'BookVersions.Code.PublicationConfigurationSheet.publishingFrom',
-  [ $escapetool.xml($line.variable) ]
-)
-      #end
-      #if("$!{line.message}" == "Using variant")
-$services.localization.render(
-  'BookVersions.Code.PublicationConfigurationSheet.usingVariant',
-  [ $escapetool.xml($line.variable) ]
-)
-      #end
-      #if("$!{line.message}" == "Library is published and will be used")
-$services.localization.render(
-  'BookVersions.Code.PublicationConfigurationSheet.usingLibrary',
-  [
-    "#renderReference($line.variable.libraryRef)",
-    "#renderReference($line.variable.versionRef)"
-  ]
-)
-$services.localization.render(
-  'BookVersions.Code.PublicationConfigurationSheet.publishedAt',
-  [ "#renderReference($line.variable.publishedRef)" ]
-)
-      #end
-      #if("$!{line.message}" == "WARNING: Library is not published")
-{{warning}}
-$services.localization.render(
-  'BookVersions.Code.PublicationConfigurationSheet.libraryIsNotPublished',
-  [
-    "#renderReference($line.variable.libraryRef)",
-    "#renderReference($line.variable.versionRef)"
-  ]
-)
-{{/warning}}
-      #end
-      #if("$!{line.message}" == "Pages to process")
-----
-$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.pagesToProcess')
-      #end
-    #end
-    ## Display pages in a simple indented format
-    ## Find main book page first
-    #set($mainBookPage = "")
-    #foreach($line in $previewData)
-      #if("$!{line.message}" == "Page will be published" &amp;&amp; "$!{line.variable.source}" != "")
-        #set($source = "$!{line.variable.source}")
-        #if($source.endsWith("WebHome") || $source.endsWith("Book"))
-          #set($mainBookPage = $source)
-          #break
-        #end
-      #end
-    #end
-    ## If we have a main book page, display it first
-    #if($mainBookPage != "")
-      #foreach($line in $previewData)
-        #if("$!{line.message}" == "Page will be published" &amp;&amp; "$!{line.variable.source}" == "$mainBookPage")
-$services.localization.render(
-  'BookVersions.Code.PublicationConfigurationSheet.pageWillBePublished',
-  [
-    "#renderReference($line.variable.source)",
-    "#renderReference($line.variable.destination)"
-  ]
-)
-#if("$!{line.variable.content}" != "$!{line.variable.source}")
-   $services.localization.render(
-     'BookVersions.Code.PublicationConfigurationSheet.contentFrom',
-     [ "#renderReference($line.variable.content)" ]
-   )
-#end
-        #end
-      #end
-      ## Display child pages
-      #foreach($line in $previewData)
-        #if("$!{line.message}" == "Page will be published" &amp;&amp; "$!{line.variable.source}" != "$mainBookPage")
-  * $services.localization.render(
-      'BookVersions.Code.PublicationConfigurationSheet.pageWillBePublished',
-      [
-        "#renderReference($line.variable.source)",
-        "#renderReference($line.variable.destination)"
-      ]
-    )
-#if("$!{line.variable.content}" != "$!{line.variable.source}")
+#**
+ * Define macro to render a page information line
+ *#
+#macro(renderPagePublishInfo $source $destination $content)
+  $services.localization.render(
+    'BookVersions.Code.PublicationConfigurationSheet.pageWillBePublished',
+    [
+      "#renderReference($source)",
+      "#renderReference($destination)"
+    ]
+  )
+  #if("$!{content}" != "$!{source}")
      $services.localization.render(
        'BookVersions.Code.PublicationConfigurationSheet.contentFrom',
-       [ "#renderReference($line.variable.content)" ]
+       [ "#renderReference($content)" ]
      )
+  #end
 #end
-        #end
+{{/velocity}}
+
+{{velocity}}
+##
+## Handle publication request first, before any output
+##
+#if ("$!request.action" == 'publish' &amp;&amp; $services.csrf.isTokenValid($!request.form_token))
+  #if ($configReference)
+    #set ($jobId = $services.bookversions.publish($services.model.resolveDocument($configReference)))
+    #if ($jobId)
+      ## Redirect to self with jobId parameter
+      #set ($redirectParams = $escapetool.url({'jobId': $jobId}))
+      $response.sendRedirect($doc.getURL('view', $redirectParams))
+      ## Stop processing here
+      #stop
+    #end
+  #end
+#elseif ("$!request.action" == 'preview' &amp;&amp; $services.csrf.isTokenValid($!request.form_token))
+  == $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.previewTitle') ==
+  #set($previewData = $services.bookversions.previewPublication($doc.documentReference, $xcontext.getUserReference()))
+
+  {{box}}
+  ##
+  ## Process preview data if available
+  ##
+  #if("$!{previewData}" != '')
+    ##
+    ## Check if the publication will be canceled
+    ##
+    #set($canceled = false)
+    #foreach($line in $previewData)
+      #if("$!{line.message}" == "Publication will be canceled because target is not empty")
+        #set($canceled = true)
+        {{warning}}
+          $services.localization.render(
+            'BookVersions.Code.PublicationConfigurationSheet.publicationCanceledBecauseTargetIsNotEmpty', 
+            [ $escapetool.xml($line.variable.targetSpace) ]
+          )
+          $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.existingDocuments')
+          #foreach($existingdoc in $line.variable.existingDocs)
+            #set($targeWikiRef = $line.variable.targetSpace.getWikiReference().getName())
+            #set($existingDocFullRef = "${targeWikiRef}:${existingdoc}")
+            $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.existingDocumentLine', [ [[$existingDocFullRef]] ])
+          #end
+        {{/warning}}
+        #break
       #end
-    #else
-      ## Just display all pages without hierarchy
+    #end
+    ##
+    #if(!$canceled)
+      ##
+      ## Display initial information
+      ##
       #foreach($line in $previewData)
-        #if("$!{line.message}" == "Page will be published")
-$services.localization.render(
-  'BookVersions.Code.PublicationConfigurationSheet.pageWillBePublished',
-  [
-    "#renderReference($line.variable.source)",
-    "#renderReference($line.variable.destination)"
-  ]
-)
-#if("$!{line.variable.content}" != "$!{line.variable.source}")
-   $services.localization.render(
-     'BookVersions.Code.PublicationConfigurationSheet.contentFrom',
-     [ "#renderReference($line.variable.content)" ]
-   )
-#end
+        #if("$!{line.message}" == "Target space will be emptied before publication")
+          $services.localization.render(
+            'BookVersions.Code.PublicationConfigurationSheet.publicationWillRepublish',
+            [ "#renderReference($line.variable)" ]
+          )
+          ##
+          $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.theFollowingDocumentsWillBeRemoved')
+        #end
+        #if("$!{line.message}" == "Document would be removed")
+          * $services.localization.render(
+              'BookVersions.Code.PublicationConfigurationSheet.docWouldBeRemoved',
+              [ "#renderReference($line.variable)" ]
+          )
+        #end
+        #if("$!{line.message}" == "Publishing from collection and version")
+          ##
+          $services.localization.render(
+            'BookVersions.Code.PublicationConfigurationSheet.publishingFrom',
+            [ $escapetool.xml($line.variable) ]
+          )
+        #end
+        #if("$!{line.message}" == "Using variant")
+          $services.localization.render(
+            'BookVersions.Code.PublicationConfigurationSheet.usingVariant',
+            [ $escapetool.xml($line.variable) ]
+          )
+        #end
+        #if("$!{line.message}" == "Library is published and will be used")
+          $services.localization.render(
+            'BookVersions.Code.PublicationConfigurationSheet.usingLibrary',
+            [
+              "#renderReference($line.variable.libraryRef)",
+              "#renderReference($line.variable.versionRef)"
+            ]
+          )
+          $services.localization.render(
+            'BookVersions.Code.PublicationConfigurationSheet.publishedAt',
+            [ "#renderReference($line.variable.publishedRef)" ]
+          )
+        #end
+        #if("$!{line.message}" == "WARNING: Library is not published")
+          {{warning}}
+          $services.localization.render(
+            'BookVersions.Code.PublicationConfigurationSheet.libraryIsNotPublished',
+            [
+              "#renderReference($line.variable.libraryRef)",
+              "#renderReference($line.variable.versionRef)"
+            ]
+          )
+          {{/warning}}
+        #end
+        #if("$!{line.message}" == "Pages to process")
+          ----
+          $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.pagesToProcess')
         #end
       #end
+      ##
+      ##
+      ## Display pages in a simple indented format
+      ## Find main book page first
+      ##
+      #set($mainBookPage = "")
+      #foreach($line in $previewData)
+        #if("$!{line.message}" == "Page will be published" &amp;&amp; "$!{line.variable.source}" != "")
+          #set($source = "$!{line.variable.source}")
+          #if($source.endsWith("WebHome") || $source.endsWith("Book"))
+            #set($mainBookPage = $source)
+            #break
+          #end
+        #end
+      #end
+      ##
+      ##
+      ## If we have a main book page, display it first
+      ##
+      #if($mainBookPage != "")
+        #foreach($line in $previewData)
+          #if("$!{line.message}" == "Page will be published" &amp;&amp; "$!{line.variable.source}" == "$mainBookPage")
+            #renderPagePublishInfo($line.variable.source, $line.variable.destination, $line.variable.content)
+          #end
+        #end
+        ##
+        ##
+        ## Display child pages
+        ##
+        #foreach($line in $previewData)
+          #if("$!{line.message}" == "Page will be published" &amp;&amp; "$!{line.variable.source}" != "$mainBookPage")
+            * #renderPagePublishInfo($line.variable.source, $line.variable.destination, $line.variable.content)
+          #end
+        #end
+      #else
+        ##
+        ## Just display all pages without hierarchy
+        ##
+        #foreach($line in $previewData)
+          #if("$!{line.message}" == "Page will be published")
+            #renderPagePublishInfo($line.variable.source, $line.variable.destination, $line.variable.content)
+          #end
+        #end
+      #end
+      ##
+      ##
+      ## Display skipped and deleted pages
+      ##
+      #foreach($line in $previewData)
+        #if("$!{line.message.startsWith('Page has')}" == "true")
+          $services.localization.render(
+            'BookVersions.Code.PublicationConfigurationSheet.pageHasSomething',
+            [
+              "#renderReference($line.variable.pageRef)",
+              $escapetool.xml($line.message)
+            ]
+          )
+        #end
+        #if("$!{line.message}" == "Page is not associated with the published variant")
+          $services.localization.render(
+            'BookVersions.Code.PublicationConfigurationSheet.pageNotInPublishedVariant',
+            [
+              "#renderReference($line.variable.pageRef)",
+              $escapetool.xml($line.message)
+            ]
+          )
+        #end
+        #if("$!{line.message}" == "Page is marked as deleted and will be removed from target if exists" &amp;&amp; $xwiki.exists($line.variable.targetToDelete))
+          $services.localization.render(
+            'BookVersions.Code.PublicationConfigurationSheet.pageIsMarkedDeletedRemoveFromTarget',
+            [
+              "#renderReference($line.variable.sourceMarkedDeleted)",
+              "#renderReference($line.variable.targetToDelete)"
+            ]
+          )
+        #end
+      #end
+      ##
+      ##
+      ## Display deletion summary and page order info
+      ##
+      #foreach($line in $previewData)
+        #if("$!{line.message}" == "Pages marked as deleted that will be removed from target")
+          ----
+          ##
+          ## Create a counter for existing documents
+          ##
+          #set($existingCount = 0)
+          #set($existingRefs = [])
+          #foreach($ref in $line.variable.references)
+            #if($xwiki.exists($ref))
+              #set($existingCount = $existingCount + 1)
+              #set($discard = $existingRefs.add($ref))
+            #end
+          #end
+          $services.localization.render(
+            'BookVersions.Code.PublicationConfigurationSheet.documentsToBeRemovedFromTarget',
+            [ $escapetool.xml($existingCount) ]
+          )
+          #foreach($ref in $existingRefs)
+            * #renderReference($ref)
+
+          #end
+        #end
+        #if("$!{line.message}" == "Page order will be preserved")
+          ----
+          $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.pageOrderWillBePreserved')
+        #end
+      #end
+      ##
+      ##
+      ## Simple legend
+      ##
+      ----
+      $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.legend')
+
+      $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.legendWillBePublished')
+      $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.legendWillBeSkipped')
+      $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.legendWillBeDeleted')
+
     #end
-    ## Display skipped and deleted pages
-    #foreach($line in $previewData)
-      #if("$!{line.message.startsWith('Page has')}" == "true")
-$services.localization.render(
-  'BookVersions.Code.PublicationConfigurationSheet.pageHasSomething',
-  [
-    "#renderReference($line.variable.pageRef)",
-    $escapetool.xml($line.message)
-  ]
-)
-      #end
-      #if("$!{line.message}" == "Page is not associated with the published variant")
-        ❌ **#renderReference($line.variable.pageRef)**: $services.localization.render("BookVersions.Code.PublicationConfigurationSheet.pageNotInPublishedVariant")
-      #end
-      #if("$!{line.message}" == "Page is marked as deleted and will be removed from target if exists" &amp;&amp; $xwiki.exists($line.variable.targetToDelete))
-$services.localization.render(
-  'BookVersions.Code.PublicationConfigurationSheet.pageIsMarkedDeletedRemoveFromTarget',
-  [
-    "#renderReference($line.variable.sourceMarkedDeleted)",
-    "#renderReference($line.variable.targetToDelete)"
-  ]
-)
-      #end
-    #end
-    ## Display deletion summary and page order info
-    #foreach($line in $previewData)
-      #if("$!{line.message}" == "Pages marked as deleted that will be removed from target")
-----
-## Create a counter for existing documents
-#set($existingCount = 0)
-#set($existingRefs = [])
-#foreach($ref in $line.variable.references)
-  #if($xwiki.exists($ref))
-    #set($existingCount = $existingCount + 1)
-    #set($discard = $existingRefs.add($ref))
+  #else
+    $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.noPreviewDataAvailable')
   #end
-#end
-$services.localization.render(
-  'BookVersions.Code.PublicationConfigurationSheet.documentsToBeRemovedFromTarget',
-  [ $escapetool.xml($existingCount) ]
-)
-#foreach($ref in $existingRefs)
-  * #renderReference($ref)
+  {{/box}}
 
-#end
-      #end
-      #if("$!{line.message}" == "Page order will be preserved")
-----
-$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.pageOrderWillBePreserved')
-      #end
-    #end
-
-    ## Simple legend
-    ----
-$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.legend')
-
-$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.legendWillBePublished')
-$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.legendWillBeSkipped')
-$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.legendWillBeDeleted')
-
-  #end
-#else
-  $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.noPreviewDataAvailable')
-#end
-{{/box}}
-
-
+  ##
+  ## Display publish button
+  ##
   {{html wiki="true" clean="false"}}
   &lt;form action="$doc.getURL()" method="post" class="publication-form"&gt;
     &lt;input type="hidden" name="action" value="publish" /&gt;
@@ -313,33 +346,44 @@ $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.l
   #stop
 #end
 
-
-## We have to use wiki=true because $doc.display() can produce wiki syntax.
+##
+## Main Content Display
+##
 {{html wiki="true" clean="false"}}
+##
 ## Load the JavaScript code required to make the object properties editable in-place.
+##
 #set ($discard = $xwiki.jsfx.use('uicomponents/edit/editableProperty.js', {
   'forceSkinAction': true,
   'language': $xcontext.locale
 }))
 #set ($editing = $xcontext.action == 'edit')
+##
 ## The object to display.
+##
 #set ($xobject = $doc.getObject('BookVersions.Code.PublicationConfigurationClass'))
+##
 ## The class that describes the object properties.
+##
 #set ($xclass = $xobject.xWikiClass)
 #set ($discard = $doc.use($xobject))
+##
 ## Adapt display if is a library
-#set ($collectionReference = $services.bookversions.getVersionedCollectionReference($doc.getDocumentReference()))
-#set ($isLibrary = $services.bookversions.isLibrary($collectionReference))
+##
 #set ($propertyHidden = ['variant','language'])
 
+##
 ## Check if we have a job ID parameter and should display progress
+##
 #if ("$!{request.jobId}" != '')
   &lt;div class="publication-progress"&gt;
     &lt;h2&gt;$services.localization.render('BookVersions.Code.PublicationProgress.title')&lt;/h2&gt;
 
     {{jobprogress jobid="$!request.jobId"/}}
 
+    ##
     ## Add navigation links
+    ##
     &lt;div class="publication-navigation"&gt;
       #set ($sourceValue = $xobject.getProperty('source').value)
       &lt;a href="$xwiki.getURL($doc)" class="btn btn-default"&gt;

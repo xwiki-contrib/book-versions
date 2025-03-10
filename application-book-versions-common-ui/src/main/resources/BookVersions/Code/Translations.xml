@@ -112,13 +112,13 @@ BookVersions.Code.PublicationConfigurationSheet.usingLibrary=Using library: **{0
 BookVersions.Code.PublicationConfigurationSheet.publishedAt=Published at: {0}
 BookVersions.Code.PublicationConfigurationSheet.libraryIsNotPublished=Library **{0}** (version: {1}) is not published! Content including this library may not work as expected.
 # -- Pages to process
-BookVersions.Code.PublicationConfigurationSheet.pagesToProcess=Pages to process
+BookVersions.Code.PublicationConfigurationSheet.pagesToProcess=Pages to process:
 # -- Page publication lines
 BookVersions.Code.PublicationConfigurationSheet.pageWillBePublished=✅ **{0}** → {1}
 BookVersions.Code.PublicationConfigurationSheet.contentFrom=(content from: {0})
 # -- Deleted or skipped pages
-BookVersions.Code.PublicationConfigurationSheet.pageIsMarkedDeleted=❌ **{0}**: Page is marked as deleted
-BookVersions.Code.PublicationConfigurationSheet.pageHasSomething=❌ **{0}**: {1}
+BookVersions.Code.PublicationConfigurationSheet.pageIsMarkedDeleted=❌️ **{0}**: Page is marked as deleted
+BookVersions.Code.PublicationConfigurationSheet.pageHasSomething=❌️ **{0}**: {1}
 BookVersions.Code.PublicationConfigurationSheet.pageIsMarkedDeletedRemoveFromTarget=🗑️ **{0}** is marked as deleted - Target will be removed: {1}
 BookVersions.Code.PublicationConfigurationSheet.pageWillBeDeletedFromTarget=🗑️ **{0}** will be deleted (Source: {1})
 # -- Deletion summary
@@ -127,12 +127,12 @@ BookVersions.Code.PublicationConfigurationSheet.pageOrderWillBePreserved=**Page 
 # -- Legend
 BookVersions.Code.PublicationConfigurationSheet.legend=**Legend:**
 BookVersions.Code.PublicationConfigurationSheet.legendWillBePublished=* ✅ - Page will be published
-BookVersions.Code.PublicationConfigurationSheet.legendWillBeSkipped=* ❌ - Page will be skipped
+BookVersions.Code.PublicationConfigurationSheet.legendWillBeSkipped=* ❌️ - Page will be skipped
 BookVersions.Code.PublicationConfigurationSheet.legendWillBeDeleted=* 🗑️ - Page/document will be deleted
 # -- No preview data
 BookVersions.Code.PublicationConfigurationSheet.noPreviewDataAvailable=No preview data available.
 BookVersions.Code.PublicationConfigurationSheet.previewContinueButton=Publish
-BookVersions.Code.PublicationConfigurationSheet.pageNotInPublishedVariant=Page is ignored because it is not associated with the published variant.
+BookVersions.Code.PublicationConfigurationSheet.pageNotInPublishedVariant=❌️ **{0}** Page is ignored because it is not associated with the published variant.
 
 # Publication process
 BookVersions.DefaultBookVersionsManager.publishInternal.nullParameter=One of the provided parameters is null.
@@ -164,7 +164,6 @@ BookVersions.DefaultBookVersionsManager.isToBePublished.variantPage=Page [{0}] i
 BookVersions.DefaultBookVersionsManager.isToBePublished.otherVariant=Page [{0}] is ignored because it is not associated with the published variant [{1}].
 BookVersions.DefaultBookVersionsManager.isToBePublished.noTranslation=Page [{0}] is ignored because it is not associated with the published language [{1}].
 BookVersions.DefaultBookVersionsManager.isToBePublished.noCompleteTranslation=Page is [{0}] ignored because the translation doesn''t have a [{1}] status.
-
 BookVersions.DefaultBookVersionsManager.transformSiblingBookPage.notInCollection=The [{0}] macro refers to page [{1}] which collection [{2}] is not the same as the currently published collection [{3}]. Macro is ignored. On the published page, it won''t probably display anything.
 
 # Creation templates
