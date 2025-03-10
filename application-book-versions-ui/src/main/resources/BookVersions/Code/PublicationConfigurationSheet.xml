@@ -195,6 +195,7 @@
         #if("$!{line.message}" == "Pages to process")
           ----
           $services.localization.render('BookVersions.Code.PublicationConfigurationSheet.pagesToProcess')
+
         #end
       #end
       ##
