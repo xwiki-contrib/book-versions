@@ -83,6 +83,10 @@ public class BookPublicationReferencesTransformationHelper
     private static final List<ResourceType> SUPPORTED_ATTACHMENT_RESOURCES = Arrays.asList(ResourceType.ATTACHMENT,
         ResourceType.PAGE_ATTACHMENT);
 
+    private static final String DOCUMENTTREE_MACRO_ID = "documentTree";
+
+    private static final String DOCUMENTTREE_PARAM_ROOT = "root";
+
     @Inject
     private Logger logger;
 
@@ -94,7 +98,7 @@ public class BookPublicationReferencesTransformationHelper
     private EntityReferenceSerializer<String> entityReferenceSerializer;
 
     @Inject
-    private ComponentManager componentManager;
+    private ComponentManager rootComponentManager;
 
     @Inject
     private Provider<BookVersionsManager> bookVersionsManagerProvider;
@@ -160,18 +164,19 @@ public class BookPublicationReferencesTransformationHelper
             MacroBlock macroBlock = (MacroBlock) block;
 
             // Try to load the macro definition
-            if (componentManager.hasComponent(Macro.class, macroBlock.getId())) {
-                try {
+            try {
+                ComponentManager componentManager = findComponentManager();
+                if (componentManager.hasComponent(Macro.class, macroBlock.getId())) {
                     Macro macro = componentManager.getInstance(Macro.class, macroBlock.getId());
                     Map<String, ParameterDescriptor> parameterDescriptors =
                         macro.getDescriptor().getParameterDescriptorMap();
 
-                    hasXDOMChanged |= transformMacroBlock(macroBlock, parameterDescriptors, originalReference,
-                        spaceReferencesMap);
-                } catch (ComponentLookupException e) {
-                    // Should never happen
-                    logger.error("Failed to lookup macro definition for [{}]", macroBlock.getId(), e);
+                    hasXDOMChanged |=
+                        transformMacroBlock(macroBlock, parameterDescriptors, originalReference, spaceReferencesMap);
                 }
+            } catch (ComponentLookupException e) {
+                // Should never happen
+                logger.error("Failed to lookup macro definition for [{}]", macroBlock.getId(), e);
             }
         }
 
@@ -242,31 +247,64 @@ public class BookPublicationReferencesTransformationHelper
     {
         boolean hasXDOMChanged = false;
 
-        for (Map.Entry<String, ParameterDescriptor> parameterDescriptorEntry
-            : parameterDescriptors.entrySet()) {
+        for (Map.Entry<String, ParameterDescriptor> parameterDescriptorEntry : parameterDescriptors.entrySet()) {
+            String parameter = macroBlock.getParameter(parameterDescriptorEntry.getKey());
+            if (parameter == null || StringUtils.isBlank(parameter)) {
+                continue;
+            }
+
+            String equivalentReference = null;
             if (DocumentReference.class.equals(parameterDescriptorEntry.getValue().getParameterType())
-                || EntityReferenceString.class.equals(
-                parameterDescriptorEntry.getValue().getDisplayType())) {
-                String parameter = macroBlock.getParameter(parameterDescriptorEntry.getKey());
-                if (StringUtils.isNotBlank(parameter)) {
-                    String equivalentReference = getEquivalentDocumentStringReference(parameter,
-                        originalReference, spaceReferencesMap);
-                    if (equivalentReference != null) {
-                        macroBlock.setParameter(parameterDescriptorEntry.getKey(), equivalentReference);
-                        hasXDOMChanged = true;
-                    }
-                }
-            } else if (AttachmentReference.class.equals(
-                parameterDescriptorEntry.getValue().getParameterType())) {
-                String parameter = macroBlock.getParameter(parameterDescriptorEntry.getKey());
-                if (StringUtils.isNotBlank(parameter)) {
-                    String equivalentReference = getEquivalentAttachmentStringReference(parameter,
-                        originalReference, spaceReferencesMap);
-                    if (equivalentReference != null) {
-                        macroBlock.setParameter(parameterDescriptorEntry.getKey(), equivalentReference);
-                        hasXDOMChanged = true;
-                    }
-                }
+                || EntityReferenceString.class.equals(parameterDescriptorEntry.getValue().getDisplayType())) {
+                equivalentReference =
+                    getEquivalentDocumentStringReference(parameter, originalReference, spaceReferencesMap);
+            } else if (AttachmentReference.class.equals(parameterDescriptorEntry.getValue().getParameterType())) {
+                equivalentReference =
+                    getEquivalentAttachmentStringReference(parameter, originalReference, spaceReferencesMap);
+            }
+
+            if (equivalentReference != null) {
+                macroBlock.setParameter(parameterDescriptorEntry.getKey(), equivalentReference);
+                hasXDOMChanged = true;
+            }
+        }
+
+        if (macroBlock.getId().equals(DOCUMENTTREE_MACRO_ID)) {
+            // The Document Tree macro is a special case, because its root parameter is a String
+            hasXDOMChanged = hasXDOMChanged || transformDocumentTreeMacroBlock(macroBlock, parameterDescriptors,
+                originalReference, spaceReferencesMap);
+        }
+
+        return hasXDOMChanged;
+    }
+
+    private boolean transformDocumentTreeMacroBlock(MacroBlock macroBlock,
+        Map<String, ParameterDescriptor> parameterDescriptors, DocumentReference originalReference,
+        Map<SpaceReference, SpaceReference> spaceReferencesMap)
+    {
+        boolean hasXDOMChanged = false;
+        String root = macroBlock.getParameter(DOCUMENTTREE_PARAM_ROOT);
+        if (root == null || root.isEmpty()) {
+            return false;
+        }
+
+        EntityReference entityReference = convertToType(root, originalReference);
+        DocumentReference reference = null;
+        if (entityReference.getType().equals(EntityType.DOCUMENT)) {
+            reference = new DocumentReference(entityReference);
+        }
+
+        if (entityReference.getType().equals(EntityType.SPACE)) {
+            SpaceReference spaceReference = (SpaceReference) entityReference;
+            reference = new DocumentReference(getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE, spaceReference);
+        }
+
+        if (reference != null) {
+            DocumentReference equivalentReference = getEquivalentReference(reference, spaceReferencesMap);
+            String equivalentReferenceSerialized = this.convertToString(equivalentReference);
+            if (equivalentReferenceSerialized != null && !root.equals(equivalentReferenceSerialized)) {
+                macroBlock.setParameter(DOCUMENTTREE_PARAM_ROOT, equivalentReferenceSerialized);
+                hasXDOMChanged = true;
             }
         }
 
@@ -429,6 +467,50 @@ public class BookPublicationReferencesTransformationHelper
         }
 
         return reference;
+    }
+
+    protected EntityReference convertToType(Object value, DocumentReference originalReference)
+    {
+        String[] parts = StringUtils.split(String.valueOf(value), ":", 2);
+        if (parts == null || parts.length != 2) {
+            return null;
+        }
+
+        try {
+            return this.currentEntityReferenceResolver.resolve(parts[1],
+                EntityType.valueOf(camelCaseToUnderscore(parts[0]).toUpperCase()), originalReference);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    protected String convertToString(DocumentReference documentReference)
+    {
+        if (documentReference == null) {
+            return null;
+        }
+
+        return underscoreToCamelCase(documentReference.getType().name().toLowerCase()) + ':'
+            + this.entityReferenceSerializer.serialize(documentReference);
+    }
+
+    private String camelCaseToUnderscore(String nodeType)
+    {
+        return StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(nodeType), '_');
+    }
+
+    private String underscoreToCamelCase(String entityType)
+    {
+        StringBuilder result = new StringBuilder();
+        for (String part : StringUtils.split(entityType, '_')) {
+            result.append(StringUtils.capitalize(part));
+        }
+        return StringUtils.uncapitalize(result.toString());
+    }
+
+    private ComponentManager findComponentManager() throws ComponentLookupException
+    {
+        return this.rootComponentManager.getInstance(ComponentManager.class, "wiki");
     }
 
     /**
