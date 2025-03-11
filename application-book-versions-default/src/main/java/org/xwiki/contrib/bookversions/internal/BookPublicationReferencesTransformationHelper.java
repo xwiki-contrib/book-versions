@@ -26,6 +26,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +34,7 @@ import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
+import org.xwiki.contrib.bookversions.BookVersionsManager;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
@@ -51,6 +53,9 @@ import org.xwiki.rendering.listener.reference.ResourceReference;
 import org.xwiki.rendering.listener.reference.ResourceType;
 import org.xwiki.rendering.macro.Macro;
 import org.xwiki.rendering.macro.descriptor.ParameterDescriptor;
+
+import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
 
 /**
  * This component focuses on transforming references between Book Version pages at publication time.
@@ -90,6 +95,12 @@ public class BookPublicationReferencesTransformationHelper
 
     @Inject
     private ComponentManager componentManager;
+
+    @Inject
+    private Provider<BookVersionsManager> bookVersionsManagerProvider;
+
+    @Inject
+    private Provider<XWikiContext> contextProvider;
 
     /**
      * Transform the provided XDOM to update any wiki references stored in its content to point to published spaces.
@@ -360,8 +371,11 @@ public class BookPublicationReferencesTransformationHelper
     private DocumentReference getEquivalentReference(DocumentReference reference,
         Map<SpaceReference, SpaceReference> spaceReferencesMap)
     {
+        // If the page is versioned, we need to work with the root page that is the parent of this reference
+        DocumentReference targetReference = getRootPageReference(reference);
+
         SpaceReference foundSpaceReference = null;
-        for (EntityReference entityReference : reference.getReversedReferenceChain()) {
+        for (EntityReference entityReference : targetReference.getReversedReferenceChain()) {
             if (EntityType.SPACE.equals(entityReference.getType()) && spaceReferencesMap.containsKey(entityReference)) {
                 foundSpaceReference = (SpaceReference) entityReference;
                 break;
@@ -371,12 +385,59 @@ public class BookPublicationReferencesTransformationHelper
         if (foundSpaceReference != null) {
             // The page will then be located within the newly published space. We need to re-compute its reference
             // chain.
-            return reference.replaceParent(foundSpaceReference, spaceReferencesMap.get(foundSpaceReference));
+            return targetReference.replaceParent(foundSpaceReference, spaceReferencesMap.get(foundSpaceReference));
         } else {
             // If no space reference is found, it means that we are in the case where the document reference actually
             // points to a page outside any book or library involved in this publication. We then don't need to
             // update it.
-            return reference;
+            return targetReference;
         }
+    }
+
+    private DocumentReference getRootPageReference(DocumentReference reference)
+    {
+        try {
+            EntityReference parentEntityReference = reference.getParent();
+            if (bookVersionsManagerProvider.get().isVersionedContent(reference) && parentEntityReference != null) {
+                // Check if the parent is a document.
+                EntityReference parentDocumentEntityReference =
+                    parentEntityReference.extractReference(EntityType.DOCUMENT);
+
+                if (parentDocumentEntityReference != null) {
+                    // Build the root reference
+                    return parentDocumentEntityReference instanceof DocumentReference
+                        ? (DocumentReference) parentDocumentEntityReference
+                        : new DocumentReference(parentDocumentEntityReference);
+
+                } else {
+                    // If not a document, check if it is a space.
+                    parentDocumentEntityReference = parentEntityReference.extractReference(EntityType.SPACE);
+                    SpaceReference parentSpaceReference = parentDocumentEntityReference instanceof SpaceReference
+                        ? (SpaceReference) parentDocumentEntityReference
+                        : new SpaceReference(parentDocumentEntityReference);
+                    if (parentDocumentEntityReference != null) {
+                        // Build the root reference
+                        return new DocumentReference(getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE,
+                            parentSpaceReference);
+                    }
+                }
+            }
+
+        } catch (XWikiException e) {
+            // Should never happen
+            logger.error("Failed to lookup root book page for [{}]", reference, e);
+        }
+
+        return reference;
+    }
+
+    /**
+     * Get the XWiki context.
+     *
+     * @return the xwiki context.
+     */
+    protected XWikiContext getXWikiContext()
+    {
+        return contextProvider.get();
     }
 }
