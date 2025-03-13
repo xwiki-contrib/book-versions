@@ -529,7 +529,7 @@ public class BookVersionsScriptService implements ScriptService
      *
      * @param versionReference the version to get the preceding version from
      * @param versionTree the full versions tree as a map {parent (null for root), list of children}
-     * @returnthe preceding versions of the given version, from the first previous to the root version Empty list if
+     * @return the preceding versions of the given version, from the first previous to the root version. Empty list if
      * null parameter or infinite loop of versions is detected.
      * @throws XWikiException If any exception occurs while checking if the given version is a version document
      */
