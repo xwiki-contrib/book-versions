@@ -285,6 +285,18 @@ rendering.macro.includeLibrary.description=Include content from a versioned libr
 rendering.macro.includeLibrary.parameter.keyReference.name=Library key
 rendering.macro.includeLibrary.parameter.keyReference.description=The key of a library to get the content from
 
+# Excerpt Library include macro
+rendering.macro.excerptIncludeLibrary.name=Excerpt Include Library (Book Versions)
+rendering.macro.excerptIncludeLibrary.description=Includes excerpts from libraries into the current page. The included pages need to contain the simple `excerpt` macro. Requires XWiki SAS's Pro Macros (paid extension).
+rendering.macro.excerptIncludeLibrary.parameter.keyReference.name=Library key
+rendering.macro.excerptIncludeLibrary.parameter.keyReference.description=The key of a library to get the content from
+rendering.macro.excerptIncludeLibrary.parameter.name.name=Name
+rendering.macro.excerptIncludeLibrary.parameter.name.description=The name of the excerpt to be displayed
+rendering.macro.excerptIncludeLibrary.parameter.nopanel.name=No panel
+rendering.macro.excerptIncludeLibrary.parameter.nopanel.description=Disable the panel
+rendering.macro.excerptIncludeLibrary.parameter.inline.name=Inline
+rendering.macro.excerptIncludeLibrary.parameter.inline.description=Use the macro in inline mode. When in inline mode, the panel parameter is ignored.
+
 # Content Translation macro
 rendering.macro.contentTranslation.name=Content Translation (Book Versions)
 rendering.macro.contentTranslation.description=Add translated content
