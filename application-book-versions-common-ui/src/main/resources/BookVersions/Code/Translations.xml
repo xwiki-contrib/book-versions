@@ -165,6 +165,7 @@ BookVersions.DefaultBookVersionsManager.isToBePublished.otherVariant=Page [{0}] 
 BookVersions.DefaultBookVersionsManager.isToBePublished.noTranslation=Page [{0}] is ignored because it is not associated with the published language [{1}].
 BookVersions.DefaultBookVersionsManager.isToBePublished.noCompleteTranslation=Page is [{0}] ignored because the translation doesn''t have a [{1}] status.
 BookVersions.DefaultBookVersionsManager.transformSiblingBookPage.notInCollection=The [{0}] macro refers to page [{1}] which collection [{2}] is not the same as the currently published collection [{3}]. Macro is ignored. On the published page, it won''t probably display anything.
+BookVersions.DefaultBookVersionsManager.transformLibrary.notPublished=The library [{0}] has not been published. Macro is ignored.
 
 # Creation templates
 BookVersions.template.newBook=Create a new book.

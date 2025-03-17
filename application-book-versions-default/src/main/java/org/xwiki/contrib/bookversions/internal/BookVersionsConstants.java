@@ -488,6 +488,26 @@ public interface BookVersionsConstants
     String INCLUDE_MACRO_PROP_REFERENCE = "reference";
 
     /**
+     * The ID of the excerptIncludeLibrary macro.
+     */
+    String EXCERPTINCLUDELIBRARY_MACRO_ID = "excerptIncludeLibrary";
+
+    /**
+     * The keyReference property of an excerptIncludeLibrary macro.
+     */
+    String EXCERPTINCLUDELIBRARY_MACRO_PROP_KEYREFERENCE = "keyReference";
+
+    /**
+     * The ID of the excerpt-include macro.
+     */
+    String EXCERPTINCLUDE_MACRO_ID = "excerpt-include";
+
+    /**
+     * The 0 (reference) property of an excerpt-include macro.
+     */
+    String EXCERPTINCLUDE_MACRO_PROP_0 = "0";
+
+    /**
      * The ID of the display macro.
      */
     String DISPLAY_MACRO_ID = "display";

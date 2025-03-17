@@ -3106,15 +3106,19 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
         boolean transformedTranslation = transformTranslation(xdom, language);
         boolean transformedLibrary =
-            transformLibrary(xdom, originalDocumentReference, publishedLibraries, versionReference);
+            transformLibrary(xdom, originalDocumentReference, publishedLibraries, versionReference,
+                BookVersionsConstants.INCLUDELIBRARY_MACRO_ID, userLocale);
+        boolean transformedExceptLibrary =
+            transformLibrary(xdom, originalDocumentReference, publishedLibraries, versionReference,
+                BookVersionsConstants.EXCERPTINCLUDELIBRARY_MACRO_ID, userLocale);
         Map<DocumentReference, DocumentReference> currentPublishedLibraries =
             publishedLibraries != null ? publishedLibraries.get(getVersionName(versionReference)) : new HashMap<>();
         boolean transformSiblingBookPage = transformSiblingBookPage(xdom, originalDocumentReference, configuration,
             userLocale);
         boolean transformedReferences = publicationReferencesTransformationHelper.transform(xdom,
             originalDocumentReference, currentPublishedLibraries, configuration);
-        return hasXDOMChanged || transformedTranslation || transformedLibrary || transformSiblingBookPage
-            || transformedReferences;
+        return hasXDOMChanged || transformedTranslation || transformedLibrary || transformedExceptLibrary
+            || transformSiblingBookPage || transformedReferences;
     }
 
     private boolean transformTranslation(XDOM xdom, String language)
@@ -3150,22 +3154,48 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         return hasChanged;
     }
 
+    /**
+     * Transform the includeLibrary or excerptIncludeLibrary macros to include or excerpt-include respectively.
+     * @param xdom the XDOM to work on
+     * @param originalDocumentReference the page from which the content is taken from
+     * @param publishedLibraries the published libraries used in the book
+     * @param versionReference the version selected for the publication
+     * @param macroId the macro to work on, includeLibrary or excerptIncludeLibrary
+     * @param userLocale the current locale of the user
+     * @return true if the XDOM has been changed
+     * @throws QueryException if an error happens when searching for the referenced library page
+     * @throws XWikiException if an error happens when searching for the referenced library page or checking if
+     *      originalDocumentReference is versioned content
+     */
     private boolean transformLibrary(XDOM xdom, DocumentReference originalDocumentReference,
-        Map<String, Map<DocumentReference, DocumentReference>> publishedLibraries, DocumentReference versionReference)
+        Map<String, Map<DocumentReference, DocumentReference>> publishedLibraries, DocumentReference versionReference,
+        String macroId, Locale userLocale)
         throws QueryException, XWikiException
     {
-        if (xdom == null || originalDocumentReference == null || versionReference == null) {
+        if (xdom == null || originalDocumentReference == null || versionReference == null || macroId == null) {
             return false;
         }
 
-        logger.debug("[transformLibrary] Starting to transform includeLibrary macro reference");
+        String referenceProperty = "";
+        String replaceMacroId = "";
+        if (macroId.equals(BookVersionsConstants.INCLUDELIBRARY_MACRO_ID)) {
+            referenceProperty = BookVersionsConstants.INCLUDELIBRARY_MACRO_PROP_KEYREFERENCE;
+            replaceMacroId = BookVersionsConstants.INCLUDE_MACRO_ID;
+        } else if (macroId.equals(BookVersionsConstants.EXCERPTINCLUDELIBRARY_MACRO_ID)) {
+            referenceProperty = BookVersionsConstants.EXCERPTINCLUDELIBRARY_MACRO_PROP_KEYREFERENCE;
+            replaceMacroId = BookVersionsConstants.EXCERPTINCLUDE_MACRO_ID;
+        } else {
+            logger.error("[transformLibrary] [{}] is not an expected macro ID", macroId);
+            return false;
+        }
+
+        logger.debug("[transformLibrary] Starting to transform [{}] macro reference", macroId);
         boolean hasChanged = false;
         List<MacroBlock> listBlock = xdom.getBlocks(
             new ClassBlockMatcher(
-                new MacroBlock(BookVersionsConstants.INCLUDELIBRARY_MACRO_ID, Collections.emptyMap(), true).getClass()),
+                new MacroBlock(macroId, Collections.emptyMap(), true).getClass()),
             Block.Axes.DESCENDANT_OR_SELF);
-        logger.debug("[transformLibrary] [{}] '{}' macros found in the passed XDOM", listBlock.size(),
-            BookVersionsConstants.INCLUDELIBRARY_MACRO_ID);
+        logger.debug("[transformLibrary] [{}] '{}' macros found in the passed XDOM", listBlock.size(), macroId);
 
         String versionName = getVersionName(versionReference);
         if (isVersionedContent(originalDocumentReference)) {
@@ -3176,18 +3206,19 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         }
 
         for (MacroBlock macroBlock : listBlock) {
+            if (!macroId.equals(macroBlock.getId())) {
+                continue;
+            }
             // Get the key reference (library page reference)
-            String keyRefString = macroBlock.getParameter(BookVersionsConstants.INCLUDELIBRARY_MACRO_PROP_KEYREFERENCE);
+            String keyRefString = macroBlock.getParameter(referenceProperty);
             if (keyRefString == null || StringUtils.isEmpty(keyRefString)) {
-                logger.debug("[transformLibrary] {} macro found without {} parameter. Macro is ignored.",
-                    BookVersionsConstants.INCLUDELIBRARY_MACRO_ID,
-                    BookVersionsConstants.INCLUDELIBRARY_MACRO_PROP_KEYREFERENCE);
+                logger.debug("[transformLibrary] {} macro found without {} parameter. Macro is ignored.", macroId,
+                    referenceProperty);
                 continue;
             }
 
             DocumentReference libraryPageReference = referenceResolver.resolve(keyRefString, originalDocumentReference);
-            logger.debug("[transformLibrary] Updating {} macro referencing [{}].",
-                BookVersionsConstants.INCLUDELIBRARY_MACRO_ID, libraryPageReference);
+            logger.debug("[transformLibrary] Updating {} macro referencing [{}].", macroId, libraryPageReference);
             // Get the library reference
             DocumentReference libraryReference = getVersionedCollectionReference(libraryPageReference);
             // Get the published library reference
@@ -3195,8 +3226,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 publishedLibraries != null && versionName != null && libraryReference != null
                     ? publishedLibraries.get(versionName).get(libraryReference) : null;
             if (publishedLibraryReference == null) {
-                logger.error("[transformLibrary] The library [{}] has not been published. Macro is ignored.",
-                    libraryReference);
+                logger.error(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager."
+                    + "transformLibrary.notPublished", userLocale, libraryReference));
                 continue;
             }
 
@@ -3205,11 +3236,19 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 getPublishedReference(libraryPageReference, libraryReference,
                     publishedLibraryReference.getLastSpaceReference());
             if (publishedPageReference != null) {
-                logger.debug("[transformLibrary] Page reference is changed to [{}].", publishedPageReference);
-                // Replace the macro by include macro and change to the published reference
-                MacroBlock newMacroBlock = new MacroBlock(BookVersionsConstants.INCLUDE_MACRO_ID,
-                    Map.of(BookVersionsConstants.INCLUDE_MACRO_PROP_REFERENCE, publishedPageReference.toString()),
-                    macroBlock.isInline());
+                logger.debug("[transformLibrary] Page reference is changed to [{}], macro is changed to [{}].",
+                    publishedPageReference, replaceMacroId);
+                // Replace the macro change to the published reference
+                Map<String, String> parametersMap = new HashMap<>();
+                if (macroId.equals(BookVersionsConstants.INCLUDELIBRARY_MACRO_ID)) {
+                    parametersMap = Map.of(
+                        BookVersionsConstants.INCLUDE_MACRO_PROP_REFERENCE, publishedPageReference.toString());
+                } else if (macroId.equals(BookVersionsConstants.EXCERPTINCLUDELIBRARY_MACRO_ID)) {
+                    parametersMap = new HashMap<>(macroBlock.getParameters());
+                    parametersMap.put(
+                        BookVersionsConstants.EXCERPTINCLUDE_MACRO_PROP_0, publishedPageReference.toString());
+                }
+                MacroBlock newMacroBlock = new MacroBlock(replaceMacroId, parametersMap, macroBlock.isInline());
                 macroBlock.getParent().replaceChild(newMacroBlock, macroBlock);
                 hasChanged = true;
             }
