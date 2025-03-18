@@ -1,0 +1,89 @@
+<?xml version="1.1" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.5" reference="BookVersions.Code.LibraryVersionSuggestService" locale="">
+  <web>BookVersions.Code</web>
+  <name>LibraryVersionSuggestService</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <parent>WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <version>1.1</version>
+  <title>LibraryVersionSuggestService</title>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>{{velocity}}
+##$response.setContentType("application/json")
+#set ($input = "")
+#if ($request.q)
+ #set ($input = $!request.q)
+#end
+#if ("$!input" == "")
+ #if ($request.text)
+   #set ($input = $!request.text)
+ #end
+#end
+#set ($library = "$!request.library")
+#if ($library == '')
+  ## Shouldn't happen. We expect that in all cases the library parameter is provided
+  #jsonResponse([])
+  #stop
+#end
+#set ($libraryVersions = $services.model.createDocumentReference('Versions', $services.model.resolveDocument($library).getLastSpaceReference()))
+#set ($binds = {})
+#set ($hql = 'select doc.fullName from XWikiDocument as doc, BaseObject as obj where obj.name = doc.fullName and obj.className = :className and doc.space like :space')
+#if ("$!input" != '')
+  #if ($request.exactMatch == 'true')
+    #set ($hql = $hql + ' and doc.fullName = :input order by lower(doc.title) asc')
+    #set ($query = $services.query.hql($hql).bindValue('input', $input))
+  #else
+    #set ($hql = $hql + ' and (lower(doc.name) like :input or lower(doc.title) like :input) order by lower(doc.title) asc')
+    #set ($query = $services.query.hql($hql))
+    #set ($discard = $binds.put('input', $input.toLowerCase()))
+    #set ($query = $query.bindValue('input').literal($input.toLowerCase()).anyChars().query())
+  #end
+#end
+#set ($results = $query.bindValue('className', 'BookVersions.Code.VersionClass').bindValue('space', "${services.model.serialize($libraryVersions, 'local')}").setLimit(10).execute())
+#set ($json = [])
+#foreach ($res in $results)
+  #set ($itemdoc = $xwiki.getDocument($res))
+  #if ("$!{itemdoc.title}" != '')
+    #set ($displayValue = $itemdoc.title)
+  #else
+    #set ($displayValue = $itemdoc.name)
+    #if($displayValue == 'WebHome')
+      #set ($displayValue = $itemdoc.documentReference.parent.name)
+    #end
+  #end
+  #set($discard = $json.add({
+    'label': "$!displayValue",
+    'value': "$!res"
+  }))
+#end
+#jsonResponse($json)
+{{/velocity}}</content>
+</xwikidoc>

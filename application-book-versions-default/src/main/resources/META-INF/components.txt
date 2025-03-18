@@ -9,6 +9,7 @@ org.xwiki.contrib.bookversions.internal.PublicationJob
 org.xwiki.contrib.bookversions.internal.VersionContentRemoveJob
 org.xwiki.contrib.bookversions.internal.batch.BatchChangeStatusJob
 org.xwiki.contrib.bookversions.internal.displayers.LibraryReferenceConverter
+org.xwiki.contrib.bookversions.internal.displayers.LibraryVersionReferenceConverter
 org.xwiki.contrib.bookversions.internal.displayers.PageTranslationLanguageConverter
 org.xwiki.contrib.bookversions.internal.displayers.PageTranslationLanguageListConverter
 org.xwiki.contrib.bookversions.internal.displayers.VariantReferenceListConverter

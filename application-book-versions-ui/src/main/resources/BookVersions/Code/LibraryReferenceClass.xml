@@ -108,7 +108,14 @@
     <libraryVersionReference>
       <cache>0</cache>
       <classname/>
-      <customDisplay/>
+      <customDisplay>{{velocity}}
+#set ($mode = $type)
+#if ($mode != 'edit')
+  #set ($mode = 'view')
+#end
+#set ($libraryReference = $object.getValue('libraryReference'))
+$services.display.html.display('org.xwiki.contrib.bookversions.internal.displayers.LibraryVersionReference', $value, {'data-library' : $services.model.serialize($libraryReference)}, $mode)
+{{/velocity}}</customDisplay>
       <defaultValue/>
       <disabled>0</disabled>
       <displayType>input</displayType>
@@ -126,17 +133,7 @@
       <separators/>
       <size>1</size>
       <sort/>
-      <sql>select distinct doc.fullName
-from XWikiDocument doc,
-     BaseObject libraryObj,
-     BaseObject versionObj,
-     XWikiDocument libraryDoc
-where doc.space = concat(libraryDoc.space, '.Versions')
-  and versionObj.name = doc.fullName
-  and versionObj.className = 'BookVersions.Code.VersionClass'
-  and libraryObj.name = libraryDoc.fullName
-  and libraryObj.className = 'BookVersions.Code.LibraryClass'
-order by doc.fullName</sql>
+      <sql/>
       <unmodifiable>0</unmodifiable>
       <validationMessage/>
       <validationRegExp/>
