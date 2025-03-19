@@ -1130,7 +1130,6 @@
   #foreach ($item in $versions)
     #set ($version = $services.extension.parseVersion($item))
     #set ($discard = $versionList.add($version))
-    $version
   #end
   #set ($sortedVersionList = $collectiontool.sort($versionList))
   #set ($drop = $collectiontool.reverseModifiable($sortedVersionList))
