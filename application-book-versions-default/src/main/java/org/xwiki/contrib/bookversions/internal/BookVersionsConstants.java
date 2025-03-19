@@ -267,6 +267,11 @@ public interface BookVersionsConstants
     String PUBLICATIONCONFIGURATION_PROP_PUBLISHBEHAVIOUR_REPUBLISH = "republish";
 
     /**
+     * The title property of a publication configuration.
+     */
+    String PUBLICATIONCONFIGURATION_PROP_TITLE = "title";
+
+    /**
      * The unversioned property of a book page.
      */
     String BOOKPAGE_PROP_UNVERSIONED = "unversioned";

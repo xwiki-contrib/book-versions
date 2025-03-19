@@ -1759,6 +1759,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             .getIntValue(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHONLYCOMPLETE) != 0);
         configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHPAGEORDER,
             configurationObject.getIntValue(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHPAGEORDER) != 0);
+        configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_TITLE,
+            configurationObject.getStringValue(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_TITLE));
 
         logger.debug("[loadPublicationConfiguration] Configuration loaded: [{}].", configuration);
 
@@ -2393,6 +2395,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VARIANT);
         XWikiDocument variant = variantReference != null ? xwiki.getDocument(variantReference, xcontext) : null;
 
+        String targetTitle = (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_TITLE);
+
         Map<String, Map<DocumentReference, DocumentReference>> publishedLibraries =
             collection != null && versionReference != null && isBook(collectionReference)
                 ? getUsedPublishedLibrariesWithInheritance(collection.getDocumentReference(), versionReference) : null;
@@ -2480,6 +2484,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             logger.debug("[publishInternal] Publish page.");
             publishedDocument.getAuthors().setEffectiveMetadataAuthor(userReference);
             publishedDocument.getAuthors().setOriginalMetadataAuthor(userReference);
+            if (pageReference.equals(sourceReference) && StringUtils.isNotEmpty(targetTitle)) {
+                publishedDocument.setTitle(targetTitle);
+            }
             xwiki.saveDocument(publishedDocument, publicationComment, xcontext);
             logger.debug("[publishInternal] End working on page [{}].", pageStringReference);
             logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"

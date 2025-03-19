@@ -167,7 +167,7 @@
       <largeStorage>0</largeStorage>
       <multiSelect>0</multiSelect>
       <name>publishBehaviour</name>
-      <number>9</number>
+      <number>8</number>
       <picker>1</picker>
       <prettyName>publishBehaviour</prettyName>
       <relationalStorage>0</relationalStorage>
@@ -189,7 +189,7 @@
       <displayType/>
       <hint/>
       <name>publishOnlyComplete</name>
-      <number>7</number>
+      <number>6</number>
       <prettyName>publishOnlyComplete</prettyName>
       <unmodifiable>0</unmodifiable>
       <validationMessage/>
@@ -204,7 +204,7 @@
       <displayType/>
       <hint/>
       <name>publishPageOrder</name>
-      <number>8</number>
+      <number>7</number>
       <prettyName>publishPageOrder</prettyName>
       <unmodifiable>0</unmodifiable>
       <validationMessage/>
@@ -321,6 +321,20 @@
       <valueField/>
       <classType>com.xpn.xwiki.objects.classes.PageClass</classType>
     </source>
+    <title>
+      <customDisplay/>
+      <disabled>0</disabled>
+      <hint/>
+      <name>title</name>
+      <number>9</number>
+      <picker>0</picker>
+      <prettyName>title</prettyName>
+      <size>30</size>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+    </title>
     <variant>
       <cache>0</cache>
       <classname/>
