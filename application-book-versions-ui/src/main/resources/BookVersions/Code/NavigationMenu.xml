@@ -1125,13 +1125,23 @@
 ## Render version selector HTML
 ##
 #macro(renderVersionSelector)
+  ## Order versions in a human natural way, and reverse it
+  #set ($versionList = [])
+  #foreach ($item in $versions)
+    #set ($version = $services.extension.parseVersion($item))
+    #set ($discard = $versionList.add($version))
+    $version
+  #end
+  #set ($sortedVersionList = $collectiontool.sort($versionList))
+  #set ($drop = $collectiontool.reverseModifiable($sortedVersionList))
+  ## Render selector
   &lt;div class="formContainer"&gt;
     &lt;form class="xformInline" id="changeArchiveStatus"&gt;
       &lt;input type="hidden" id="form_token" value="$escapetool.xml("$!services.csrf.token")"/&gt;
       &lt;input type="hidden" id="unversioned" value="$isUnversionedPage"/&gt;
       &lt;label for="collectionVersion"&gt;$services.localization.render('BookVersions.navMenu.versionSelect')&lt;/label&gt;
       &lt;select name="collectionVersion" id="collectionVersion"&gt;
-        #foreach($version in $versions)
+        #foreach($version in $sortedVersionList)
           #if ($version)
             #set ($versionReference = $services.model.resolveDocument($version))
             #set ($versionDocument = $xwiki.getDocument($versionReference))
