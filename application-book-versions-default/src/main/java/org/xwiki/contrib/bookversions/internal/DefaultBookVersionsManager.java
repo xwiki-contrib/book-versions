@@ -1824,6 +1824,14 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         XWikiContext xcontext = this.getXWikiContext();
         XWiki xwiki = xcontext.getWiki();
 
+        // Handle the source reference format, ensuring it's a .WebHome reference if needed
+        if (!Objects.equals(sourceReference.getName(), this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE)) {
+            SpaceReference sourceParentSpaceReference = new SpaceReference(
+                    new EntityReference(sourceReference.getName(), EntityType.SPACE, sourceReference.getParent()));
+            sourceReference =
+                    new DocumentReference(new EntityReference(this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE,
+                            EntityType.DOCUMENT, sourceParentSpaceReference));
+        }
         // Check if the source exists
         if (!xwiki.exists(sourceReference, xcontext)) {
             Map<String, Object> errorLine = new HashMap<>();
@@ -1881,15 +1889,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             summaryLine.put("message", "All documents to be removed from target space");
             summaryLine.put("variable", docsToRemoveRefs);
             previewLines.add(summaryLine);
-        }
-
-        // Handle the source reference format, ensuring it's a .WebHome reference if needed
-        if (!Objects.equals(sourceReference.getName(), this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE)) {
-            SpaceReference sourceParentSpaceReference = new SpaceReference(
-                    new EntityReference(sourceReference.getName(), EntityType.SPACE, sourceReference.getParent()));
-            sourceReference =
-                    new DocumentReference(new EntityReference(this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE,
-                            EntityType.DOCUMENT, sourceParentSpaceReference));
         }
 
         DocumentReference collectionReference = getVersionedCollectionReference(sourceReference);
