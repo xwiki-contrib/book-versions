@@ -438,9 +438,14 @@ public interface BookVersionsConstants
         BookVersionsConstants.BOOKPAGE_CLASS_REFERENCE,
         BookVersionsConstants.MARKEDDELETED_CLASS_REFERENCE,
         BookVersionsConstants.VARIANTLIST_CLASS_REFERENCE,
-        BookVersionsConstants.PUBLICATION_CLASS_REFERENCE,
-        BookVersionsConstants.XWIKICOMMENTS_CLASS_REFERENCE
+        BookVersionsConstants.PUBLICATION_CLASS_REFERENCE
     );
+
+    /**
+     * The reference of the objects to remove configuration page.
+     */
+    EntityReference CONFIGURATION_REMOVEDOBJECTS =
+        new EntityReference("ConfigurationObjectsToRemove", EntityType.DOCUMENT, BOOKVERSIONS_CODE_REFERENCE);
 
     /**
      * The first part of the publication job's ID

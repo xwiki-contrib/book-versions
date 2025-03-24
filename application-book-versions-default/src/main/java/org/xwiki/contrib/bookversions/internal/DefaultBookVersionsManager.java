@@ -61,6 +61,7 @@ import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.EntityReferenceResolver;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.model.reference.LocalDocumentReference;
 import org.xwiki.model.reference.SpaceReference;
@@ -113,6 +114,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     private DocumentReferenceResolver<String> referenceResolver;
 
     @Inject
+    private DocumentReferenceResolver<EntityReference> referenceEntityResolver;
+
+    @Inject
     private SpaceReferenceResolver<String> spaceReferenceResolver;
 
     @Inject
@@ -130,6 +134,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     @Inject
     @Named("local")
     private EntityReferenceSerializer<String> localSerializer;
+
+    @Inject
+    private EntityReferenceResolver<String> entityReferenceResolver;
 
     @Inject
     @Named("SlugEntityNameValidation")
@@ -2753,18 +2760,21 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             return false;
         }
 
+        DocumentReference objectsToRemoveConfigRef = referenceEntityResolver.resolve(
+            BookVersionsConstants.CONFIGURATION_REMOVEDOBJECTS, fromDocument.getDocumentReference());
+
         // use a fake 3 way merge: previous is toDocument without comments, rights and wf object
         // current version is current toDocument
         // next version is fromDocument without comments, rights and wf object
         XWikiDocument previousDoc = toDocument.clone();
-        this.removeObjectsForPublication(previousDoc);
+        this.removeObjectsForPublication(previousDoc, objectsToRemoveConfigRef, xcontext);
         // set reference and language
 
         // make sure that the attachments are properly loaded in memory for the duplicate to work fine, otherwise it's a
         // bit impredictable about attachments
         fromDocument.loadAttachments(xcontext);
         XWikiDocument nextDoc = fromDocument.duplicate(toDocument.getDocumentReference());
-        this.removeObjectsForPublication(nextDoc);
+        this.removeObjectsForPublication(nextDoc, objectsToRemoveConfigRef, xcontext);
 
         // and now merge. Normally the attachments which are not in the next doc are deleted from the current doc
         MergeResult result = toDocument.merge(previousDoc, nextDoc, new MergeConfiguration(), xcontext);
@@ -2985,17 +2995,45 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         return publishedReference;
     }
 
-    private XWikiDocument removeObjectsForPublication(XWikiDocument publishedPage)
+    private XWikiDocument removeObjectsForPublication(XWikiDocument publishedPage,
+        DocumentReference objectsToRemoveConfigRef, XWikiContext xcontext) throws XWikiException
     {
         if (publishedPage == null) {
             return null;
         }
 
-        for (EntityReference objectRef : BookVersionsConstants.PUBLICATION_REMOVEDOBJECTS) {
+        List<EntityReference> removedObjects = BookVersionsConstants.PUBLICATION_REMOVEDOBJECTS;
+        removedObjects.addAll(getRemovedObjectsConfiguration(publishedPage, objectsToRemoveConfigRef, xcontext));
+        for (EntityReference objectRef : removedObjects ) {
             publishedPage.removeXObjects(objectRef);
         }
 
         return publishedPage;
+    }
+
+    private List<EntityReference> getRemovedObjectsConfiguration(XWikiDocument publishedPage,
+        DocumentReference objectsToRemoveConfigRef, XWikiContext xcontext)
+        throws XWikiException
+    {
+        if (publishedPage == null || objectsToRemoveConfigRef == null || xcontext == null) {
+            return Collections.emptyList();
+        }
+
+        XWiki xwiki = xcontext.getWiki();
+        if (!xwiki.exists(objectsToRemoveConfigRef, xcontext)) {
+            logger.debug("[getRemovedObjectsConfiguration] Can't find configuration page [{}].",
+                objectsToRemoveConfigRef);
+            return Collections.emptyList();
+        }
+
+        XWikiDocument configDoc = xwiki.getDocument(objectsToRemoveConfigRef, xcontext);
+        Map<DocumentReference, List<BaseObject>> xObjects = configDoc.getXObjects();
+        List<EntityReference> result = new ArrayList<>();
+        for (DocumentReference fullObjectRef : xObjects.keySet()) {
+            result.add(entityReferenceResolver.resolve(localSerializer.serialize(fullObjectRef), EntityType.DOCUMENT));
+        }
+        logger.debug("[getRemovedObjectsConfiguration] Configuration is [{}].", result);
+        return result;
     }
 
     private XWikiDocument prepareForPublication(XWikiDocument originalDocument, XWikiDocument publishedDocument,
