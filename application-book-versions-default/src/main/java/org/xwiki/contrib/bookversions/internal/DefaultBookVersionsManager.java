@@ -1205,7 +1205,39 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     @Override
-    public List<DocumentReference> getVersionsAscending(DocumentReference versionReference, Map<DocumentReference,
+    public List<DocumentReference> getVersionsInheriting(DocumentReference versionReference, Map<DocumentReference,
+        List<DocumentReference>> versionTree) throws XWikiException, QueryException
+    {
+        if (versionTree == null || versionReference == null) {
+            return Collections.emptyList();
+        }
+
+        int versionsQuantity = getVersionedCollectionReference(versionReference).size();
+
+        List<DocumentReference> versionsInheriting = versionTree.get(versionReference);
+        List<DocumentReference> versionsToCheck = versionsInheriting;
+        int i = 0;
+        while (versionsToCheck.size() > 0 && i < versionsQuantity + 1) {
+            List<DocumentReference> childVersionsInheriting = versionTree.get(versionsToCheck.get(0));
+            for (DocumentReference childVersionInheriting : childVersionsInheriting) {
+                if (!versionsInheriting.contains(childVersionInheriting)) {
+                    versionsInheriting.add(childVersionInheriting);
+                    versionsToCheck.add(childVersionInheriting);
+                }
+            }
+            versionsToCheck.remove(0);
+            i++;
+        }
+        if (i > versionsQuantity) {
+            logger.error("[getVersionsInheriting] Infinite loop detected in versions preceding [{}].",
+                versionReference);
+            return Collections.emptyList();
+        }
+        return versionsInheriting;
+    }
+
+    @Override
+    public List<DocumentReference> getVersionsPreceding(DocumentReference versionReference, Map<DocumentReference,
         List<DocumentReference>> versionTree) throws XWikiException
     {
         List<DocumentReference> result = new ArrayList<>();

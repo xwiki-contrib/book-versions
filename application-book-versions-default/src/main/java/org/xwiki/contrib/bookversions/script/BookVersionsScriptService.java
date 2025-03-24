@@ -525,6 +525,22 @@ public class BookVersionsScriptService implements ScriptService
     }
 
     /**
+     * Get the all the versions inheriting directly or indirectly from a given version.
+     *
+     * @param versionReference the version to get the preceding version from
+     * @param versionTree the full versions tree as a map {parent (null for root), list of children}
+     * @return the inheriting versions of the given version. Empty list if null parameter or infinite loop of versions
+     * is detected.
+     * @throws QueryException If any exception occurs while getting all the versions
+     * @throws XWikiException If any exception occurs while getting all the versions
+     */
+    public List<DocumentReference> getVersionsInheriting(DocumentReference versionReference, Map<DocumentReference,
+        List<DocumentReference>> versionTree) throws XWikiException, QueryException
+    {
+        return bookVersionsManagerProvider.get().getVersionsInheriting(versionReference, versionTree);
+    }
+
+    /**
      * Get the preceding versions of a given versions, from a versions tree.
      *
      * @param versionReference the version to get the preceding version from
@@ -533,10 +549,10 @@ public class BookVersionsScriptService implements ScriptService
      * null parameter or infinite loop of versions is detected.
      * @throws XWikiException If any exception occurs while checking if the given version is a version document
      */
-    public List<DocumentReference> getVersionsAscending(DocumentReference versionReference, Map<DocumentReference,
+    public List<DocumentReference> getVersionsPreceding(DocumentReference versionReference, Map<DocumentReference,
         List<DocumentReference>> versionTree) throws XWikiException
     {
-        return bookVersionsManagerProvider.get().getVersionsAscending(versionReference, versionTree);
+        return bookVersionsManagerProvider.get().getVersionsPreceding(versionReference, versionTree);
     }
 
     /**

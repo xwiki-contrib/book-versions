@@ -529,7 +529,20 @@ public interface BookVersionsManager
         throws QueryException, XWikiException;
 
     /**
-     * Get the preceding versions of a given versions, from a versions tree.
+     * Get the all the versions inheriting directly or indirectly from a given version.
+     *
+     * @param versionReference the version to get the preceding version from
+     * @param versionTree the full versions tree as a map {parent (null for root), list of children}
+     * @return the inheriting versions of the given version. Empty list if null parameter or infinite loop of versions
+     * is detected.
+     * @throws QueryException If any exception occurs while getting all the versions
+     * @throws XWikiException If any exception occurs while getting all the versions
+     */
+    List<DocumentReference> getVersionsInheriting(DocumentReference versionReference, Map<DocumentReference,
+        List<DocumentReference>> versionTree) throws XWikiException, QueryException;
+
+    /**
+     * Get all the preceding versions, direct or indirect, of a given version, from a versions tree.
      *
      * @param versionReference the version to get the preceding version from
      * @param versionTree the full versions tree as a map {parent (null for root), list of children}
@@ -537,7 +550,7 @@ public interface BookVersionsManager
      * null parameter or infinite loop of versions is detected.
      * @throws XWikiException If any exception occurs while checking if the given version is a version document
      */
-    List<DocumentReference> getVersionsAscending(DocumentReference versionReference, Map<DocumentReference,
+    List<DocumentReference> getVersionsPreceding(DocumentReference versionReference, Map<DocumentReference,
         List<DocumentReference>> versionTree) throws XWikiException;
 
     /**
