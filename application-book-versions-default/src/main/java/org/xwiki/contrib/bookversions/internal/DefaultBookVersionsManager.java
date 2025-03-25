@@ -3002,7 +3002,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             return null;
         }
 
-        List<EntityReference> removedObjects = BookVersionsConstants.PUBLICATION_REMOVEDOBJECTS;
+        List<EntityReference> removedObjects = new ArrayList<>(BookVersionsConstants.PUBLICATION_REMOVEDOBJECTS);
         removedObjects.addAll(getRemovedObjectsConfiguration(publishedPage, objectsToRemoveConfigRef, xcontext));
         for (EntityReference objectRef : removedObjects ) {
             publishedPage.removeXObjects(objectRef);
