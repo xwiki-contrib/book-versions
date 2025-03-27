@@ -3224,7 +3224,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         String replaceMacroId = "";
         if (macroId.equals(BookVersionsConstants.INCLUDELIBRARY_MACRO_ID)) {
             referenceProperty = BookVersionsConstants.INCLUDELIBRARY_MACRO_PROP_KEYREFERENCE;
-            replaceMacroId = BookVersionsConstants.INCLUDE_MACRO_ID;
+            replaceMacroId = BookVersionsConstants.DISPLAY_MACRO_ID;
         } else if (macroId.equals(BookVersionsConstants.EXCERPTINCLUDELIBRARY_MACRO_ID)) {
             referenceProperty = BookVersionsConstants.EXCERPTINCLUDELIBRARY_MACRO_PROP_KEYREFERENCE;
             replaceMacroId = BookVersionsConstants.EXCERPTINCLUDE_MACRO_ID;
