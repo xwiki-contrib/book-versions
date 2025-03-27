@@ -550,4 +550,9 @@ public interface BookVersionsConstants
      * The default locale used for logging.
      */
     String DEFAULT_LOCALE = "en";
+
+    /**
+     * The default language field define in XWikiPreferences.
+     */
+    String XWIKIPREF_DEFAULT_LANGUAGE = "default_language";
 }

@@ -452,6 +452,11 @@
 #macro(initializeLanguageVariables)
   #set ($languages = $xwiki.getDocument($collectionRef).getObject('BookVersions.Code.PublishedBookClass').getValue('languages'))
   #set ($selectedLanguage = $services.bookversions.getSelectedLanguage($collectionRef))
+  #set ($isDefaultLanguage = $services.bookversions.isDefaultLanguage($docRef, $selectedLanguage))
+  #if ("$!selectedLanguage" == '')
+    #set ($selectedLanguage = $services.bookversions.getDefaultTranslation($doc))
+    #set ($isDefaultLanguage = true)
+  #end
 #end
 
 ##
@@ -492,7 +497,6 @@
 ## Render language selector HTML
 ##
 #macro(renderLanguageSelector)
-  #set ($isDefaultLanguage = $services.bookversions.isDefaultLanguage($docRef, $selectedLanguage))
   &lt;div class="formContainer"&gt;
     &lt;form class="xformInline" id="changeLanguageStatus" method="post"&gt;
       &lt;input type="hidden" id="language_form_token" name="form_token" value="$escapetool.xml("$!services.csrf.token")"/&gt;
@@ -507,7 +511,7 @@
             #set ($displayvalue = $escapetool.xml($stringtool.capitalize($locale.getDisplayName($locale)) +
       ' (' + $stringtool.capitalize($locale.getDisplayName($currentLocale)) + ')'))
             #set ($isSelected = $language &amp;&amp; $selectedLanguage &amp;&amp; $language.equals($selectedLanguage))
-            &lt;option value="$language" #if($isSelected)selected#end&gt;$escapetool.xml($displayvalue)&lt;/option&gt;
+            &lt;option value="$language" #if($isSelected)selected#end&gt;$escapetool.xml($displayvalue) $isSelected &lt;/option&gt;
           #end
         #end
       &lt;/select&gt;

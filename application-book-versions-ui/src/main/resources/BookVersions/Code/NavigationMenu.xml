@@ -783,6 +783,9 @@
     #set ($languages = [])
   #end
   #set ($selectedLanguage = $services.bookversions.getSelectedLanguage($collectionRef))
+  #if ("$!selectedLanguage" == '')
+    #set ($selectedLanguage = $services.bookversions.getDefaultTranslation($doc))
+  #end
 #end
 
 ##

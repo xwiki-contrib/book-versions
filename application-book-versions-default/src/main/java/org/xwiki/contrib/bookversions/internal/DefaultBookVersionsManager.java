@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -472,8 +471,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             return null;
         }
 
-        DocumentReference documentReference = document.getDocumentReference();
-
         Map<String, String> languagesMap = new HashMap<String, String>();
         XWikiRequest request = getXWikiContext().getRequest();
         HttpSession session = request.getSession();
@@ -538,7 +535,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             }
         }
 
-        return null;
+        // There is no default language set for the current document.
+        // Use the default languages in the Preferences.
+        return getXWikisDefaultLanguage();
     }
 
     private String getDefaultTranslation(XWikiDocument document) throws XWikiException, QueryException
@@ -553,7 +552,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             }
         }
 
-        return null;
+        // There is no default language set for the current document.
+        // Use the default languages in the Preferences.
+        return getXWikisDefaultLanguage();
     }
 
     @Override
@@ -561,7 +562,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     {
         String selectedLanguage = getSelectedLanguage(document);
 
-        if (selectedLanguage == null) {
+        if (selectedLanguage == null || selectedLanguage.isEmpty()) {
             selectedLanguage = this.getDefaultTranslation(document);
         }
 
@@ -3859,6 +3860,12 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             jobExecutor.execute(BookVersionsConstants.SET_PAGE_STATUS_JOBID, jobRequest);
         }
         return jobId;
+    }
+
+    private String getXWikisDefaultLanguage()
+    {
+        XWikiContext context = getXWikiContext();
+        return context.getWiki().getXWikiPreference(BookVersionsConstants.XWIKIPREF_DEFAULT_LANGUAGE, context);
     }
 
     /**
