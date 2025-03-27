@@ -85,18 +85,23 @@ public class DocumentCreatingEventListener extends AbstractLocalEventListener
         BookVersionsManager bookVersionsManager = bookVersionsManagerProvider.get();
 
         try {
-            if (bookVersionsManager.isPage(updatedXDoc) || bookVersionsManager.isVersionedPage(updatedXDoc)) {
-                // Transfer the document's content in a new child page storing its versioned content.
-                DocumentReference versionDocumentReference =
-                    bookVersionsManager.getVersionedContentReference(updatedXDoc);
+            if (bookVersionsManager.isPage(updatedXDoc)) {
 
-                if (versionDocumentReference != null) {
+                // Transfer the document's content in a new child page storing its versioned content.
+                if (bookVersionsManager.isVersionedPage(updatedXDoc)) {
+
+                    DocumentReference versionDocumentReference =
+                        bookVersionsManager.getVersionedContentReference(updatedXDoc);
+
+                    if (versionDocumentReference == null) {
+                        return;
+                    }
+
                     XWikiDocument versionedContentDocument =
                         xcontext.getWiki().getDocument(versionDocumentReference, xcontext);
                     versionedContentDocument.newXObject(BookVersionsConstants.BOOKVERSIONEDCONTENT_CLASS_REFERENCE,
                         xcontext);
-                    versionedContentDocument.newXObject(BookVersionsConstants.PAGESTATUS_CLASS_REFERENCE,
-                        xcontext);
+                    versionedContentDocument.newXObject(BookVersionsConstants.PAGESTATUS_CLASS_REFERENCE, xcontext);
                     versionedContentDocument.setContent(updatedXDoc.getContent());
                     DocumentReference userReference = this.xcontextProvider.get().getUserReference();
                     versionedContentDocument.setCreatorReference(userReference);
@@ -113,6 +118,13 @@ public class DocumentCreatingEventListener extends AbstractLocalEventListener
                     }
 
                     xcontext.getWiki().saveDocument(versionedContentDocument, xcontext);
+                }
+
+                // Now save the language data on the book page
+                Map<String, Map<String, Object>> lanugageData = bookVersionsManager.getLanguageData(updatedXDoc);
+                if (lanugageData != null && !lanugageData.isEmpty()) {
+                    bookVersionsManager.setLanguageData(updatedXDoc, lanugageData);
+                    updatedXDoc.setTitle(BookVersionsConstants.DEFAULT_TRANSLATION_TITLE);
                 }
             }
         } catch (XWikiException | QueryException e) {
