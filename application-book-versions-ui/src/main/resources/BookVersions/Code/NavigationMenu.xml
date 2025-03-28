@@ -749,8 +749,18 @@
 ##
 #macro(initializeVersionVariables)
   #set ($selectedVersion = $services.bookversions.getSelectedVersion($collectionRef))
+  #set ($selectedVersionName = $services.bookversions.getVersionName($services.model.resolveDocument($selectedVersion)))
   #set ($versions = $services.bookversions.getCollectionVersions($collectionRef))
   #set ($inheritedRedirFlag = $request.getSession().getAttribute('BookVersions.versionInheritedRedirFlag'))
+  #if ($isVersionedContent &amp;&amp; $collectionRef &amp;&amp; "$!selectedVersion" != '' &amp;&amp; !$inheritedRedirFlag )
+    #set ($currentVersionReference = $services.bookversions.getVersionReference($collectionRef, $doc.name))
+    #set ($currentVersionSerialized = $services.model.serialize($currentVersionReference, 'local'))
+    #if ($currentVersionSerialized &amp;&amp; !$currentVersionSerialized.equals($selectedVersion))
+      #set ($discard = $services.bookversions.setSelectedVersion($collectionRef, $currentVersionSerialized))
+      #set ($selectedVersion = $services.bookversions.getSelectedVersion($collectionRef))
+      #set ($selectedVersionName = $services.bookversions.getVersionName($services.model.resolveDocument($selectedVersion)))
+    #end
+  #end
 #end
 
 ##
@@ -1034,7 +1044,6 @@
 ##
 #macro(setupVersionDisplay)
   #set ($currentDocName = $docRef.getName())
-  #set ($selectedVersionName = $services.bookversions.getVersionName($services.model.resolveDocument($selectedVersion)))
   #set ($selectVersionInfoMsg = '')
   #set ($selectedVersionTitle = '')
   #set ($selectedVersionToolip = '')
