@@ -268,12 +268,16 @@
 #set ($isNestedPage = $rootDocument.name == $services.model.getEntityReference('DOCUMENT', 'default').name)
 #set ($rootParentRef = $rootDocument)
 #if ($isNestedPage)
-  #set ($rootParentRef = $rootParentRef.parent)
+  #set ($rootParentRef = $rootParentRef.getLastSpaceReference())
 #end
 #if ("$!currentValueStr" == '')
-  #set ($currentValue = $rootDocument)
+  #set ($currentValue = $rootDocument.getLastSpaceReference())
 #else
-  #set ($currentValue = $services.model.resolveSpace($currentValueStr))
+  #if($services.bookversions.isVersionedContent($services.model.resolveDocument($currentValueStr)))
+    #set ($currentValue = $services.model.resolveDocument($currentValueStr))
+  #else
+    #set ($currentValue = $services.model.resolveSpace($currentValueStr))
+  #end
 #end
 #if ($xcontext.action == 'edit')
     #locationPicker({
