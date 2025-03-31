@@ -1739,16 +1739,21 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             return configuration;
         }
 
-        try {
-            configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE,
-                currentExplicitReferenceResolver.resolve(sourceReferenceString,
-                    configurationReference.getWikiReference()));
-        } catch (Exception e) {
-            sourceReferenceString = sourceReferenceString + ".WebHome";
-            configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE,
-                currentExplicitReferenceResolver.resolve(sourceReferenceString,
-                    configurationReference.getWikiReference()));
+        // The source is store as page, but we need a complete location.WebHome reference
+        DocumentReference sourceReference =
+            currentExplicitReferenceResolver.resolve(sourceReferenceString, configurationReference.getWikiReference());
+
+        if (sourceReference != null
+            && !Objects.equals(sourceReference.getName(), this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE)) {
+            SpaceReference sourceParentSpaceReference =
+                new SpaceReference(new EntityReference(sourceReference.getName(), EntityType.SPACE,
+                    sourceReference.getLastSpaceReference()));
+            sourceReference =
+                new DocumentReference(new EntityReference(this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE,
+                    EntityType.DOCUMENT, sourceParentSpaceReference));
         }
+        configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE, sourceReference);
+
         configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE,
             spaceReferenceResolver.resolve(destinationReferenceString, configurationReference.getWikiReference()));
         configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VERSION,
@@ -2328,11 +2333,13 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     + "noConfig", userLocale));
             return;
         }
+
         DocumentReference sourceReference =
             (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE);
-        if (sourceReference == null) {
-            logger.error(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal."
-                + "noSource", userLocale, configurationReference));
+        if (sourceReference == null || !xwiki.exists(sourceReference, xcontext)) {
+            logger.error(localization.getTranslationPlain(
+                "BookVersions.DefaultBookVersionsManager.publishInternal." + "sourceNotExist", userLocale,
+                sourceReference));
             return;
         }
         SpaceReference targetReference =
@@ -2376,19 +2383,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             removeDocuments(subTargetDocumentsString, targetDocumentReference, userDocumentReference);
         }
 
-        // The source is store as page, but we need a complete location.WebHome reference
-        if (!Objects.equals(sourceReference.getName(), this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE)) {
-            SpaceReference sourceParentSpaceReference = new SpaceReference(
-                    new EntityReference(sourceReference.getName(), EntityType.SPACE, sourceReference.getParent()));
-            sourceReference =
-                    new DocumentReference(new EntityReference(this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE,
-                            EntityType.DOCUMENT, sourceParentSpaceReference));
-        }
-        if (!xwiki.exists(sourceReference, xcontext)) {
-            logger.error(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal."
-                + "sourceNotExist", userLocale, sourceReference));
-            return;
-        }
         DocumentReference collectionReference = getVersionedCollectionReference(sourceReference);
         XWikiDocument collection =
             collectionReference != null ? xwiki.getDocument(collectionReference, xcontext) : null;
