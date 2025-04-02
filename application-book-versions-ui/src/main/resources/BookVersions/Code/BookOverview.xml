@@ -83,7 +83,6 @@
   properties="doc.title,doc.location,doc.name,status,variantsList"
   source="liveTable"
   sourceParameters="className=BookVersions.Code.PageStatusClass&amp;translationPrefix=BookVersions.overview.LD.&amp;variantsList_class=BookVersions.Code.VariantsListClass&amp;queryFilters=currentlanguage"
-  sort="doc.creationDate:desc"
   filters="doc.location=${bookMainSpace}"
 }}{
     "meta": {
