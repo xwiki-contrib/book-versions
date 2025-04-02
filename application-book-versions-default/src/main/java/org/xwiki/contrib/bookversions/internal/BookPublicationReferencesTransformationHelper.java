@@ -109,19 +109,31 @@ public class BookPublicationReferencesTransformationHelper
     /**
      * Transform the provided XDOM to update any wiki references stored in its content to point to published spaces.
      *
+     *@param publicationSourceReference the source in the publication configuration
      * @param xdom the xdom to transform
      * @param originalReference the reference of the document containing this xdom
      * @param publishedLibraries a map of the published libraries
      * @param publicationConfiguration the publication configuration
      * @return true if the xdom has been modified
      */
-    public boolean transform(XDOM xdom, DocumentReference originalReference,
-        Map<DocumentReference, DocumentReference> publishedLibraries, Map<String, Object> publicationConfiguration)
+    public boolean transform(DocumentReference publicationSourceReference, XDOM xdom,
+        DocumentReference originalReference, Map<DocumentReference, DocumentReference> publishedLibraries,
+        Map<String, Object> publicationConfiguration)
     {
         // Extract information about the master spaces and the publication space
         SpaceReference sourceSpaceReference =
             ((DocumentReference) publicationConfiguration.get(
                 BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE)).getLastSpaceReference();
+        // If the source is a versioned content, then compute the parent with one level up
+        try {
+            if (!bookVersionsManagerProvider.get().isBook(publicationSourceReference)) {
+                sourceSpaceReference = (SpaceReference) sourceSpaceReference.getParent();
+            }
+        } catch (XWikiException e) {
+            // Should never happen
+            logger.error("Failed to check if the source page [{}] is versioned.", originalReference, e);
+        }
+        // Extract the target space reference
         SpaceReference publishedSpaceReference = (SpaceReference) publicationConfiguration.get(
                 BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
 

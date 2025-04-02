@@ -2481,7 +2481,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
             logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
                 + ".transformContent", userLocale));
-            prepareForPublication(contentPage, publishedDocument, publishedLibraries, configuration, userLocale);
+            prepareForPublication(sourceReference, contentPage, publishedDocument, publishedLibraries, configuration, userLocale);
 
             logger.debug("[publishInternal] Publish page.");
             publishedDocument.getAuthors().setEffectiveMetadataAuthor(userReference);
@@ -3031,10 +3031,10 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         return result;
     }
 
-    private XWikiDocument prepareForPublication(XWikiDocument originalDocument, XWikiDocument publishedDocument,
+    private XWikiDocument prepareForPublication(DocumentReference publicationSourceReference,
+        XWikiDocument originalDocument, XWikiDocument publishedDocument,
         Map<String, Map<DocumentReference, DocumentReference>> publishedLibraries, Map<String, Object> configuration,
-        Locale userLocale)
-        throws XWikiException, ComponentLookupException, ParseException, QueryException
+        Locale userLocale) throws XWikiException, ComponentLookupException, ParseException, QueryException
     {
         if (originalDocument == null || publishedDocument == null || configuration == null) {
             return null;
@@ -3049,15 +3049,16 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         // Work on the XDOM
         XDOM xdom = publishedDocument.getXDOM();
         String syntax = publishedDocument.getSyntax().toIdString();
-        transformXDOM(xdom, syntax, originalDocument.getDocumentReference(), publishedLibraries, configuration,
-            userLocale);
+        transformXDOM(publicationSourceReference, xdom, syntax, originalDocument.getDocumentReference(),
+            publishedLibraries, configuration, userLocale);
         // Set the modified XDOM
         publishedDocument.setContent(xdom);
         return publishedDocument;
     }
 
     // Heavily inspired from "Bulk update links according to a TSV mapping using XDOM" on https://snippets.xwiki.org
-    private boolean transformXDOM(XDOM xdom, String syntaxId, DocumentReference originalDocumentReference,
+    private boolean transformXDOM(DocumentReference publicationSourceReference, XDOM xdom, String syntaxId,
+        DocumentReference originalDocumentReference,
         Map<String, Map<DocumentReference, DocumentReference>> publishedLibraries, Map<String, Object> configuration,
         Locale userLocale)
         throws ComponentLookupException, ParseException, QueryException, XWikiException
@@ -3117,7 +3118,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 Parser parser = componentManagerProvider.get().getInstance(Parser.class, syntaxId);
                 XDOM contentXDOM = parser.parse(new StringReader(content));
                 boolean hasMacroContentChanged =
-                    transformXDOM(contentXDOM, syntaxId, originalDocumentReference, publishedLibraries, configuration
+                    transformXDOM(publicationSourceReference, contentXDOM, syntaxId, originalDocumentReference, publishedLibraries, configuration
                         , userLocale);
                 if (hasMacroContentChanged || id.equals(BookVersionsConstants.VARIANT_MACRO_ID)) {
                     logger.debug("[transformXDOM] The content of macro [{}] has changed", id);
@@ -3154,8 +3155,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             publishedLibraries != null ? publishedLibraries.get(getVersionName(versionReference)) : new HashMap<>();
         boolean transformSiblingBookPage = transformSiblingBookPage(xdom, originalDocumentReference, configuration,
             userLocale);
-        boolean transformedReferences = publicationReferencesTransformationHelper.transform(xdom,
-            originalDocumentReference, currentPublishedLibraries, configuration);
+        boolean transformedReferences = publicationReferencesTransformationHelper.transform(publicationSourceReference,
+            xdom, originalDocumentReference, currentPublishedLibraries, configuration);
         return hasXDOMChanged || transformedTranslation || transformedLibrary || transformedExceptLibrary
             || transformSiblingBookPage || transformedReferences;
     }
