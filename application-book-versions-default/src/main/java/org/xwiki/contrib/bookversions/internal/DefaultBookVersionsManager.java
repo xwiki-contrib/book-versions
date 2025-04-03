@@ -698,6 +698,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
         BaseObject translationObject = null;
         for (BaseObject tObj : document.getXObjects(BookVersionsConstants.PAGETRANSLATION_CLASS_REFERENCE)) {
+            if (tObj == null) {
+                continue;
+            }
             String languageEntry = tObj.getStringValue(BookVersionsConstants.PAGETRANSLATION_LANGUAGE);
             if (languageEntry != null && !languageEntry.isEmpty() && selectedLanguage != null
                 && languageEntry.equals(selectedLanguage))
@@ -719,6 +722,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         }
 
         for (BaseObject tObj : document.getXObjects(BookVersionsConstants.PAGETRANSLATION_CLASS_REFERENCE)) {
+            if (tObj == null) {
+                continue;
+            }
             String languageEntry = tObj.getStringValue(BookVersionsConstants.PAGETRANSLATION_LANGUAGE);
             if (languageEntry != null && !languageEntry.isEmpty() && language != null
                 && languageEntry.equals(language))
@@ -743,6 +749,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     public boolean isDefaultLanguage(XWikiDocument document, String language) throws XWikiException, QueryException
     {
         for (BaseObject tObj : document.getXObjects(BookVersionsConstants.PAGETRANSLATION_CLASS_REFERENCE)) {
+            if (tObj == null) {
+                continue;
+            }
             String languageEntry = tObj.getStringValue(BookVersionsConstants.PAGETRANSLATION_LANGUAGE);
             if (languageEntry != null && !languageEntry.isEmpty() && language != null
                 && languageEntry.equals(language))
@@ -1407,6 +1416,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             versionDoc.getXObjects(BookVersionsConstants.BOOKLIBRARYREFERENCE_CLASS_REFERENCE);
         boolean createObject = true;
         for (BaseObject libRefObject : libRefObjects) {
+            if (libRefObject == null) {
+                continue;
+            }
             String libraryPropValue =
                 libRefObject.getStringValue(BookVersionsConstants.BOOKLIBRARYREFERENCE_PROP_LIBRARY);
 
@@ -1495,6 +1507,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         List<BaseObject> libRefObjects =
             selectedVersionDoc.getXObjects(BookVersionsConstants.BOOKLIBRARYREFERENCE_CLASS_REFERENCE);
         for (BaseObject libRefObject : libRefObjects) {
+            if (libRefObject == null) {
+                continue;
+            }
             if (libRefObject != null && libraryReference.equals(referenceResolver.resolve(
                 libRefObject.getStringValue(BookVersionsConstants.BOOKLIBRARYREFERENCE_PROP_LIBRARY),
                 libraryReference)))
@@ -2901,6 +2916,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             publicationId, sourceReference);
         BaseObject publicationObject = null;
         for (BaseObject XObject : collectionClone.getXObjects(BookVersionsConstants.PUBLICATION_CLASS_REFERENCE)) {
+            if (XObject == null) {
+                continue;
+            }
             String objectId = XObject.getStringValue(BookVersionsConstants.PUBLICATION_PROP_ID);
             String objectSource = XObject.getStringValue(BookVersionsConstants.PUBLICATION_PROP_SOURCE);
             if (publicationId != null && publicationId.equals(objectId) && objectSource != null
@@ -2953,6 +2971,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         XWikiDocument collection = xwiki.getDocument(collectionReference, xcontext);
         DocumentReference publishedSpaceReference = null;
         for (BaseObject XObject : collection.getXObjects(BookVersionsConstants.PUBLICATION_CLASS_REFERENCE)) {
+            if (XObject == null) {
+                continue;
+            }
             String objectId = XObject.getStringValue(BookVersionsConstants.PUBLICATION_PROP_ID);
             String objectSource = XObject.getStringValue(BookVersionsConstants.PUBLICATION_PROP_SOURCE);
             if (objectId != null && publicationId.equals(objectId) && objectSource != null
@@ -3025,6 +3046,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         Map<DocumentReference, List<BaseObject>> xObjects = configDoc.getXObjects();
         List<EntityReference> result = new ArrayList<>();
         for (DocumentReference fullObjectRef : xObjects.keySet()) {
+            if (fullObjectRef == null) {
+                continue;
+            }
             result.add(entityReferenceResolver.resolve(localSerializer.serialize(fullObjectRef), EntityType.DOCUMENT));
         }
         logger.debug("[getRemovedObjectsConfiguration] Configuration is [{}].", result);
@@ -3714,6 +3738,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             BaseObject translationObject = null;
 
             for (BaseObject tObj : document.getXObjects(BookVersionsConstants.PAGETRANSLATION_CLASS_REFERENCE)) {
+                if (tObj == null) {
+                    continue;
+                }
                 String languageEntry = tObj.getStringValue(BookVersionsConstants.PAGETRANSLATION_LANGUAGE);
                 if (languageEntry != null && !languageEntry.isEmpty() && languageEntry.equals(language)) {
                     translationObject = tObj;
@@ -3748,6 +3775,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
         // Now, remove translations that were deleted by the user or don't have a language defined
         for (BaseObject tObj : document.getXObjects(BookVersionsConstants.PAGETRANSLATION_CLASS_REFERENCE)) {
+            if (tObj == null) {
+                continue;
+            }
             String languageEntry = tObj.getStringValue(BookVersionsConstants.PAGETRANSLATION_LANGUAGE);
             if (languageEntry == null || languageEntry.isEmpty() || !languageData.containsKey(languageEntry)) {
                 document.removeXObject(tObj);
@@ -3763,6 +3793,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         }
 
         for (BaseObject tObj : document.getXObjects(BookVersionsConstants.PAGETRANSLATION_CLASS_REFERENCE)) {
+            if (tObj == null) {
+                continue;
+            }
             document.removeXObject(tObj);
         }
     }
