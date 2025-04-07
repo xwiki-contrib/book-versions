@@ -287,17 +287,17 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     @Override
-    public boolean isMarkedDeleted(DocumentReference documentReference) throws XWikiException
+    public boolean isMarkedDeleted(DocumentReference documentReference) throws XWikiException, QueryException
     {
-        XWikiContext xcontext = this.getXWikiContext();
-
-        return isMarkedDeleted(xcontext.getWiki().getDocument(documentReference, xcontext));
-    }
-
-    @Override
-    public boolean isMarkedDeleted(XWikiDocument document)
-    {
-        return document != null && document.getXObject(BookVersionsConstants.MARKEDDELETED_CLASS_REFERENCE) != null;
+        String queryString = "select doc.fullName from XWikiDocument as doc, BaseObject as obj where obj.name = doc.fullName "
+            + "and obj.className = :className and doc.fullName = :docFullName";
+        List<String> results = this.queryManagerProvider.get()
+            .createQuery(queryString, Query.HQL)
+            .bindValue("className", localSerializer.serialize(BookVersionsConstants.MARKEDDELETED_CLASS_REFERENCE))
+            .bindValue("docFullName", localSerializer.serialize(documentReference))
+            .setWiki(documentReference.getWikiReference().getName())
+            .execute();
+        return results != null && results.size() > 0;
     }
 
     @Override
@@ -397,20 +397,35 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     @Override
-    public List<DocumentReference> getPageVariants(XWikiDocument page)
+    public List<DocumentReference> getPageVariants(DocumentReference pageReference)
     {
+        // ATTENTION
+        // This storage needs improvements
+        // It's a DB List property with NO RELATIONAL STORAGE !
+        // It should be transformed into relational storage and then all values should be migrated to the new format
         List<DocumentReference> result = new ArrayList<DocumentReference>();
-        if (page == null) {
+        if (pageReference == null) {
             return result;
         }
-        BaseObject variantListObj = page.getXObject(BookVersionsConstants.VARIANTLIST_CLASS_REFERENCE);
-        if (variantListObj == null) {
-            return result;
+
+        String variantQueryString =
+            "select distinct prop.value from BaseObject as obj, LargeStringProperty as prop where "
+                + "obj.className = :className and obj.name = :objectName and prop.id.id = obj.id and prop.name = :propName";
+        try {
+            List<String> variantsList = this.queryManagerProvider.get().createQuery(variantQueryString, Query.HQL)
+                .bindValue("className", localSerializer.serialize(BookVersionsConstants.VARIANTLIST_CLASS_REFERENCE))
+                .bindValue("objectName", localSerializer.serialize(pageReference))
+                .bindValue("propName", BookVersionsConstants.VARIANTLIST_PROP_VARIANTSLIST)
+                .setWiki(pageReference.getWikiReference().getName()).execute();
+            if (variantsList.size() > 0) {
+                for (String variant : variantsList.get(0).split(" |,|\\||\\r?\\n")) {
+                    result.add(referenceResolver.resolve(variant).setWikiReference(pageReference.getWikiReference()));
+                }
+            }
+        } catch (QueryException e) {
+            logger.error("Could not compute the list of variants for page [{}] : [{}]", pageReference, e);
         }
-        for (String referenceString : (List<String>) variantListObj
-            .getListValue(BookVersionsConstants.VARIANTLIST_PROP_VARIANTSLIST)) {
-            result.add(referenceResolver.resolve(referenceString, page.getDocumentReference()));
-        }
+
         return result;
     }
 
@@ -518,14 +533,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     @Override
     public String getDefaultTranslation(DocumentReference documentReference) throws XWikiException, QueryException
     {
-        XWikiContext xcontext = this.getXWikiContext();
-
-        return getDefaultTranslation(xcontext.getWiki().getDocument(documentReference, xcontext));
-    }
-
-    private String getDefaultTranslation(Document document) throws XWikiException, QueryException
-    {
-        Map<String, Map<String, Object>> languageData = getLanguageData(document);
+        Map<String, Map<String, Object>> languageData = getLanguageData(documentReference);
 
         for (Entry<String, Map<String, Object>> languageDataEntry : languageData.entrySet()) {
             if (languageDataEntry != null && languageDataEntry.getValue() != null
@@ -540,7 +548,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         return getXWikisDefaultLanguage();
     }
 
-    private String getDefaultTranslation(XWikiDocument document) throws XWikiException, QueryException
+    private String getDefaultTranslation(Document document) throws XWikiException, QueryException
     {
         Map<String, Map<String, Object>> languageData = getLanguageData(document);
 
@@ -573,23 +581,15 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     @Override
     public String getTranslatedTitle(DocumentReference documentReference) throws XWikiException, QueryException
     {
-        XWikiContext xcontext = this.getXWikiContext();
-
-        return getTranslatedTitle(xcontext.getWiki().getDocument(documentReference, xcontext));
-    }
-
-    @Override
-    public String getTranslatedTitle(XWikiDocument document) throws XWikiException, QueryException
-    {
-        DocumentReference collectionRef = getVersionedCollectionReference(document.getDocumentReference());
+        DocumentReference collectionRef = getVersionedCollectionReference(documentReference);
         String selectedLanguage = getSelectedLanguage(collectionRef);
 
         if (selectedLanguage == null) {
-            selectedLanguage = this.getDefaultTranslation(document);
+            selectedLanguage = this.getDefaultTranslation(documentReference);
         }
 
-        return selectedLanguage != null ? getTranslatedTitle(document, selectedLanguage)
-            : document.getDocumentReference().getName();
+        return selectedLanguage != null ? getTranslatedTitle(documentReference, selectedLanguage)
+            : documentReference.getName();
     }
 
     @Override
@@ -1662,7 +1662,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     @Override
-    public void switchDeletedMark(DocumentReference documentReference) throws XWikiException
+    public void switchDeletedMark(DocumentReference documentReference) throws XWikiException, QueryException
     {
         if (documentReference == null) {
             return;
@@ -1672,7 +1672,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         XWiki xwiki = xcontext.getWiki();
         XWikiDocument document = xwiki.getDocument(documentReference, xcontext).clone();
 
-        if (isMarkedDeleted(document)) {
+        if (isMarkedDeleted(documentReference)) {
             BaseObject object = document.getXObject(BookVersionsConstants.MARKEDDELETED_CLASS_REFERENCE);
             if (object != null) {
                 document.removeXObject(object);
@@ -1952,22 +1952,13 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
         DocumentReference variantReference =
                 (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VARIANT);
-        XWikiDocument variant = variantReference != null ? xwiki.getDocument(variantReference, xcontext) : null;
 
-        if (variantReference != null && variant == null) {
+        if (variantReference == null) {
             Map<String, Object> errorLine = new HashMap<>();
             errorLine.put("message", "Variant reference does not exist");
             errorLine.put("variable", variantReference);
             previewLines.add(errorLine);
             return previewLines;
-        }
-
-        // Add variant info if applicable
-        if (variant != null) {
-            Map<String, Object> variantLine = new HashMap<>();
-            variantLine.put("message", "Using variant");
-            variantLine.put("variable", variant.getTitle());
-            previewLines.add(variantLine);
         }
 
         // Check if needed libraries are published
@@ -2077,7 +2068,6 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             }
 
             // Check if content should be published
-            XWikiDocument contentPage = xwiki.getDocument(contentPageReference, xcontext);
             Locale userLocale = xcontext.getLocale();
 
             // Add detailed page processing information
@@ -2094,14 +2084,14 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             processInfo.put("targetExists", xwiki.exists(publishedReference, xcontext));
 
             // Add status and variant info
-            processInfo.put("status", getPageStatus(page));
-            processInfo.put("variants", getPageVariants(page));
+            processInfo.put("status", getPageStatus(pageReference));
+            processInfo.put("variants", getPageVariants(pageReference));
 
             // Add language info if applicable
             String language = (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_LANGUAGE);
             if (StringUtils.isNotEmpty(language)) {
                 processInfo.put("language", language);
-                Map<String, Map<String, Object>> languageData = getLanguageData(contentPage);
+                Map<String, Map<String, Object>> languageData = getLanguageData(contentPageReference);
                 processInfo.put("languageData", languageData);
             }
 
@@ -2109,8 +2099,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             previewLines.add(processLine);
 
             // Preview publication status for this page
-            if (!previewIsToBePublished(contentPage, variant, configuration, userLocale, previewLines, pageReference)) {
-                if (isMarkedDeleted(contentPage)) {
+            if (!previewIsToBePublished(publishedReference, variantReference, configuration, userLocale, previewLines)) {
+                if (isMarkedDeleted(publishedReference)) {
                     // The original document is marked as deleted
                     markedAsDeletedReferences.add(publishedReference);
 
@@ -2193,26 +2183,37 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     /**
      * Preview version of isToBePublished that collects information about why pages would or wouldn't be published
      * without affecting the actual publication logic.
+     * @throws QueryException In case something goes wrong.
+     * @throws XWikiException In case something goes wrong.
      */
-    private boolean previewIsToBePublished(XWikiDocument page, XWikiDocument variant,
-                                           Map<String, Object> configuration, Locale userLocale, List<Map<String, Object>> previewLines,
-                                           DocumentReference pageReference)
+    private boolean previewIsToBePublished(DocumentReference pageReference, DocumentReference variantReference,
+                                           Map<String, Object> configuration, Locale userLocale, List<Map<String, Object>> previewLines) throws QueryException, XWikiException
     {
-        if (page == null || configuration == null) {
+        if (pageReference == null || configuration == null) {
             return false;
         }
         if (userLocale == null) {
             userLocale = new Locale(BookVersionsConstants.DEFAULT_LOCALE);
         }
 
-        List<DocumentReference> variants = getPageVariants(page);
-        String status = getPageStatus(page);
+        List<DocumentReference> variants = getPageVariants(pageReference);
+        String status = getPageStatus(pageReference);
         boolean publishOnlyComplete =
                 (boolean) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHONLYCOMPLETE);
         boolean excludePagesOutsideVariant = false;
-        if (variant != null) {
-            excludePagesOutsideVariant = (variant.getXObject(BookVersionsConstants.VARIANT_CLASS_REFERENCE)
-                    .getIntValue(BookVersionsConstants.VARIANT_PROP_EXCLUDE) == 1);
+        String localVariantReference = localSerializer.serialize(variantReference);
+        if (variantReference != null) {
+            String variantQueryString = "select distinct prop.value from XWikiDocument as doc, BaseObject as obj, IntegerProperty as prop where obj.name = doc.fullName "
+                + "and obj.className = :className and prop.id.id = obj.id and prop.id.name = :propName and doc.fullName = :variant and prop.value = :propValue";
+            List<Integer> variantQueryResults = this.queryManagerProvider.get()
+                .createQuery(variantQueryString, Query.HQL)
+                .bindValue("className", localSerializer.serialize(BookVersionsConstants.VARIANT_CLASS_REFERENCE))
+                .bindValue("propName", BookVersionsConstants.VARIANT_PROP_EXCLUDE)
+                .bindValue("variant", localSerializer.serialize(variantReference))
+                .bindValue("propValue", 1)
+                .setWiki(variantReference.getWikiReference().getName())
+                .execute();
+            excludePagesOutsideVariant = variantQueryResults != null && variantQueryResults.size() > 0;
         }
         String language = (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_LANGUAGE);
 
@@ -2220,7 +2221,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         Map<String, Object> reasonLine = new HashMap<>();
         Map<String, Object> reasonInfo = new HashMap<>();
 
-        if (isMarkedDeleted(page)) {
+        if (isMarkedDeleted(pageReference)) {
             // Page is marked as deleted
             reasonInfo.put("pageRef", pageReference);
             reasonInfo.put("reason", "marked_deleted");
@@ -2242,7 +2243,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             reasonLine.put("variable", reasonInfo);
             previewLines.add(reasonLine);
             return false;
-        } else if (variant == null && variants != null && !variants.isEmpty()) {
+        } else if (variantReference == null && variants != null && !variants.isEmpty()) {
             // No variant to be published AND page is associated with variant(s)
             reasonInfo.put("pageRef", pageReference);
             reasonInfo.put("reason", "variant_page_no_variant_selected");
@@ -2252,12 +2253,12 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             reasonLine.put("variable", reasonInfo);
             previewLines.add(reasonLine);
             return false;
-        } else if (variant != null && variants != null && !variants.contains(variant.getDocumentReference())
+        } else if (variantReference != null && variants != null && !variants.contains(variantReference)
                 && (excludePagesOutsideVariant || (!excludePagesOutsideVariant && !variants.isEmpty()))) {
             // A variant is to be published AND the page is associated with other variant(s)
             reasonInfo.put("pageRef", pageReference);
             reasonInfo.put("reason", "wrong_variant");
-            reasonInfo.put("publishedVariant", variant.getDocumentReference());
+            reasonInfo.put("publishedVariant", variantReference);
             reasonInfo.put("associatedVariants", variants);
             reasonInfo.put("excludePagesOutsideVariant", excludePagesOutsideVariant);
 
@@ -2266,7 +2267,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             previewLines.add(reasonLine);
             return false;
         } else if (StringUtils.isNotEmpty(language)) {
-            Map<String, Map<String, Object>> languageData = getLanguageData(page);
+            Map<String, Map<String, Object>> languageData = getLanguageData(pageReference);
             if (languageData.get(language) == null) {
                 // The page has no translation
                 reasonInfo.put("pageRef", pageReference);
@@ -2301,13 +2302,13 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         publishReasonInfo.put("pageRef", pageReference);
         publishReasonInfo.put("status", status);
 
-        if (variant != null) {
-            publishReasonInfo.put("variant", variant.getDocumentReference());
+        if (variantReference != null) {
+            publishReasonInfo.put("variant", variantReference);
             publishReasonInfo.put("associatedVariants", variants);
         }
 
         if (StringUtils.isNotEmpty(language)) {
-            Map<String, Map<String, Object>> languageData = getLanguageData(page);
+            Map<String, Map<String, Object>> languageData = getLanguageData(pageReference);
             publishReasonInfo.put("language", language);
             publishReasonInfo.put("translationStatus", languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_STATUS));
         }
@@ -2476,8 +2477,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
             // Check if the content should be published
             XWikiDocument contentPage = xwiki.getDocument(contentPageReference, xcontext).clone();
-            if (!isToBePublished(contentPage, variant, configuration, userLocale)) {
-                if (isMarkedDeleted(contentPage)) {
+            if (!isToBePublished(contentPageReference, variant, configuration, userLocale)) {
+                if (isMarkedDeleted(contentPageReference)) {
                     // The original document is marked as deleted, add the published copy to be deleted from target
                     markedAsDeletedReferences.add(publishedReference);
                 }
@@ -3475,19 +3476,18 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VERSION));
     }
 
-    private boolean isToBePublished(XWikiDocument page, XWikiDocument variant, Map<String, Object> configuration,
-        Locale userLocale)
+    private boolean isToBePublished(DocumentReference pageReference, XWikiDocument variant, Map<String, Object> configuration,
+        Locale userLocale) throws XWikiException, QueryException
     {
-        if (page == null || configuration == null) {
+        if (pageReference == null || configuration == null) {
             return false;
         }
         if (userLocale == null) {
             userLocale = new Locale(BookVersionsConstants.DEFAULT_LOCALE);
         }
 
-        DocumentReference pageReference = page.getDocumentReference();
-        List<DocumentReference> variants = getPageVariants(page);
-        String status = getPageStatus(page);
+        List<DocumentReference> variants = getPageVariants(pageReference);
+        String status = getPageStatus(pageReference);
         boolean publishOnlyComplete =
             (boolean) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHONLYCOMPLETE);
         boolean excludePagesOutsideVariant = false;
@@ -3496,7 +3496,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 .getIntValue(BookVersionsConstants.VARIANT_PROP_EXCLUDE) == 1);
         }
         String language = (String) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_LANGUAGE);
-        if (isMarkedDeleted(page)) {
+        if (isMarkedDeleted(pageReference)) {
             // Page is marked as deleted
             logger.debug("[isToBePublished] Page [{}] is ignored because it is marked as deleted.", pageReference);
             logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.isToBePublished."
@@ -3531,7 +3531,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     + "otherVariant", userLocale, pageReference, variant));
             return false;
         } else if (StringUtils.isNotEmpty(language)) {
-            Map<String, Map<String, Object>> languageData = getLanguageData(page);
+            Map<String, Map<String, Object>> languageData = getLanguageData(pageReference);
             if (languageData.get(language) == null) {
                 // The page has no translation
                 logger.debug("[isToBePublished] Page [{}] is ignored because it is not associated with the "
@@ -3554,16 +3554,31 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     @Override
-    public String getPageStatus(XWikiDocument page)
+    public String getPageStatus(DocumentReference pageReference)
     {
-        if (page == null) {
-            return "";
+        String result = null;
+        if (pageReference == null) {
+            return result;
         }
-        BaseObject statusObj = page.getXObject(BookVersionsConstants.PAGESTATUS_CLASS_REFERENCE);
-        if (statusObj == null) {
-            return "";
+
+        String statusQueryString = "select prop.value from BaseObject as obj, StringProperty as prop where obj.className = :className "
+            + "and obj.name = :objectName and prop.id.id = obj.id and prop.name = :propName";
+        try {
+            List<String> statusList = this.queryManagerProvider.get()
+                .createQuery(statusQueryString, Query.HQL)
+                .bindValue("className", localSerializer.serialize(BookVersionsConstants.PAGESTATUS_CLASS_REFERENCE))
+                .bindValue("objectName", localSerializer.serialize(pageReference))
+                .bindValue("propName", BookVersionsConstants.PAGESTATUS_PROP_STATUS)
+                .setWiki(pageReference.getWikiReference().getName()).execute();
+            for(String status : statusList) {
+                result = status;
+                break;
+            }
+        } catch (QueryException e) {
+            logger.error("Could not compute the status for page [{}] : [{}]", pageReference, e);
         }
-        return statusObj.getStringValue(BookVersionsConstants.PAGESTATUS_PROP_STATUS);
+
+        return result;
     }
 
     private List<String> getPageReferenceTree(DocumentReference sourceReference) throws QueryException
@@ -3652,6 +3667,82 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                     languageData.put(language, currentLanguageData);
                 }
             }
+        }
+
+        return languageData;
+    }
+
+    @Override
+    public Map<String, Map<String, Object>> getLanguageData(DocumentReference documentReference)
+    {
+        Map<String, Map<String, Object>> languageData = new HashMap<String, Map<String, Object>>();
+
+        String languageQueryString =
+            "select language.value, title.value, status.value, isDefault.value from BaseObject as obj, "
+                + "StringProperty as language, StringProperty as title, StringProperty as status, IntegerProperty as isDefault where "
+                + "obj.className = :className and obj.name = :objectName and language.id.id = obj.id and language.name = :languageName and "
+                + "title.id.id = obj.id and title.name = :titleName and status.id.id = obj.id and status.name = :statusName and "
+                + "isDefault.id.id = obj.id and isDefault.name = :isDefaultName";
+        try {
+            List<Object[]> documentlanguageData =
+                this.queryManagerProvider.get().createQuery(languageQueryString, Query.HQL)
+                    .bindValue("className",
+                        this.localSerializer.serialize(BookVersionsConstants.PAGETRANSLATION_CLASS_REFERENCE))
+                    .bindValue("objectName", this.localSerializer.serialize(documentReference))
+                    .bindValue("languageName", BookVersionsConstants.PAGETRANSLATION_LANGUAGE)
+                    .bindValue("titleName", BookVersionsConstants.PAGETRANSLATION_TITLE)
+                    .bindValue("statusName", BookVersionsConstants.PAGETRANSLATION_STATUS)
+                    .bindValue("isDefaultName", BookVersionsConstants.PAGETRANSLATION_ISDEFAULT)
+                    .setWiki(documentReference.getWikiReference().getName()).execute();
+            for (Object[] entry : documentlanguageData) {
+                if (entry == null || (entry != null && entry.length == 0)) {
+                    continue;
+                }
+
+                String language = (String) entry[0];
+                if (language != null && !language.isEmpty()) {
+                    // Title
+                    String title = (String) entry[1];
+
+                    // Status
+                    String statusParameterValue = (String) entry[2];
+                    Integer isDefault = (Integer) entry[3];
+
+                    // Status
+                    PageTranslationStatus status = PageTranslationStatus.NOT_TRANSLATED;
+                    if (statusParameterValue != null && !statusParameterValue.isEmpty()
+                        && statusParameterValue.toLowerCase().equals("translated")) {
+                        status = PageTranslationStatus.TRANSLATED;
+                    }
+                    if (statusParameterValue != null && !statusParameterValue.isEmpty()
+                        && statusParameterValue.toLowerCase().equals("outdated")) {
+                        status = PageTranslationStatus.OUTDATED;
+                    }
+
+                    // Default language
+                    Map<String, Object> currentLanguageData = new HashMap<String, Object>();
+                    currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_TITLE,
+                        title != null && !title.isEmpty() ? title : "");
+                    currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_STATUS,
+                        status != null ? status : PageTranslationStatus.NOT_TRANSLATED);
+                    if (languageData.get(language) != null
+                        && languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED) != null
+                        && (boolean) languageData.get(language)
+                            .get(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED)) {
+                        // the current language already has a Translated status which should be kept
+                        currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED, true);
+                    } else {
+                        currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_HASTRANSLATED,
+                            status == PageTranslationStatus.TRANSLATED);
+                    }
+                    currentLanguageData.put(BookVersionsConstants.PAGETRANSLATION_ISDEFAULT,
+                        isDefault != null && isDefault > 0 ? true : false);
+
+                    languageData.put(language, currentLanguageData);
+                }
+            }
+        } catch (QueryException e) {
+            logger.error("Could not compute teh list of variants for page [{}] : [{}]", documentReference, e);
         }
 
         return languageData;

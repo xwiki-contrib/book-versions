@@ -100,49 +100,6 @@
         <artifactId>revapi-maven-plugin</artifactId>
         <configuration>
           <analysisConfiguration combine.children="append">
-            <!-- Add ignores here using the following syntax. You can use a single <revapi.differences> entry but it
-                 cannot be empty. You can also use different <revapi.differences> entries if you wish to use a common
-                 justification for example (see example below).
-
-                 By default criticality is set to "error" if not specified.
-                 See https://revapi.org/revapi/configuration.html#_criticality for more.
-
-                 Note: you can use regexes by using the syntax: <regex>true</regex>
-                 Don't forget to '\'-escape dots and other special characters in this case ;)
-
-                 Common justification example:
-
-            <revapi.differences>
-              <justification>This change is necessary to fix bug #1234</justification>
-              <criticality>highlight</criticality>
-              <differences>
-                <item>
-                  <code>java.method.addToInterface</code>
-                  <fullQualifiedClassName>com.acme.ToolInterface</fullyQualifiedClassName>
-                  <new>method void com.acme.ToolInterface::setup()</new>
-                </item>
-                <item>
-                  <code>java.method.removed</code>
-                  <fullQualifiedClassName>com.acme.ToolInterface</fullyQualifiedClassName>
-                  <old>method void com.acme.ToolInterface::initialize()</old>
-                  <justification>...</justification>
-                </item>
-              </differences>
-            </revapi.differences>
-
-                 Single justification example:
-
-            <revapi.differences>
-              <differences>
-                <item>
-                  <code>java.method.removed</code>
-                  <old>method void org.xwiki.diff.xml.XMLDiff::xxx()</old>
-                  <justification>Unstable API added by mistake.</justification>
-                  <criticality>highlight</criticality>
-                </item>
-              </differences>
-            </revapi.differences>
-          -->
           <revapi.differences>
             <differences>
               <item>
@@ -361,6 +318,64 @@
                 <code>java.method.addedToInterface</code>
                 <new>method void org.xwiki.contrib.bookversions.BookVersionsManager::removeVersionContentInternal(org.xwiki.model.reference.DocumentReference, org.xwiki.model.reference.DocumentReference) throws org.xwiki.query.QueryException, com.xpn.xwiki.XWikiException</new>
                 <justification>Needed for new features.</justification>
+              </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.addedToInterface</code>
+                <new>method java.util.Map&lt;java.lang.String, java.util.Map&lt;java.lang.String, java.lang.Object&gt;&gt; org.xwiki.contrib.bookversions.BookVersionsManager::getLanguageData(org.xwiki.model.reference.DocumentReference)</new>
+                <justification>Needed for improving performance.</justification>
+              </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.lang.String org.xwiki.contrib.bookversions.BookVersionsManager::getPageStatus(===com.xpn.xwiki.doc.XWikiDocument===)</old>
+                <new>parameter java.lang.String org.xwiki.contrib.bookversions.BookVersionsManager::getPageStatus(===org.xwiki.model.reference.DocumentReference===)</new>
+                <parameterIndex>0</parameterIndex>
+                <justification>Needed for improving performance.</justification>
+              </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.parameterTypeChanged</code>
+                <old>parameter java.util.List&lt;org.xwiki.model.reference.DocumentReference&gt; org.xwiki.contrib.bookversions.BookVersionsManager::getPageVariants(===com.xpn.xwiki.doc.XWikiDocument===)</old>
+                <new>parameter java.util.List&lt;org.xwiki.model.reference.DocumentReference&gt; org.xwiki.contrib.bookversions.BookVersionsManager::getPageVariants(===org.xwiki.model.reference.DocumentReference===)</new>
+                <parameterIndex>0</parameterIndex>
+                <justification>Needed for improving performance.</justification>
+              </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.removed</code>
+                <old>method java.lang.String org.xwiki.contrib.bookversions.BookVersionsManager::getTranslatedTitle(com.xpn.xwiki.doc.XWikiDocument) throws com.xpn.xwiki.XWikiException, org.xwiki.query.QueryException</old>
+                <justification>Needed for improving performance.</justification>
+              </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.removed</code>
+                <old>method java.lang.String org.xwiki.contrib.bookversions.script.BookVersionsScriptService::getPageStatus(com.xpn.xwiki.doc.XWikiDocument)</old>
+                <justification>Needed for improving performance.</justification>
+              </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.removed</code>
+                <old>method java.util.List&lt;org.xwiki.model.reference.DocumentReference&gt; org.xwiki.contrib.bookversions.script.BookVersionsScriptService::getPageVariants(com.xpn.xwiki.doc.XWikiDocument)</old>
+                <justification>Needed for improving performance.</justification>
+              </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.removed</code>
+                <old>method java.lang.String org.xwiki.contrib.bookversions.script.BookVersionsScriptService::getTranslatedTitle(com.xpn.xwiki.doc.XWikiDocument) throws com.xpn.xwiki.XWikiException, org.xwiki.query.QueryException</old>
+                <justification>Needed for improving performance.</justification>
+              </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.removed</code>
+                <old>method boolean org.xwiki.contrib.bookversions.BookVersionsManager::isMarkedDeleted(com.xpn.xwiki.doc.XWikiDocument)</old>
+                <justification>Needed for improving performance.</justification>
+              </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.removed</code>
+                <old>method boolean org.xwiki.contrib.bookversions.script.BookVersionsScriptService::isMarkedDeleted(com.xpn.xwiki.doc.XWikiDocument)</old>
+                <justification>Needed for improving performance.</justification>
               </item>
             </differences>
           </revapi.differences>

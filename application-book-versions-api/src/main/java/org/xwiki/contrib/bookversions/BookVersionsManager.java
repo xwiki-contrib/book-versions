@@ -195,16 +195,9 @@ public interface BookVersionsManager
      * @param documentReference The document reference
      * @return True if the document is marked as deleted
      * @throws XWikiException could occur if getDocument has an issue
+     * @throws QueryException In case something is wrong
      */
-    boolean isMarkedDeleted(DocumentReference documentReference) throws XWikiException;
-
-    /**
-     * Check if the given document is marked as deleted.
-     *
-     * @param document The document
-     * @return True if the document is marked as deleted
-     */
-    boolean isMarkedDeleted(XWikiDocument document);
+    boolean isMarkedDeleted(DocumentReference documentReference) throws XWikiException, QueryException;
 
     /**
      * Transform the given name by using the slug name validation.
@@ -245,10 +238,10 @@ public interface BookVersionsManager
     /**
      * Get the variants the page belongs to.
      *
-     * @param page the page document
+     * @param documentReference the page reference
      * @return the variants which the page belongs to
      */
-    List<DocumentReference> getPageVariants(XWikiDocument page);
+    List<DocumentReference> getPageVariants(DocumentReference documentReference);
 
     /**
      * Set the selected variant in the session for the given collection (book / library).
@@ -285,16 +278,6 @@ public interface BookVersionsManager
      * @throws QueryException If any exception occurs while querying the database.
      */
     String getDefaultTranslation(DocumentReference documentReference) throws XWikiException, QueryException;
-
-    /**
-     * Get the translated title for a document based on the selected language.
-     *
-     * @param document The document to get the translated title for
-     * @return The translated title if found, null otherwise
-     * @throws XWikiException In case the system can't provide an answer.
-     * @throws QueryException If any exception occurs while querying the database.
-     */
-    String getTranslatedTitle(XWikiDocument document) throws XWikiException, QueryException;
 
     /**
      * Get the translation title for the given document.
@@ -653,8 +636,9 @@ public interface BookVersionsManager
      *
      * @param documentReference The document reference
      * @throws XWikiException could occur if getDocument, newXObject or save have an issue
+     * @throws QueryException In case the query can't be executed
      */
-    void switchDeletedMark(DocumentReference documentReference) throws XWikiException;
+    void switchDeletedMark(DocumentReference documentReference) throws XWikiException, QueryException;
 
     /**
      * Execute the publication process with the provided configuration.
@@ -724,10 +708,18 @@ public interface BookVersionsManager
     /**
      * Get the page status.
      *
-     * @param page the page document
+     * @param documentReference the document reference
      * @return the status of the page
      */
-    String getPageStatus(XWikiDocument page);
+    String getPageStatus(DocumentReference documentReference);
+
+    /**
+     * Get the data about page translations.
+     *
+     * @param documentReference The XWiki document reference.
+     * @return the data about page translations.
+     */
+    Map<String, Map<String, Object>> getLanguageData(DocumentReference documentReference);
 
     /**
      * Get the data about page translations.
