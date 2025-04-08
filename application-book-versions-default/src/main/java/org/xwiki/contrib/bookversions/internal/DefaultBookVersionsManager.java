@@ -2493,7 +2493,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 // Change the original content if a translation is to be published
                 mergeTranslatedContent(contentPage, publishedDocument, language);
             }
-            copyContentsToNewVersion(contentPage, publishedDocument, xcontext);
+            copyContentsToNewVersion(contentPage, publishedDocument, xcontext,
+                getRemovedObjectsForPublication(contentPage.getDocumentReference(), xcontext));
 
             logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
                 + ".transformContent", userLocale));
@@ -2763,29 +2764,36 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         return subTargetDocumentsString.isEmpty();
     }
 
-    // Adapted from org.xwiki.workflowpublication.internal.DefaultPublicationWorkflow (Publication Workflow Application)
+    /**
+     * Copy a document to another document, and remove the provided objects. The target document won't be saved.
+     * Adapted from org.xwiki.workflowpublication.internal.DefaultPublicationWorkflow (Publication Workflow Application)
+     *
+     * @param fromDocument the document to copy
+     * @param toDocument the target document. It won't be saved, so it will need to be done after this method call.
+     * @param xcontext the context
+     * @param removedObjects the objects to be removed during copy
+     * @return true if the copy worked
+     * @throws XWikiException happens if loading attachments or removing the objects have issue.
+     */
     protected boolean copyContentsToNewVersion(XWikiDocument fromDocument, XWikiDocument toDocument,
-        XWikiContext xcontext) throws XWikiException
+        XWikiContext xcontext, List<EntityReference> removedObjects) throws XWikiException
     {
-        if (fromDocument == null || toDocument == null) {
+        if (fromDocument == null || toDocument == null || xcontext == null) {
             return false;
         }
-
-        DocumentReference objectsToRemoveConfigRef = referenceEntityResolver.resolve(
-            BookVersionsConstants.CONFIGURATION_REMOVEDOBJECTS, fromDocument.getDocumentReference());
 
         // use a fake 3 way merge: previous is toDocument without comments, rights and wf object
         // current version is current toDocument
         // next version is fromDocument without comments, rights and wf object
         XWikiDocument previousDoc = toDocument.clone();
-        this.removeObjectsForPublication(previousDoc, objectsToRemoveConfigRef, xcontext);
+        this.removeObjects(previousDoc, removedObjects);
         // set reference and language
 
         // make sure that the attachments are properly loaded in memory for the duplicate to work fine, otherwise it's a
         // bit impredictable about attachments
         fromDocument.loadAttachments(xcontext);
         XWikiDocument nextDoc = fromDocument.duplicate(toDocument.getDocumentReference());
-        this.removeObjectsForPublication(nextDoc, objectsToRemoveConfigRef, xcontext);
+        this.removeObjects(nextDoc, removedObjects);
 
         // and now merge. Normally the attachments which are not in the next doc are deleted from the current doc
         MergeResult result = toDocument.merge(previousDoc, nextDoc, new MergeConfiguration(), xcontext);
@@ -3012,27 +3020,62 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         return publishedReference;
     }
 
-    private XWikiDocument removeObjectsForPublication(XWikiDocument publishedPage,
-        DocumentReference objectsToRemoveConfigRef, XWikiContext xcontext) throws XWikiException
+    /**
+     * Remove the objects from the document. The document won't be saved.
+     *
+     * @param document the document to remove the objects from. It won't be saved, so it will need to be after
+     * calling this method.
+     * @param removedObjects the list of objects to remove
+     * @return the document after removing the objects.
+     */
+    private XWikiDocument removeObjects(XWikiDocument document, List<EntityReference> removedObjects)
     {
-        if (publishedPage == null) {
+        if (document == null || removedObjects == null) {
             return null;
         }
 
-        List<EntityReference> removedObjects = new ArrayList<>(BookVersionsConstants.PUBLICATION_REMOVEDOBJECTS);
-        removedObjects.addAll(getRemovedObjectsConfiguration(publishedPage, objectsToRemoveConfigRef, xcontext));
         for (EntityReference objectRef : removedObjects ) {
-            publishedPage.removeXObjects(objectRef);
+            document.removeXObjects(objectRef);
         }
 
-        return publishedPage;
+        return document;
     }
 
-    private List<EntityReference> getRemovedObjectsConfiguration(XWikiDocument publishedPage,
-        DocumentReference objectsToRemoveConfigRef, XWikiContext xcontext)
+    /**
+     * Get the list of objects to be removed at publication.
+     *
+     * @param documentReference the document which will be published reference
+     * @param xcontext the context
+     * @return the list of objects to be removed at publication
+     * @throws XWikiException if issues while getting or checking the existence of the configuration document
+     */
+    private List<EntityReference> getRemovedObjectsForPublication(DocumentReference documentReference,
+        XWikiContext xcontext) throws XWikiException
+    {
+        if (documentReference == null || xcontext == null) {
+            return Collections.emptyList();
+        }
+
+        DocumentReference objectsToRemoveConfigRef = referenceEntityResolver.resolve(
+            BookVersionsConstants.CONFIGURATION_REMOVEDOBJECTS, documentReference);
+        List<EntityReference> removedObjects = new ArrayList<>(BookVersionsConstants.PUBLICATION_REMOVEDOBJECTS);
+        removedObjects.addAll(getRemovedObjectsConfiguration(objectsToRemoveConfigRef, xcontext));
+        return removedObjects;
+    }
+
+    /**
+     * Get the objects to remove from the provided configuration document.
+     *
+     * @param objectsToRemoveConfigRef the reference of the document to get the objects from
+     * @param xcontext the context
+     * @return the list of objects contained in the document
+     * @throws XWikiException if issues while getting the document or checking its existence
+     */
+    private List<EntityReference> getRemovedObjectsConfiguration(DocumentReference objectsToRemoveConfigRef,
+        XWikiContext xcontext)
         throws XWikiException
     {
-        if (publishedPage == null || objectsToRemoveConfigRef == null || xcontext == null) {
+        if (objectsToRemoveConfigRef == null || xcontext == null) {
             return Collections.emptyList();
         }
 
