@@ -653,6 +653,32 @@ public class BookVersionsScriptService implements ScriptService
     }
 
     /**
+     * Switch an unversioned document to versioned.
+     *
+     * @param unversionedDocumentReference the source unversioned document reference
+     * @param versionedDocumentReference the target versioned document reference
+     * @throws XWikiException when issues when manipulating the documents
+     */
+    public void switchToVersioned(DocumentReference unversionedDocumentReference,
+        DocumentReference versionedDocumentReference) throws XWikiException
+    {
+        bookVersionsManagerProvider.get().switchToVersioned(unversionedDocumentReference, versionedDocumentReference);
+    }
+
+    /**
+     * Switch a versioned document to unversioned.
+     *
+     * @param unversionedDocumentReference the source versioned document reference
+     * @param versionedDocumentReference the target unversioned document reference
+     * @throws XWikiException when issues when manipulating the documents
+     */
+    public void switchToUnversioned(DocumentReference versionedDocumentReference,
+        DocumentReference unversionedDocumentReference) throws XWikiException
+    {
+        bookVersionsManagerProvider.get().switchToUnversioned(versionedDocumentReference, unversionedDocumentReference);
+    }
+
+    /**
      * Get the information for the publication preview.
      * @param configurationReference
      * @param userDocumentReference

@@ -1691,6 +1691,111 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     @Override
+    public void switchToVersioned(DocumentReference unversionedDocumentReference,
+        DocumentReference versionedDocumentReference) throws XWikiException
+    {
+        if (unversionedDocumentReference == null || versionedDocumentReference == null ||
+            !isPage(unversionedDocumentReference) || isVersionedContent(unversionedDocumentReference) ) {
+            return;
+        }
+
+        XWikiContext xcontext = this.getXWikiContext();
+        XWiki xwiki = xcontext.getWiki();
+        XWikiDocument unversionedDocument = xwiki.getDocument(unversionedDocumentReference, xcontext).clone();
+        XWikiDocument versionedDocument = xwiki.getDocument(versionedDocumentReference, xcontext).clone();
+
+        boolean result = copyContentsToNewVersion(unversionedDocument, versionedDocument, xcontext,
+            BookVersionsConstants.UNVERSIONEDTOVERSIONED_REMOVEDOBJECTS);
+        if (!result) {
+            // Copy did not happen
+            return;
+        }
+
+        // Change the unversioned document to versioned
+        BaseObject xObject = unversionedDocument.getXObject(BookVersionsConstants.BOOKPAGE_CLASS_REFERENCE);
+        if (xObject == null) {
+            xObject = unversionedDocument.newXObject(BookVersionsConstants.BOOKPAGE_CLASS_REFERENCE, xcontext);
+        }
+        xObject.set(BookVersionsConstants.BOOKPAGE_PROP_UNVERSIONED, 0, xcontext);
+        xwiki.saveDocument(unversionedDocument,
+            "Changed to versioned in Version "+ getVersionName(versionedDocumentReference), xcontext);
+
+        // Add the necessary objects to the versioned document
+        for (EntityReference objectRef : BookVersionsConstants.UNVERSIONEDTOVERSIONED_ADDOBJECTS) {
+            BaseObject objectList = versionedDocument.getXObject(objectRef);
+            if (objectList == null) {
+                versionedDocument.newXObject(objectRef, xcontext);
+            }
+        }
+        xwiki.saveDocument(versionedDocument,
+            "Created versioned content for Version "+ getVersionName(versionedDocumentReference), xcontext);
+    }
+
+    @Override
+    public void switchToUnversioned(DocumentReference versionedDocumentReference,
+        DocumentReference unversionedDocumentReference) throws XWikiException
+    {
+        if (unversionedDocumentReference == null || versionedDocumentReference == null ||
+            !isVersionedContent(versionedDocumentReference) ) {
+            return;
+        }
+
+        XWikiContext xcontext = this.getXWikiContext();
+        XWiki xwiki = xcontext.getWiki();
+        XWikiDocument unversionedDocument = xwiki.getDocument(unversionedDocumentReference, xcontext).clone();
+        XWikiDocument versionedDocument = xwiki.getDocument(versionedDocumentReference, xcontext).clone();
+
+        BaseObject originalCollectionClass = unversionedDocument.getXObject(BookVersionsConstants.BOOK_CLASS_REFERENCE);
+        if (originalCollectionClass == null) {
+            originalCollectionClass = unversionedDocument.getXObject(BookVersionsConstants.LIBRARY_CLASS_REFERENCE);
+        }
+        List<BaseObject> collectionPublications =
+            unversionedDocument.getXObjects(BookVersionsConstants.PUBLICATION_CLASS_REFERENCE);
+        List<BaseObject> collectionPublicationsClones = new ArrayList<>();
+        for (BaseObject collectionPublication : collectionPublications) {
+            if (collectionPublication != null) {
+                collectionPublicationsClones.add(collectionPublication.clone());
+            }
+        }
+
+        boolean result = copyContentsToNewVersion(versionedDocument, unversionedDocument, xcontext,
+            BookVersionsConstants.VERSIONEDTOUNVERSIONED_REMOVEDOBJECTS);
+        if (!result) {
+            // Copy did not happen
+            return;
+        }
+
+        // Change the unversioned document to unversioned value and add eventual top page data
+        if (originalCollectionClass != null) {
+            // Set the collection's top page if it is the case
+            unversionedDocument.newXObject(originalCollectionClass.getXClassReference(), xcontext);
+            if (collectionPublicationsClones != null && collectionPublicationsClones.size() > 0) {
+                for (BaseObject collectionPublication : collectionPublicationsClones) {
+                    if (collectionPublication == null) {
+                        continue;
+                    }
+                    BaseObject tmpObject =
+                        unversionedDocument.newXObject(BookVersionsConstants. PUBLICATION_CLASS_REFERENCE, xcontext);
+                    tmpObject.set(BookVersionsConstants.PUBLICATION_PROP_ID,
+                        collectionPublication.getStringValue(BookVersionsConstants.PUBLICATION_PROP_ID), xcontext);
+                    tmpObject.set(BookVersionsConstants.PUBLICATION_PROP_SOURCE,
+                        collectionPublication.getStringValue(BookVersionsConstants.PUBLICATION_PROP_SOURCE), xcontext);
+                    tmpObject.set(BookVersionsConstants.PUBLICATION_PROP_PUBLISHEDSPACE,
+                        collectionPublication.getStringValue(BookVersionsConstants.PUBLICATION_PROP_PUBLISHEDSPACE),
+                        xcontext);
+                }
+            }
+        }
+        BaseObject xObject = unversionedDocument.getXObject(BookVersionsConstants.BOOKPAGE_CLASS_REFERENCE);
+        if (xObject == null) {
+            xObject = unversionedDocument.newXObject(BookVersionsConstants.BOOKPAGE_CLASS_REFERENCE, xcontext);
+        }
+        xObject.set(BookVersionsConstants.BOOKPAGE_PROP_UNVERSIONED, 1, xcontext);
+        xwiki.saveDocument(unversionedDocument,
+            "Changed to unversioned from Version "+ getVersionName(versionedDocumentReference), xcontext);
+    }
+
+    @Override
     public String publish(DocumentReference configurationReference) throws JobException
     {
         if (configurationReference == null) {
@@ -2782,9 +2887,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             return false;
         }
 
-        // use a fake 3 way merge: previous is toDocument without comments, rights and wf object
+        // use a fake 3 way merge: previous is toDocument without the provided list of objects
         // current version is current toDocument
-        // next version is fromDocument without comments, rights and wf object
+        // next version is fromDocument without the provided list of objects
         XWikiDocument previousDoc = toDocument.clone();
         this.removeObjects(previousDoc, removedObjects);
         // set reference and language

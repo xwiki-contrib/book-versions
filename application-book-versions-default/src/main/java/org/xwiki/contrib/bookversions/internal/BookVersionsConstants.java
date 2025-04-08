@@ -448,6 +448,30 @@ public interface BookVersionsConstants
         new EntityReference("ConfigurationObjectsToRemove", EntityType.DOCUMENT, BOOKVERSIONS_CODE_REFERENCE);
 
     /**
+     * The list of objects to remove when switching unversioned to versioned.
+     */
+    List<EntityReference> UNVERSIONEDTOVERSIONED_REMOVEDOBJECTS = Arrays.asList(
+        BookVersionsConstants.BOOK_CLASS_REFERENCE,
+        BookVersionsConstants.LIBRARY_CLASS_REFERENCE,
+        BookVersionsConstants.BOOKPAGE_CLASS_REFERENCE,
+        BookVersionsConstants.PUBLICATION_CLASS_REFERENCE
+    );
+
+    /**
+     * The list of objects to add when switching unversioned to versioned.
+     */
+    List<EntityReference> UNVERSIONEDTOVERSIONED_ADDOBJECTS = Arrays.asList(
+        BookVersionsConstants.BOOKVERSIONEDCONTENT_CLASS_REFERENCE
+    );
+
+    /**
+     * The list of objects to remove when switching unversioned to versioned.
+     */
+    List<EntityReference> VERSIONEDTOUNVERSIONED_REMOVEDOBJECTS = Arrays.asList(
+        BookVersionsConstants.BOOKVERSIONEDCONTENT_CLASS_REFERENCE
+    );
+
+    /**
      * The first part of the publication job's ID
      */
     String PUBLICATION_JOBID_PREFIX = "BookVersionsPublication";

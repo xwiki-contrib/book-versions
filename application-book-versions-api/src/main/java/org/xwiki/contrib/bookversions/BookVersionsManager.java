@@ -641,6 +641,26 @@ public interface BookVersionsManager
     void switchDeletedMark(DocumentReference documentReference) throws XWikiException, QueryException;
 
     /**
+     * Switch an unversioned document to versioned.
+     *
+     * @param unversionedDocumentReference the source unversioned document reference
+     * @param versionedDocumentReference the target versioned document reference
+     * @throws XWikiException when issues when manipulating the documents
+     */
+    void switchToVersioned(DocumentReference unversionedDocumentReference,
+        DocumentReference versionedDocumentReference) throws XWikiException;
+
+    /**
+     * Switch a versioned document to unversioned.
+     *
+     * @param unversionedDocumentReference the source versioned document reference
+     * @param versionedDocumentReference the target unversioned document reference
+     * @throws XWikiException when issues when manipulating the documents
+     */
+    void switchToUnversioned(DocumentReference versionedDocumentReference,
+        DocumentReference unversionedDocumentReference) throws XWikiException;
+
+    /**
      * Execute the publication process with the provided configuration.
      *
      * @param configurationReference the configuration reference
