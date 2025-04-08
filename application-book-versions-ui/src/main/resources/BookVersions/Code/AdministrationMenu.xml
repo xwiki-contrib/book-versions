@@ -544,7 +544,7 @@
             &lt;/li&gt;
           &lt;/ul&gt;
         &lt;/dd&gt;
-        #if($services.bookversions.isPage($docRef) || $isVersionedContent)
+        (!$services.bookversions.isBook($docRef) &amp;&amp; ($services.bookversions.isPage($docRef) || $isVersionedContent))
         &lt;dt class="dropdown-header"&gt;$services.localization.render('BookVersions.adminMenu.pageActions')&lt;/dt&gt;
         &lt;dd&gt;
           &lt;ul&gt;
