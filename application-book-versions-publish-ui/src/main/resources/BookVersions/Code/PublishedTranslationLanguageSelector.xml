@@ -511,7 +511,7 @@
             #set ($displayvalue = $escapetool.xml($stringtool.capitalize($locale.getDisplayName($locale)) +
       ' (' + $stringtool.capitalize($locale.getDisplayName($currentLocale)) + ')'))
             #set ($isSelected = $language &amp;&amp; $selectedLanguage &amp;&amp; $language.equals($selectedLanguage))
-            &lt;option value="$language" #if($isSelected)selected#end&gt;$escapetool.xml($displayvalue) $isSelected &lt;/option&gt;
+            &lt;option value="$language" #if($isSelected)selected#end&gt;$escapetool.xml($displayvalue)&lt;/option&gt;
           #end
         #end
       &lt;/select&gt;
