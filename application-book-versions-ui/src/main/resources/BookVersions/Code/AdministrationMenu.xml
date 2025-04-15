@@ -160,6 +160,14 @@
     tempForm.appendTo('body').submit();
   }
 
+  function hideBookVersionsAdministrationMenu() {
+    $('#tmBVAdministrationMenu').addClass('hidden');
+  }
+
+  function showBookVersionsAdministrationMenu() {
+    $('#tmBVAdministrationMenu').removeClass('hidden');
+  }
+
   // Handle link clicks
   convertToUnversionedLink.on('click', function(e) {
     e.preventDefault();
@@ -201,6 +209,14 @@
       .fail(function(jqXHR, textStatus, errorThrown) {
         console.error('Failed to update status:', errorThrown);
       });
+  });
+
+  $('#xwikicontent').on('xwiki:actions:edit', function() {
+    hideBookVersionsAdministrationMenu(true);
+  });
+
+  $('#xwikicontent').on('xwiki:actions:view', function() {
+    showBookVersionsAdministrationMenu(true);
   });
 });</code>
     </property>
@@ -504,7 +520,7 @@
   ## Get the current selected version
   #set ($selectedVersion = $services.bookversions.getSelectedVersion($docRef))
   {{html}}
-    &lt;div class="btn-group" id="tmAdministrationMenu"&gt;
+    &lt;div class="btn-group" id="tmBVAdministrationMenu"&gt;
       &lt;button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"&gt;
         &lt;span class="fa fa-bars" aria-hidden="true"&gt;&lt;/span&gt;
         $services.localization.render('BookVersions.adminMenu.title')
