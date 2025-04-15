@@ -377,6 +377,18 @@
                 <old>method boolean org.xwiki.contrib.bookversions.script.BookVersionsScriptService::isMarkedDeleted(com.xpn.xwiki.doc.XWikiDocument)</old>
                 <justification>Needed for improving performance.</justification>
               </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.addedToInterface</code>
+                <new>method void org.xwiki.contrib.bookversions.BookVersionsManager::switchToUnversioned(org.xwiki.model.reference.DocumentReference, org.xwiki.model.reference.DocumentReference) throws com.xpn.xwiki.XWikiException</new>
+                <justification>Needed for new features</justification>
+              </item>
+              <item>
+                <ignore>true</ignore>
+                <code>java.method.addedToInterface</code>
+                <new>method void org.xwiki.contrib.bookversions.BookVersionsManager::switchToVersioned(org.xwiki.model.reference.DocumentReference, org.xwiki.model.reference.DocumentReference) throws com.xpn.xwiki.XWikiException</new>
+                <justification>Needed for new features</justification>
+              </item>
             </differences>
           </revapi.differences>
         </analysisConfiguration>
