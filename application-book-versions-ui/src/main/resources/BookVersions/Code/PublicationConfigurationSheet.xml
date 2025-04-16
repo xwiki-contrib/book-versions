@@ -37,6 +37,7 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
   <content>{{velocity output=false}}
+#set($discard = $xwiki.ssx.use('BookVersions.Code.PublicationConfigurationSheet'))
 #**
  * Initialize common variables used throughout the sheet
  *#
@@ -86,6 +87,27 @@
        [ "#renderReference($content)" ]
      )
   #end
+#end
+#**
+ * Publish form
+ *#
+#macro(displayPublishForm $doc $xobject $back)
+  &lt;form action="$doc.getURL()" method="post" class="publication-form"&gt;
+    &lt;input type="hidden" name="action" value="publish" /&gt;
+    &lt;input type="hidden" name="form_token" value="$!services.csrf.getToken()" /&gt;
+    &lt;input type="hidden" name="configReference" value="$services.model.serialize($doc.documentReference, 'local')" /&gt;
+    #if($back)
+      &lt;a href="$xwiki.getURL($doc)" class="btn btn-default"&gt;
+        $services.localization.render('BookVersions.Code.PublicationProgress.back')
+      &lt;/a&gt;
+    #end
+    &lt;div class="btn-group" id="tmCreateResource"&gt;
+      &lt;button type="submit" class="btn btn-primary" title="$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.previewContinueButton')"&gt;
+        &lt;span class="fa fa-print" aria-hidden="true"&gt;&lt;/span&gt;
+        &lt;span class="btn-label"&gt;$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.previewContinueButton')&lt;/span&gt;
+      &lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/form&gt;
 #end
 {{/velocity}}
 
@@ -328,21 +350,7 @@
   ## Display publish button
   ##
   {{html wiki="true" clean="false"}}
-  &lt;form action="$doc.getURL()" method="post" class="publication-form"&gt;
-    &lt;input type="hidden" name="action" value="publish" /&gt;
-    &lt;input type="hidden" name="form_token" value="$!services.csrf.getToken()" /&gt;
-    &lt;input type="hidden" name="configReference" value="$services.model.serialize($doc.documentReference, 'local')" /&gt;
-      #set ($sourceValue = $xobject.getProperty('source').value)
-      &lt;a href="$xwiki.getURL($doc)" class="btn btn-default"&gt;
-        $services.localization.render('BookVersions.Code.PublicationProgress.back')
-      &lt;/a&gt;
-    &lt;div class="btn-group" id="tmCreateResource"&gt;
-      &lt;button type="submit" class="btn btn-primary" title="$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.previewContinueButton')"&gt;
-        &lt;span class="fa fa-print" aria-hidden="true"&gt;&lt;/span&gt;
-        &lt;span class="btn-label"&gt;$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.previewContinueButton')&lt;/span&gt;
-      &lt;/button&gt;
-    &lt;/div&gt;
-  &lt;/form&gt;
+    #displayPublishForm($doc $xobject true)
   {{/html}}
   #stop
 #end
@@ -386,7 +394,6 @@
     ## Add navigation links
     ##
     &lt;div class="publication-navigation"&gt;
-      #set ($sourceValue = $xobject.getProperty('source').value)
       &lt;a href="$xwiki.getURL($doc)" class="btn btn-default"&gt;
         $services.localization.render('BookVersions.Code.PublicationProgress.back')
       &lt;/a&gt;
@@ -427,19 +434,150 @@
     &lt;/dl&gt;
   &lt;/div&gt;
   #if (!$editing)
-  &lt;form action="$doc.getURL()" method="post" class="publication-form"&gt;
-    &lt;input type="hidden" name="action" value="preview" /&gt;
-    &lt;input type="hidden" name="form_token" value="$!services.csrf.getToken()" /&gt;
-    &lt;input type="hidden" name="configReference" value="$services.model.serialize($doc.documentReference, 'local')" /&gt;
-    &lt;div class="btn-group" id="tmCreateResource"&gt;
-      &lt;button type="submit" class="btn btn-primary" title="$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.nextButton')"&gt;
-        &lt;span class="fa fa-print" aria-hidden="true"&gt;&lt;/span&gt;
-        &lt;span class="btn-label"&gt;$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.nextButton')&lt;/span&gt;
-      &lt;/button&gt;
-    &lt;/div&gt;
-  &lt;/form&gt;
+    ##
+    ## Display publish button
+    ##
+    &lt;form action="$doc.getURL()" method="post" class="publication-preview-form"&gt;
+      &lt;input type="hidden" name="action" value="preview" /&gt;
+      &lt;input type="hidden" name="form_token" value="$!services.csrf.getToken()" /&gt;
+      &lt;input type="hidden" name="configReference" value="$services.model.serialize($doc.documentReference, 'local')" /&gt;
+      &lt;div class="btn-group" id="tmCreateResource"&gt;
+        &lt;button type="submit" class="btn btn-secondary" title="$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.nextButton')"&gt;
+          &lt;span class="fa fa-print" aria-hidden="true"&gt;&lt;/span&gt;
+          &lt;span class="btn-label"&gt;$services.localization.render('BookVersions.Code.PublicationConfigurationSheet.nextButton')&lt;/span&gt;
+        &lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/form&gt;
+    ##
+    ## Display publish button
+    ##
+    #displayPublishForm($doc $xobject false)
   #end
 #end
 {{/html}}
 {{/velocity}}</content>
+  <object>
+    <name>BookVersions.Code.PublicationConfigurationSheet</name>
+    <number>0</number>
+    <className>XWiki.StyleSheetExtension</className>
+    <guid>24fc24e6-1c62-429a-81b8-2d16eb1fd8ac</guid>
+    <class>
+      <name>XWiki.StyleSheetExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <defaultValue>long</defaultValue>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <contenttype>PureText</contenttype>
+        <disabled>0</disabled>
+        <editor>PureText</editor>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <restricted>0</restricted>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <contentType>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>contentType</name>
+        <number>6</number>
+        <prettyName>Content Type</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>CSS|LESS</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </contentType>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <freeText>forbidden</freeText>
+        <largeStorage>0</largeStorage>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>.publication-preview-form {
+  float : left;
+  margin-right: 10px;
+}</code>
+    </property>
+    <property>
+      <contentType>CSS</contentType>
+    </property>
+    <property>
+      <name/>
+    </property>
+    <property>
+      <parse>0</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
 </xwikidoc>
