@@ -560,7 +560,7 @@
             &lt;/li&gt;
           &lt;/ul&gt;
         &lt;/dd&gt;
-        #if($services.bookversions.isPage($docRef) || $isVersionedContent)
+        #if(($services.bookversions.isPage($docRef) || $isVersionedContent) &amp;&amp; $services.security.authorization.hasAccess('edit', $docRef))
         &lt;dt class="dropdown-header"&gt;$services.localization.render('BookVersions.adminMenu.pageActions')&lt;/dt&gt;
         &lt;dd&gt;
           &lt;ul&gt;

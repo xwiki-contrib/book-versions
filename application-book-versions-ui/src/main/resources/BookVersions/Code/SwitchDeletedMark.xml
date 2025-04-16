@@ -39,16 +39,16 @@
   <content>{{velocity}}
 #set ($debuglogger = $services.logging.getLogger('BookVersions.SwitchDeletedMark'))
 #set ($discard = $debuglogger.debug("START Switch Deleted Mark"))
-#if ($services.csrf.isTokenValid($!request.form_token))
-  #set ($pageReference = $!request.pageReference)
+#set ($pageId = $!request.pageReference)
+#if ($services.csrf.isTokenValid($!request.form_token) &amp;&amp; "$!pageId" != '')
+  #set ($pageReference = $!services.model.resolveDocument($request.pageReference))
   #set ($isVersionedContent = $services.bookversions.isVersionedContent($pageReference))
   #set ($isUnversionedPage = $services.bookversions.isPage($pageReference) &amp;&amp; !$services.bookversions.isVersionedPage($pageReference))
-  #set ($hasAccess = $services.security.authorization.hasAccess('edit', $bookReference))
-  #set ($discard = $debuglogger.debug("pageReference [$pageReference], isVersionedContent [$isVersionedPage], isUnversionedPage [$isUnversionedPage], hasAccess [$isUnexistingConhasAccesstent]"))
-  #if (($isVersionedContent || $isUnversionedPage) &amp;&amp;
-        $services.security.authorization.hasAccess('edit', $bookReference))
+  #set ($hasAccess = $services.security.authorization.hasAccess('edit', $pageReference))
+  #set ($discard = $debuglogger.debug("pageReference [$pageReference], isVersionedContent [$isVersionedPage], isUnversionedPage [$isUnversionedPage], hasAccess [$hasAccess]"))
+  #if (($isVersionedContent || $isUnversionedPage) &amp;&amp; $hasAccess)
     $services.bookversions.switchDeletedMark($pageReference)
-      #set ($discard = $debuglogger.debug("switch required to API"))
+    #set ($discard = $debuglogger.debug("Switch required to API"))
   #end
 #end
 {{/velocity}}
