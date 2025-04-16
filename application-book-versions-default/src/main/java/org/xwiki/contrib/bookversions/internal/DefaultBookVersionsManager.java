@@ -2057,8 +2057,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
         DocumentReference variantReference =
                 (DocumentReference) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_VARIANT);
+        XWikiDocument variant = variantReference != null ? xwiki.getDocument(variantReference, xcontext) : null;
 
-        if (variantReference == null) {
+        if (variantReference != null && variant == null) {
             Map<String, Object> errorLine = new HashMap<>();
             errorLine.put("message", "Variant reference does not exist");
             errorLine.put("variable", variantReference);
