@@ -86,9 +86,6 @@
 &lt;/div&gt;
 {{/html}}
 
-## Ensure navigation panel is set on either the left or the right side
-#ensureBookNavigationPanel()
-
 ## Ensure Versions, Variants and Libraries WebHome pages exist in the current book space
 #set ($currentSpace = $doc.space)
 #set ($versionsFullName = $escapetool.xml("${currentSpace}.Versions.WebHome"))
