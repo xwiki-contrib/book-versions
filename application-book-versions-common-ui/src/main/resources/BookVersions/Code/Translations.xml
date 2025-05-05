@@ -119,7 +119,7 @@ BookVersions.Code.PublicationConfigurationSheet.pagesToProcess=**Pages to proces
 BookVersions.Code.PublicationConfigurationSheet.pageWillBePublished=✅ **{0}** → {1}
 BookVersions.Code.PublicationConfigurationSheet.contentFrom=(content from: {0})
 # -- Deleted or skipped pages
-BookVersions.Code.PublicationConfigurationSheet.pageIsMarkedDeleted=❌️ **{0}**: Page is marked as deleted
+BookVersions.Code.PublicationConfigurationSheet.pageIsMarkedDeleted=❌️ **{0}**: Page is ignored because it is marked as deleted
 BookVersions.Code.PublicationConfigurationSheet.pageHasSomething=❌️ **{0}**: {1}
 BookVersions.Code.PublicationConfigurationSheet.pageIsMarkedDeletedRemoveFromTarget=🗑️ **{0}** is marked as deleted - Target will be removed: {1}
 BookVersions.Code.PublicationConfigurationSheet.pageWillBeDeletedFromTarget=🗑️ **{0}** will be deleted (Source: {1})

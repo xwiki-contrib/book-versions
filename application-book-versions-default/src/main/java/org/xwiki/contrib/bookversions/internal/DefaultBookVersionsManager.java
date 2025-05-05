@@ -2205,8 +2205,9 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             previewLines.add(processLine);
 
             // Preview publication status for this page
-            if (!previewIsToBePublished(publishedReference, variantReference, configuration, userLocale, previewLines)) {
-                if (isMarkedDeleted(publishedReference)) {
+            if (!previewIsToBePublished(contentPageReference, variantReference, configuration, userLocale,
+                previewLines, pageReference)) {
+                if (isMarkedDeleted(contentPageReference)) {
                     // The original document is marked as deleted
                     markedAsDeletedReferences.add(publishedReference);
 
@@ -2292,18 +2293,20 @@ public class DefaultBookVersionsManager implements BookVersionsManager
      * @throws QueryException In case something goes wrong.
      * @throws XWikiException In case something goes wrong.
      */
-    private boolean previewIsToBePublished(DocumentReference pageReference, DocumentReference variantReference,
-                                           Map<String, Object> configuration, Locale userLocale, List<Map<String, Object>> previewLines) throws QueryException, XWikiException
+    private boolean previewIsToBePublished(DocumentReference contentPageReference, DocumentReference variantReference,
+                                           Map<String, Object> configuration, Locale userLocale,
+                                           List<Map<String, Object>> previewLines, DocumentReference pageReference)
+        throws QueryException, XWikiException
     {
-        if (pageReference == null || configuration == null) {
+        if (contentPageReference == null || configuration == null) {
             return false;
         }
         if (userLocale == null) {
             userLocale = new Locale(BookVersionsConstants.DEFAULT_LOCALE);
         }
 
-        List<DocumentReference> variants = getPageVariants(pageReference);
-        String status = getPageStatus(pageReference);
+        List<DocumentReference> variants = getPageVariants(contentPageReference);
+        String status = getPageStatus(contentPageReference);
         boolean publishOnlyComplete =
                 (boolean) configuration.get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_PUBLISHONLYCOMPLETE);
         boolean excludePagesOutsideVariant = false;
@@ -2327,7 +2330,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         Map<String, Object> reasonLine = new HashMap<>();
         Map<String, Object> reasonInfo = new HashMap<>();
 
-        if (isMarkedDeleted(pageReference)) {
+        if (isMarkedDeleted(contentPageReference)) {
             // Page is marked as deleted
             reasonInfo.put("pageRef", pageReference);
             reasonInfo.put("reason", "marked_deleted");
@@ -2373,7 +2376,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             previewLines.add(reasonLine);
             return false;
         } else if (StringUtils.isNotEmpty(language)) {
-            Map<String, Map<String, Object>> languageData = getLanguageData(pageReference);
+            Map<String, Map<String, Object>> languageData = getLanguageData(contentPageReference);
             if (languageData.get(language) == null) {
                 // The page has no translation
                 reasonInfo.put("pageRef", pageReference);
@@ -2414,7 +2417,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         }
 
         if (StringUtils.isNotEmpty(language)) {
-            Map<String, Map<String, Object>> languageData = getLanguageData(pageReference);
+            Map<String, Map<String, Object>> languageData = getLanguageData(contentPageReference);
             publishReasonInfo.put("language", language);
             publishReasonInfo.put("translationStatus", languageData.get(language).get(BookVersionsConstants.PAGETRANSLATION_STATUS));
         }

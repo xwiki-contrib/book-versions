@@ -287,6 +287,15 @@
             ]
           )
         #end
+        #if("$!{line.message}" == "Page is marked as deleted")
+          $services.localization.render(
+            'BookVersions.Code.PublicationConfigurationSheet.pageIsMarkedDeleted',
+            [
+              "#renderReference($line.variable.pageRef)",
+              $escapetool.xml($line.message)
+            ]
+          )
+        #end
         #if("$!{line.message}" == "Page is marked as deleted and will be removed from target if exists" &amp;&amp; $xwiki.exists($line.variable.targetToDelete))
           $services.localization.render(
             'BookVersions.Code.PublicationConfigurationSheet.pageIsMarkedDeletedRemoveFromTarget',
