@@ -126,7 +126,7 @@ public class BookPublicationReferencesTransformationHelper
                 BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE)).getLastSpaceReference();
         // If the source is a versioned content, then compute the parent with one level up
         try {
-            if (!bookVersionsManagerProvider.get().isBook(publicationSourceReference)) {
+            if (bookVersionsManagerProvider.get().isVersionedContent(publicationSourceReference)) {
                 sourceSpaceReference = (SpaceReference) sourceSpaceReference.getParent();
             }
         } catch (XWikiException e) {
