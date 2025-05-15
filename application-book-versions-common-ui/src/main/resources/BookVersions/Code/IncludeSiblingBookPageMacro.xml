@@ -292,10 +292,12 @@
       <contentType>No content</contentType>
     </property>
     <property>
-      <defaultCategories/>
+      <defaultCategories>
+        <value>Content</value>
+      </defaultCategories>
     </property>
     <property>
-      <description>Use this macro to include pages of the same book, at the same version.</description>
+      <description/>
     </property>
     <property>
       <id>includeSiblingBookPage</id>
@@ -391,7 +393,7 @@
       <defaultValue/>
     </property>
     <property>
-      <description>Reference of the page to include</description>
+      <description/>
     </property>
     <property>
       <mandatory>1</mandatory>

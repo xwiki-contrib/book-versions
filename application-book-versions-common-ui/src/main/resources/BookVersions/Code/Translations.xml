@@ -371,9 +371,13 @@ BookVersions.Code.BookOverview.statusFieldHint=The new status to set on the sele
 BookVersions.Code.BookOverview.statusPlaceHolder=Select the new status
 BookVersions.Code.BookOverview.changeStatusBtn=Change status on selected pages
 
-# Include Sibling Page
+# Include Sibling Page macro
 BookVersions.includesibling.outsidespace=The Include Sibling Page macro should reference pages from the same space.
 BookVersions.includesibling.doesnotexist=The referenced page in Include Sibling Page macro does not exist.
+rendering.macro.includeSiblingBookPage.name=Include Sibling Book Page (Book Versions)
+rendering.macro.includeSiblingBookPage.description=Include pages of the same book, at the same version.
+rendering.macro.includeSiblingBookPage.parameter.reference.name=Variants
+rendering.macro.includeSiblingBookPage.parameter.reference.description=Reference of the page to include.
 </content>
   <object>
     <name>BookVersions.Code.Translations</name>
