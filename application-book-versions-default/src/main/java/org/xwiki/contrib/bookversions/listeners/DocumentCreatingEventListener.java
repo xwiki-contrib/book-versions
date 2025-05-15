@@ -85,7 +85,8 @@ public class DocumentCreatingEventListener extends AbstractLocalEventListener
         BookVersionsManager bookVersionsManager = bookVersionsManagerProvider.get();
 
         try {
-            if (bookVersionsManager.isPage(updatedXDoc)) {
+            // isNew() is relevant to distinguish newly created pages and already existing which are moved/renamed
+            if (bookVersionsManager.isPage(updatedXDoc) && updatedXDoc.isNew()) {
 
                 // Transfer the document's content in a new child page storing its versioned content.
                 if (bookVersionsManager.isVersionedPage(updatedXDoc)) {
