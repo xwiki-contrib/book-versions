@@ -263,14 +263,19 @@
     ## Included document reference
     #set ($contentRef = $services.model.resolveDocument($contentRefSerialized))
     #set ($contentIsVersionedContent = $services.bookversions.isVersionedContent($contentRef))
+    #set ($contentIsVersionedPage = $services.bookversions.isVersionedPage($contentRef))
     #set ($contentIsBookPage = $services.bookversions.isPage($contentRef) || $contentIsVersionedContent)
     #set ($docCollectionRef = $services.bookversions.getVersionedCollectionReference($docRef))
     #set ($contentCollectionRef = $services.bookversions.getVersionedCollectionReference($contentRef))
     #if ($docCollectionRef &amp;&amp; $contentCollectionRef &amp;&amp; !$docCollectionRef.equals($contentCollectionRef))
       {{warning}}$services.localization.render('BookVersions.includesibling.outsidespace'){{/warning}}
-    #elseif ($docIsBookPage &amp;&amp; $contentIsBookPage &amp;&amp; $docCollectionRef &amp;&amp; $contentCollectionRef &amp;&amp; $contentIsVersionedContent)
-      #set ($versionReference = $services.bookversions.getVersionReference($docCollectionRef, $doc.name))
-      #set ($contentRef = $services.bookversions.getInheritedContentReference($contentRef, $versionReference))
+    #elseif ($docIsBookPage &amp;&amp; $contentIsBookPage &amp;&amp; $docCollectionRef &amp;&amp; $contentCollectionRef)
+      ## Current doc is book page and content also is, both in a book/collection
+      #if ($contentIsVersionedContent || $contentIsVersionedPage)
+        ## content is versioned sub-page OR content is book page, versioned
+        #set ($versionReference = $services.bookversions.getSelectedVersion($docRef))
+        #set ($contentRef = $services.bookversions.getInheritedContentReference($contentRef, $versionReference))
+      #end
     #end
     #if(!$xwiki.exists($contentRef))
       #if($docIsBookPage)
