@@ -255,19 +255,6 @@
     </property>
     <property>
       <code>{{velocity}}
-#set ($instanceMacro = $services.component.getInstance("org.xwiki.rendering.macro.Macro","excerpt-include"))
-## checking licence on excerpt, as excerpt-include is java
-#set ($entityRef = $services.model.createEntityReference('Excerpt','DOCUMENT',
-                      $services.model.createEntityReference('Macros','SPACE',
-                      $services.model.createEntityReference('Confluence','SPACE'))))
-#set ($hasLicence = $services.promacrolicensing.hasLicensureForEntity($entityRef))
-#if ("$!hasLicence" == '' || $hasLicense == false)
-{{warning}}XWiki SAS's Pro Macros License is invalid.{{/warning}}
-  #stop
-#elseif ("$!instanceMacro" == '')
-{{warning}}excerpt-include macro from XWiki SAS's Pro Macros is missing.{{/warning}}
-  #stop
-#end
 #set ($contentRef = $services.bookversions.getLinkedLibraryContentReference($doc.documentReference, $!context.macro.params.keyReference))
 #set ($name = $!context.macro.params.name)
 #set ($nopanel = $!context.macro.params.nopanel)
