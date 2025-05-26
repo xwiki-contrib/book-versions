@@ -2575,7 +2575,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
             // Get the published reference
             DocumentReference publishedReference =
-                getPublishedReference(pageReference, collectionReference, targetReference);
+                getPublishedReference(pageReference, sourceReference, targetReference);
             if (publishedReference == null) {
                 logger.debug("[publishInternal] Page publication cancelled because the published reference can't be "
                     + "computed by getPublishedReference. One input is null.");
