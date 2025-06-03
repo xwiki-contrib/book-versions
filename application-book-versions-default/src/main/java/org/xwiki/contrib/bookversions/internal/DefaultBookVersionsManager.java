@@ -1859,19 +1859,13 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             return configuration;
         }
 
-        // The source is store as page, but we need a complete location.WebHome reference
-        DocumentReference sourceReference =
-            currentExplicitReferenceResolver.resolve(sourceReferenceString, configurationReference.getWikiReference());
+        // The source is provided as space, but we need a complete page location.WebHome reference
+        SpaceReference sourceSpaceReference =
+            spaceReferenceResolver.resolve(sourceReferenceString, configurationReference.getWikiReference());
 
-        if (sourceReference != null
-            && !Objects.equals(sourceReference.getName(), this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE)) {
-            SpaceReference sourceParentSpaceReference =
-                new SpaceReference(new EntityReference(sourceReference.getName(), EntityType.SPACE,
-                    sourceReference.getLastSpaceReference()));
-            sourceReference =
-                new DocumentReference(new EntityReference(this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE,
-                    EntityType.DOCUMENT, sourceParentSpaceReference));
-        }
+        DocumentReference sourceReference = new DocumentReference(new EntityReference(
+            this.getXWikiContext().getWiki().DEFAULT_SPACE_HOMEPAGE, EntityType.DOCUMENT, sourceSpaceReference));
+
         configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE, sourceReference);
 
         configuration.put(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE,
