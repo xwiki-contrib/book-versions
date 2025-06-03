@@ -418,7 +418,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 .bindValue("propName", BookVersionsConstants.VARIANTLIST_PROP_VARIANTSLIST)
                 .setWiki(pageReference.getWikiReference().getName()).execute();
             if (variantsList.size() > 0) {
-                for (String variant : variantsList.get(0).split(" |,|\\||\\r?\\n")) {
+                for (String variant : variantsList.get(0).split("\\|")) {
                     result.add(referenceResolver.resolve(variant).setWikiReference(pageReference.getWikiReference()));
                 }
             }
