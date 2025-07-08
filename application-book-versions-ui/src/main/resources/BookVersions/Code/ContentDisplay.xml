@@ -38,7 +38,7 @@
   <hidden>true</hidden>
   <content>{{velocity}}
 #if ($doc.fullName != 'BookVersions.Code.ContentDisplay')
-  ## The following code is mostly copied from AppWithinMinutes.Content
+  ## The following code is mostly copied from AppWithinMinutes.Content, 102124c214f107bf0bfd2b709969482625f1af53
   #if ($xcontext.action == 'edit')
     #set ($className = $object.getxWikiClass().name)
     #if ($doc.fullName == $className)
@@ -88,9 +88,19 @@
     ## Display the content of the current document without using any sheet. We can't use the include macro here (with the
     ## author parameter) because the content may have unsaved changes (e.g. on preview action). We make sure that the HTML
     ## macro is not closed unintentionally, even though the XHTML printer protects us against this, just to be extra safe.
-    {{html}}$services.display.content($tdoc, {
-      'displayerHint': 'default'
-    }).replace('{{/html}}', '&amp;amp;#123;&amp;amp;#123;/html&amp;amp;#125;&amp;amp;#125;'){{/html}}
+    #set($currentSession = $request.getSession())
+    #set($attributeName = "BookVersions.Code.ContentDisplay.$doc.getDocumentReference()")
+    ## Prevent reentrancy
+    #if("$currentSession.getAttribute($attributeName)" != true)
+      #set ($discard = $currentSession.setAttribute($attributeName,true))
+      #set($displayContent = $services.display.content($tdoc, {
+        'displayerHint': 'default'
+      }).replace('{{/html}}', '&amp;amp;#123;&amp;amp;#123;/html&amp;amp;#125;&amp;amp;#125;'))
+      #if("$displayContent" != '')
+        {{html}}$displayContent{{/html}}
+      #end
+      #set ($discard = $currentSession.setAttribute($attributeName,false))
+    #end
   #else
     The display mode is not specified!
   #end
