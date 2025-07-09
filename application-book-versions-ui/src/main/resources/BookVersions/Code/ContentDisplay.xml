@@ -88,18 +88,19 @@
     ## Display the content of the current document without using any sheet. We can't use the include macro here (with the
     ## author parameter) because the content may have unsaved changes (e.g. on preview action). We make sure that the HTML
     ## macro is not closed unintentionally, even though the XHTML printer protects us against this, just to be extra safe.
-    #set($currentSession = $request.getSession())
-    #set($attributeName = "BookVersions.Code.ContentDisplay.$doc.getDocumentReference()")
     ## Prevent reentrancy
-    #if("$currentSession.getAttribute($attributeName)" != true)
-      #set ($discard = $currentSession.setAttribute($attributeName,true))
-      #set($displayContent = $services.display.content($tdoc, {
-        'displayerHint': 'default'
-      }).replace('{{/html}}', '&amp;amp;#123;&amp;amp;#123;/html&amp;amp;#125;&amp;amp;#125;'))
-      #if("$displayContent" != '')
-        {{html}}$displayContent{{/html}}
+    #if("$!reentranceFlag" != true)
+      ## Ensure setting the flag to false in case of exception
+      #try()
+        #set($reentranceFlag = true)
+        #set($displayContent = $services.display.content($tdoc, {
+          'displayerHint': 'default'
+        }).replace('{{/html}}', '&amp;amp;#123;&amp;amp;#123;/html&amp;amp;#125;&amp;amp;#125;'))
+        #if("$displayContent" != '')
+          {{html}}$displayContent{{/html}}
+        #end
       #end
-      #set ($discard = $currentSession.setAttribute($attributeName,false))
+      #set($reentranceFlag = false)
     #end
   #else
     The display mode is not specified!
