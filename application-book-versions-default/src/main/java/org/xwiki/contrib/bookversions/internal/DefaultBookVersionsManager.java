@@ -3410,11 +3410,12 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         logger.debug("[transformLibrary] [{}] '{}' macros found in the passed XDOM", listBlock.size(), macroId);
 
         String versionName = getVersionName(versionReference);
+        String inheritedVersionName = null;
         if (isVersionedContent(originalDocumentReference)) {
             // If versioned page is published, use the inherited version, provided by the document to be published.
             // This allows to use library version corresponding to the inherited content version instead of the
             // selected version for publication.
-            versionName = originalDocumentReference.getName();
+            inheritedVersionName = originalDocumentReference.getName();
         }
 
         for (MacroBlock macroBlock : listBlock) {
@@ -3434,12 +3435,15 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             // Get the library reference
             DocumentReference libraryReference = getVersionedCollectionReference(libraryPageReference);
             // Get the published library reference
+            // If the library version was not published, then get the inherited published library reference
             DocumentReference publishedLibraryReference =
                 publishedLibraries != null && versionName != null && libraryReference != null
-                    ? publishedLibraries.get(versionName).get(libraryReference) : null;
+                    ? publishedLibraries.get(versionName).get(libraryReference) : (inheritedVersionName != null
+                        ? publishedLibraries.get(inheritedVersionName).get(libraryReference) : null);
             if (publishedLibraryReference == null) {
-                logger.error(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager."
-                    + "transformLibrary.notPublished", userLocale, libraryReference));
+                logger.error(localization.getTranslationPlain(
+                    "BookVersions.DefaultBookVersionsManager." + "transformLibrary.notPublished", userLocale,
+                    libraryReference));
                 continue;
             }
 
