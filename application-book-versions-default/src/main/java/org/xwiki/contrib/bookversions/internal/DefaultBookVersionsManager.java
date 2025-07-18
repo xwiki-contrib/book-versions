@@ -3220,7 +3220,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         // Work on the XDOM
         XDOM xdom = publishedDocument.getXDOM();
         String syntax = publishedDocument.getSyntax().toIdString();
-        transformXDOM(publicationSourceReference, xdom, syntax, originalDocument.getDocumentReference(),
+        DocumentReference sourceCollectionReference = getVersionedCollectionReference(publicationSourceReference);
+        transformXDOM(sourceCollectionReference, publicationSourceReference, xdom, syntax, originalDocument.getDocumentReference(),
             publishedLibraries, configuration, userLocale);
         // Set the modified XDOM
         publishedDocument.setContent(xdom);
@@ -3228,11 +3229,11 @@ public class DefaultBookVersionsManager implements BookVersionsManager
     }
 
     // Heavily inspired from "Bulk update links according to a TSV mapping using XDOM" on https://snippets.xwiki.org
-    private boolean transformXDOM(DocumentReference publicationSourceReference, XDOM xdom, String syntaxId,
+    private boolean transformXDOM(DocumentReference sourceCollectionReference,
+        DocumentReference publicationSourceReference, XDOM xdom, String syntaxId,
         DocumentReference originalDocumentReference,
         Map<String, Map<DocumentReference, DocumentReference>> publishedLibraries, Map<String, Object> configuration,
-        Locale userLocale)
-        throws ComponentLookupException, ParseException, QueryException, XWikiException
+        Locale userLocale) throws ComponentLookupException, ParseException, QueryException, XWikiException
     {
         if (xdom == null || syntaxId == null || originalDocumentReference == null || configuration == null) {
             logger.error("[transformXDOM] Can't execute because one input is null.");
@@ -3289,7 +3290,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 Parser parser = componentManagerProvider.get().getInstance(Parser.class, syntaxId);
                 XDOM contentXDOM = parser.parse(new StringReader(content));
                 boolean hasMacroContentChanged =
-                    transformXDOM(publicationSourceReference, contentXDOM, syntaxId, originalDocumentReference, publishedLibraries, configuration
+                    transformXDOM(sourceCollectionReference, publicationSourceReference, contentXDOM, syntaxId, originalDocumentReference, publishedLibraries, configuration
                         , userLocale);
                 if (hasMacroContentChanged || id.equals(BookVersionsConstants.VARIANT_MACRO_ID)) {
                     logger.debug("[transformXDOM] The content of macro [{}] has changed", id);
@@ -3326,7 +3327,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
             publishedLibraries != null ? publishedLibraries.get(getVersionName(versionReference)) : new HashMap<>();
         boolean transformSiblingBookPage = transformSiblingBookPage(xdom, originalDocumentReference, configuration,
             userLocale);
-        boolean transformedReferences = publicationReferencesTransformationHelper.transform(publicationSourceReference,
+        boolean transformedReferences = publicationReferencesTransformationHelper.transform(sourceCollectionReference, publicationSourceReference,
             xdom, originalDocumentReference, currentPublishedLibraries, configuration);
         return hasXDOMChanged || transformedTranslation || transformedLibrary || transformedExceptLibrary
             || transformSiblingBookPage || transformedReferences;

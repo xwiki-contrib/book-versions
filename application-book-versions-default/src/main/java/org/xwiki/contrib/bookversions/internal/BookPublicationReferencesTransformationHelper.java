@@ -19,6 +19,7 @@
  */
 package org.xwiki.contrib.bookversions.internal;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -58,15 +59,14 @@ import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 
 /**
- * This component focuses on transforming references between Book Version pages at publication time.
- *
- * The following transformations are supported :
+ * This component focuses on transforming references between Book Version pages at publication time. The following
+ * transformations are supported :
  * <ul>
- *     <li>Transformation of links containing document references, attachment references, page references, page
- *     attachment references</li>
- *     <li>Transformation of images containing attachment references, page attachment references</li>
- *     <li>Transformation of macro parameters that are of type document reference, attachment reference, or have the
- *     display type of entity reference string</li>
+ * <li>Transformation of links containing document references, attachment references, page references, page attachment
+ * references</li>
+ * <li>Transformation of images containing attachment references, page attachment references</li>
+ * <li>Transformation of macro parameters that are of type document reference, attachment reference, or have the display
+ * type of entity reference string</li>
  * </ul>
  *
  * @version $Id$
@@ -77,11 +77,11 @@ import com.xpn.xwiki.XWikiException;
 public class BookPublicationReferencesTransformationHelper
 {
     // Note that we don't support interwiki links, as books cannot span over multiple wikis
-    private static final List<ResourceType> SUPPORTED_DOCUMENT_RESOURCES = Arrays.asList(ResourceType.DOCUMENT,
-        ResourceType.PAGE);
+    private static final List<ResourceType> SUPPORTED_DOCUMENT_RESOURCES =
+        Arrays.asList(ResourceType.DOCUMENT, ResourceType.PAGE);
 
-    private static final List<ResourceType> SUPPORTED_ATTACHMENT_RESOURCES = Arrays.asList(ResourceType.ATTACHMENT,
-        ResourceType.PAGE_ATTACHMENT);
+    private static final List<ResourceType> SUPPORTED_ATTACHMENT_RESOURCES =
+        Arrays.asList(ResourceType.ATTACHMENT, ResourceType.PAGE_ATTACHMENT);
 
     private static final String DOCUMENTTREE_MACRO_ID = "documentTree";
 
@@ -109,21 +109,27 @@ public class BookPublicationReferencesTransformationHelper
     /**
      * Transform the provided XDOM to update any wiki references stored in its content to point to published spaces.
      *
-     *@param publicationSourceReference the source in the publication configuration
+     * @param sourceCollectionReference the reference of the source collection (master)
+     * @param publicationSourceReference the source in the publication configuration
      * @param xdom the xdom to transform
      * @param originalReference the reference of the document containing this xdom
      * @param publishedLibraries a map of the published libraries
      * @param publicationConfiguration the publication configuration
      * @return true if the xdom has been modified
      */
-    public boolean transform(DocumentReference publicationSourceReference, XDOM xdom,
-        DocumentReference originalReference, Map<DocumentReference, DocumentReference> publishedLibraries,
-        Map<String, Object> publicationConfiguration)
+    public boolean transform(DocumentReference sourceCollectionReference, DocumentReference publicationSourceReference,
+        XDOM xdom, DocumentReference originalReference, Map<DocumentReference, DocumentReference> publishedLibraries,
+        Map<String, Object> publicationConfiguration) throws XWikiException
     {
         // Extract information about the master spaces and the publication space
-        SpaceReference sourceSpaceReference =
-            ((DocumentReference) publicationConfiguration.get(
-                BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE)).getLastSpaceReference();
+        DocumentReference sourceDocumentReference = (DocumentReference) publicationConfiguration
+            .get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_SOURCE);
+        if (sourceDocumentReference == null) {
+            return false;
+        }
+
+        SpaceReference sourceSpaceReference = (sourceDocumentReference).getLastSpaceReference();
+
         // If the source is a versioned content, then compute the parent with one level up
         try {
             if (bookVersionsManagerProvider.get().isVersionedContent(publicationSourceReference)) {
@@ -134,13 +140,25 @@ public class BookPublicationReferencesTransformationHelper
             logger.error("Failed to check if the source page [{}] is versioned.", originalReference, e);
         }
         // Extract the target space reference
-        SpaceReference publishedSpaceReference = (SpaceReference) publicationConfiguration.get(
-                BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
+        SpaceReference targetSpaceReference = (SpaceReference) publicationConfiguration
+            .get(BookVersionsConstants.PUBLICATIONCONFIGURATION_PROP_DESTINATIONSPACE);
 
         // Build the space references map
         Map<SpaceReference, SpaceReference> spaceReferencesMap = new HashMap<>();
+        Map<SpaceReference, SpaceReference> collectionReferencesMap = new HashMap<>();
         // Add the published space
-        spaceReferencesMap.put(sourceSpaceReference, publishedSpaceReference);
+        spaceReferencesMap.put(sourceSpaceReference, targetSpaceReference);
+        // Add the master space reference
+        // Build the master reference on the target location of the collection by removing the pages from the target,
+        // based on how many pages should be removed from the source
+        // Ex : is source is Master.A.B and target is Publish.Me.Here.A.B
+        // Then A.B (two pages) must be removed => the target location of the collection is Publish.Me.Here
+        SpaceReference sourceCollectionSpaceReference = sourceCollectionReference.getLastSpaceReference();
+        if (!sourceCollectionReference.equals(sourceDocumentReference) && sourceCollectionReference != null) {
+            collectionReferencesMap.put(sourceCollectionSpaceReference, getPublishCollectionReference(
+                sourceDocumentReference, targetSpaceReference, sourceCollectionSpaceReference));
+        }
+
         for (Map.Entry<DocumentReference, DocumentReference> entry : publishedLibraries.entrySet()) {
             if (entry.getValue() != null) {
                 spaceReferencesMap.put(entry.getKey().getLastSpaceReference(),
@@ -148,7 +166,38 @@ public class BookPublicationReferencesTransformationHelper
             }
         }
 
-        return transform(xdom, originalReference, spaceReferencesMap);
+        return transform(xdom, originalReference, spaceReferencesMap, collectionReferencesMap);
+    }
+
+    private SpaceReference getPublishCollectionReference(DocumentReference sourceSpaceReference,
+        SpaceReference targetSpaceReference, SpaceReference sourceCollectionReference)
+    {
+        SpaceReference publishCollectionReference = targetSpaceReference;
+        for (EntityReference entityReference : getReversedSpaceReferences(
+            sourceSpaceReference.getLastSpaceReference())) {
+            if (EntityType.SPACE.equals(entityReference.getType())
+                && sourceCollectionReference.equals(entityReference)) {
+                break;
+            }
+            publishCollectionReference = (SpaceReference) publishCollectionReference.getParent();
+        }
+
+        return publishCollectionReference;
+    }
+
+    private List<SpaceReference> getReversedSpaceReferences(SpaceReference spaceReference)
+    {
+        List<SpaceReference> references = new ArrayList<SpaceReference>();
+
+        EntityReference reference = spaceReference;
+        while (reference != null) {
+            if (reference.getType() == EntityType.SPACE) {
+                references.add((SpaceReference) reference);
+            }
+            reference = reference.getParent();
+        }
+        // The first entry is the parent of the Document Reference
+        return references;
     }
 
     /**
@@ -157,18 +206,20 @@ public class BookPublicationReferencesTransformationHelper
      * @param xdom the xdom to transform
      * @param originalReference the page containing this xdom
      * @param spaceReferencesMap a mapping between master spaces and published spaces
+     * @param collectionReferencesMap a mapping between master collection reference and published collection reference
      * @return true if the xdom has been modified
      */
     public boolean transform(XDOM xdom, DocumentReference originalReference,
-        Map<SpaceReference, SpaceReference> spaceReferencesMap)
+        Map<SpaceReference, SpaceReference> spaceReferencesMap,
+        Map<SpaceReference, SpaceReference> collectionReferencesMap)
     {
         boolean hasXDOMChanged = false;
 
         // Handle the transformation of links
-        hasXDOMChanged |= transformLinkBlocks(xdom, originalReference, spaceReferencesMap);
+        hasXDOMChanged |= transformLinkBlocks(xdom, originalReference, spaceReferencesMap, collectionReferencesMap);
 
         // Handle the transformation of images
-        hasXDOMChanged |= transformImageBlocks(xdom, originalReference, spaceReferencesMap);
+        hasXDOMChanged |= transformImageBlocks(xdom, originalReference, spaceReferencesMap, collectionReferencesMap);
 
         // We assume that transformation of macro content is already handled through calls in #transformXDOM.
         // Here we only care about updating the macro parameters which are declared as document references
@@ -183,8 +234,8 @@ public class BookPublicationReferencesTransformationHelper
                     Map<String, ParameterDescriptor> parameterDescriptors =
                         macro.getDescriptor().getParameterDescriptorMap();
 
-                    hasXDOMChanged |=
-                        transformMacroBlock(macroBlock, parameterDescriptors, originalReference, spaceReferencesMap);
+                    hasXDOMChanged |= transformMacroBlock(macroBlock, parameterDescriptors, originalReference,
+                        spaceReferencesMap, collectionReferencesMap);
                 }
             } catch (ComponentLookupException e) {
                 // Should never happen
@@ -196,7 +247,8 @@ public class BookPublicationReferencesTransformationHelper
     }
 
     private boolean transformLinkBlocks(XDOM xdom, DocumentReference originalReference,
-        Map<SpaceReference, SpaceReference> spaceReferencesMap)
+        Map<SpaceReference, SpaceReference> spaceReferencesMap,
+        Map<SpaceReference, SpaceReference> collectionReferencesMap)
     {
         boolean hasXDOMChanged = false;
 
@@ -205,7 +257,7 @@ public class BookPublicationReferencesTransformationHelper
             ResourceType resourceType = linkBlock.getReference().getType();
             if (SUPPORTED_DOCUMENT_RESOURCES.contains(resourceType)) {
                 ResourceReference equivalentResourceReference = getEquivalentDocumentResourceReference(
-                    linkBlock.getReference(), originalReference, spaceReferencesMap);
+                    linkBlock.getReference(), originalReference, spaceReferencesMap, collectionReferencesMap);
 
                 if (equivalentResourceReference != null) {
                     LinkBlock newLinkBlock = new LinkBlock(linkBlock.getChildren(), equivalentResourceReference,
@@ -215,7 +267,7 @@ public class BookPublicationReferencesTransformationHelper
                 }
             } else if (SUPPORTED_ATTACHMENT_RESOURCES.contains(resourceType)) {
                 ResourceReference equivalentResourceReference = getEquivalentAttachmentResourceReference(
-                    linkBlock.getReference(), originalReference, spaceReferencesMap);
+                    linkBlock.getReference(), originalReference, spaceReferencesMap, collectionReferencesMap);
 
                 if (equivalentResourceReference != null) {
                     LinkBlock newLinkBlock = new LinkBlock(linkBlock.getChildren(), equivalentResourceReference,
@@ -230,7 +282,8 @@ public class BookPublicationReferencesTransformationHelper
     }
 
     private boolean transformImageBlocks(XDOM xdom, DocumentReference originalReference,
-        Map<SpaceReference, SpaceReference> spaceReferencesMap)
+        Map<SpaceReference, SpaceReference> spaceReferencesMap,
+        Map<SpaceReference, SpaceReference> collectionReferencesMap)
     {
         boolean hasXDOMChanged = false;
 
@@ -240,7 +293,7 @@ public class BookPublicationReferencesTransformationHelper
 
             if (SUPPORTED_ATTACHMENT_RESOURCES.contains(resourceType)) {
                 ResourceReference equivalentResourceReference = getEquivalentAttachmentResourceReference(
-                    imageBlock.getReference(), originalReference, spaceReferencesMap);
+                    imageBlock.getReference(), originalReference, spaceReferencesMap, collectionReferencesMap);
 
                 if (equivalentResourceReference != null) {
                     ImageBlock newImageBlock = new ImageBlock(equivalentResourceReference,
@@ -255,7 +308,8 @@ public class BookPublicationReferencesTransformationHelper
     }
 
     private boolean transformMacroBlock(MacroBlock macroBlock, Map<String, ParameterDescriptor> parameterDescriptors,
-        DocumentReference originalReference, Map<SpaceReference, SpaceReference> spaceReferencesMap)
+        DocumentReference originalReference, Map<SpaceReference, SpaceReference> spaceReferencesMap,
+        Map<SpaceReference, SpaceReference> collectionReferencesMap)
     {
         boolean hasXDOMChanged = false;
 
@@ -268,11 +322,11 @@ public class BookPublicationReferencesTransformationHelper
             String equivalentReference = null;
             if (DocumentReference.class.equals(parameterDescriptorEntry.getValue().getParameterType())
                 || EntityReferenceString.class.equals(parameterDescriptorEntry.getValue().getDisplayType())) {
-                equivalentReference =
-                    getEquivalentDocumentStringReference(parameter, originalReference, spaceReferencesMap);
+                equivalentReference = getEquivalentDocumentStringReference(parameter, originalReference,
+                    spaceReferencesMap, collectionReferencesMap);
             } else if (AttachmentReference.class.equals(parameterDescriptorEntry.getValue().getParameterType())) {
-                equivalentReference =
-                    getEquivalentAttachmentStringReference(parameter, originalReference, spaceReferencesMap);
+                equivalentReference = getEquivalentAttachmentStringReference(parameter, originalReference,
+                    spaceReferencesMap, collectionReferencesMap);
             }
 
             if (equivalentReference != null) {
@@ -284,7 +338,7 @@ public class BookPublicationReferencesTransformationHelper
         if (macroBlock.getId().equals(DOCUMENTTREE_MACRO_ID)) {
             // The Document Tree macro is a special case, because its root parameter is a String
             hasXDOMChanged = hasXDOMChanged || transformDocumentTreeMacroBlock(macroBlock, parameterDescriptors,
-                originalReference, spaceReferencesMap);
+                originalReference, spaceReferencesMap, collectionReferencesMap);
         }
 
         return hasXDOMChanged;
@@ -292,7 +346,8 @@ public class BookPublicationReferencesTransformationHelper
 
     private boolean transformDocumentTreeMacroBlock(MacroBlock macroBlock,
         Map<String, ParameterDescriptor> parameterDescriptors, DocumentReference originalReference,
-        Map<SpaceReference, SpaceReference> spaceReferencesMap)
+        Map<SpaceReference, SpaceReference> spaceReferencesMap,
+        Map<SpaceReference, SpaceReference> collectionReferencesMap)
     {
         boolean hasXDOMChanged = false;
         String root = macroBlock.getParameter(DOCUMENTTREE_PARAM_ROOT);
@@ -312,7 +367,8 @@ public class BookPublicationReferencesTransformationHelper
         }
 
         if (reference != null) {
-            DocumentReference equivalentReference = getEquivalentReference(reference, spaceReferencesMap);
+            DocumentReference equivalentReference =
+                getEquivalentReference(reference, spaceReferencesMap, collectionReferencesMap);
             String equivalentReferenceSerialized = this.convertToString(equivalentReference);
             if (equivalentReferenceSerialized != null && !root.equals(equivalentReferenceSerialized)) {
                 macroBlock.setParameter(DOCUMENTTREE_PARAM_ROOT, equivalentReferenceSerialized);
@@ -324,11 +380,13 @@ public class BookPublicationReferencesTransformationHelper
     }
 
     private String getEquivalentDocumentStringReference(String stringReference, DocumentReference originalReference,
-        Map<SpaceReference, SpaceReference> spaceReferencesMap)
+        Map<SpaceReference, SpaceReference> spaceReferencesMap,
+        Map<SpaceReference, SpaceReference> collectionReferencesMap)
     {
-        DocumentReference reference = new DocumentReference(currentEntityReferenceResolver.resolve(stringReference,
-            EntityType.DOCUMENT, originalReference));
-        DocumentReference equivalentReference = getEquivalentReference(reference, spaceReferencesMap);
+        DocumentReference reference = new DocumentReference(
+            currentEntityReferenceResolver.resolve(stringReference, EntityType.DOCUMENT, originalReference));
+        DocumentReference equivalentReference =
+            getEquivalentReference(reference, spaceReferencesMap, collectionReferencesMap);
         if (!reference.equals(equivalentReference)) {
             // Update the link with the new reference
             return entityReferenceSerializer.serialize(equivalentReference);
@@ -338,49 +396,53 @@ public class BookPublicationReferencesTransformationHelper
     }
 
     private String getEquivalentAttachmentStringReference(String stringReference, DocumentReference originalReference,
-        Map<SpaceReference, SpaceReference> spaceReferencesMap)
+        Map<SpaceReference, SpaceReference> spaceReferencesMap,
+        Map<SpaceReference, SpaceReference> collectionReferencesMap)
     {
-        AttachmentReference attachmentReference = new AttachmentReference(currentEntityReferenceResolver.resolve(
-            stringReference, EntityType.ATTACHMENT, originalReference));
+        AttachmentReference attachmentReference = new AttachmentReference(
+            currentEntityReferenceResolver.resolve(stringReference, EntityType.ATTACHMENT, originalReference));
         DocumentReference reference = attachmentReference.getDocumentReference();
-        DocumentReference equivalentReference = getEquivalentReference(reference, spaceReferencesMap);
+        DocumentReference equivalentReference =
+            getEquivalentReference(reference, spaceReferencesMap, collectionReferencesMap);
         if (!reference.equals(equivalentReference)) {
             // Update the link with the new reference
-            return entityReferenceSerializer.serialize(
-                new AttachmentReference(attachmentReference.getName(), equivalentReference));
+            return entityReferenceSerializer
+                .serialize(new AttachmentReference(attachmentReference.getName(), equivalentReference));
         } else {
             return null;
         }
     }
 
     private ResourceReference getEquivalentDocumentResourceReference(ResourceReference resourceReference,
-        DocumentReference originalReference, Map<SpaceReference, SpaceReference> spaceReferencesMap)
+        DocumentReference originalReference, Map<SpaceReference, SpaceReference> spaceReferencesMap,
+        Map<SpaceReference, SpaceReference> collectionReferencesMap)
     {
         DocumentReference reference = convertDocumentResourceReference(resourceReference, originalReference);
         DocumentReference equivalentReference =
-            getEquivalentReference(reference, spaceReferencesMap);
+            getEquivalentReference(reference, spaceReferencesMap, collectionReferencesMap);
         if (!reference.equals(equivalentReference)) {
             // Update the link with the new reference
-            return new ResourceReference(
-                entityReferenceSerializer.serialize(equivalentReference), ResourceType.DOCUMENT);
+            return new ResourceReference(entityReferenceSerializer.serialize(equivalentReference),
+                ResourceType.DOCUMENT);
         } else {
             return null;
         }
     }
 
     private ResourceReference getEquivalentAttachmentResourceReference(ResourceReference resourceReference,
-        DocumentReference originalReference, Map<SpaceReference, SpaceReference> spaceReferencesMap)
+        DocumentReference originalReference, Map<SpaceReference, SpaceReference> spaceReferencesMap,
+        Map<SpaceReference, SpaceReference> collectionReferencesMap)
     {
         AttachmentReference reference = convertAttachmentResourceReference(resourceReference, originalReference);
         DocumentReference equivalentReference =
-            getEquivalentReference(reference.getDocumentReference(), spaceReferencesMap);
+            getEquivalentReference(reference.getDocumentReference(), spaceReferencesMap, collectionReferencesMap);
 
         if (!reference.getDocumentReference().equals(equivalentReference)) {
             // Update the link with the new reference
             AttachmentReference equivalentAttachmentReference =
                 new AttachmentReference(reference.getName(), equivalentReference);
-            return new ResourceReference(
-                entityReferenceSerializer.serialize(equivalentAttachmentReference), ResourceType.ATTACHMENT);
+            return new ResourceReference(entityReferenceSerializer.serialize(equivalentAttachmentReference),
+                ResourceType.ATTACHMENT);
         } else {
             return null;
         }
@@ -393,8 +455,8 @@ public class BookPublicationReferencesTransformationHelper
             return new DocumentReference(currentEntityReferenceResolver.resolve(reference.getReference(),
                 EntityType.DOCUMENT, originalReference));
         } else if (reference.getType().equals(ResourceType.PAGE)) {
-            return new DocumentReference(currentEntityReferenceResolver.resolve(reference.getReference(),
-                EntityType.PAGE, originalReference));
+            return new DocumentReference(
+                currentEntityReferenceResolver.resolve(reference.getReference(), EntityType.PAGE, originalReference));
         } else {
             logger.error("Unsupported resource type for converting to a document reference : [{}]",
                 reference.getType());
@@ -419,29 +481,47 @@ public class BookPublicationReferencesTransformationHelper
     }
 
     private DocumentReference getEquivalentReference(DocumentReference reference,
-        Map<SpaceReference, SpaceReference> spaceReferencesMap)
+        Map<SpaceReference, SpaceReference> spaceReferencesMap,
+        Map<SpaceReference, SpaceReference> collectionReferencesMap)
     {
         // If the page is versioned, we need to work with the root page that is the parent of this reference
         DocumentReference targetReference = getRootPageReference(reference);
 
-        SpaceReference foundSpaceReference = null;
-        for (EntityReference entityReference : targetReference.getReversedReferenceChain()) {
-            if (EntityType.SPACE.equals(entityReference.getType()) && spaceReferencesMap.containsKey(entityReference)) {
-                foundSpaceReference = (SpaceReference) entityReference;
-                break;
-            }
-        }
+        SpaceReference foundSpaceReference = getMatchingSpaceReference(targetReference, spaceReferencesMap);
 
         if (foundSpaceReference != null) {
             // The page will then be located within the newly published space. We need to re-compute its reference
             // chain.
             return targetReference.replaceParent(foundSpaceReference, spaceReferencesMap.get(foundSpaceReference));
         } else {
+            // If the reference is in the same collection, replace the reference's parent with the publish location.
+            foundSpaceReference = getMatchingSpaceReference(targetReference, collectionReferencesMap);
+
             // If no space reference is found, it means that we are in the case where the document reference actually
             // points to a page outside any book or library involved in this publication. We then don't need to
             // update it.
-            return targetReference;
+            return foundSpaceReference != null
+                ? targetReference.replaceParent(foundSpaceReference, collectionReferencesMap.get(foundSpaceReference))
+                : targetReference;
         }
+    }
+
+    private SpaceReference getMatchingSpaceReference(DocumentReference targetReference,
+        Map<SpaceReference, SpaceReference> spaceReferencesMap)
+    {
+        if (spaceReferencesMap.isEmpty()) {
+            return null;
+        }
+
+        SpaceReference spaceReference = null;
+        for (EntityReference entityReference : targetReference.getReversedReferenceChain()) {
+            if (EntityType.SPACE.equals(entityReference.getType()) && spaceReferencesMap.containsKey(entityReference)) {
+                spaceReference = (SpaceReference) entityReference;
+                break;
+            }
+        }
+
+        return spaceReference;
     }
 
     private DocumentReference getRootPageReference(DocumentReference reference)
