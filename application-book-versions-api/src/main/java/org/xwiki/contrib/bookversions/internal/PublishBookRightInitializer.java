@@ -34,8 +34,8 @@ import org.xwiki.component.phase.InitializationException;
 import org.xwiki.contrib.bookversions.PublishBookRight;
 import org.xwiki.observation.AbstractEventListener;
 import org.xwiki.observation.event.Event;
-import org.xwiki.security.authorization.AuthorizationException;
 import org.xwiki.security.authorization.AuthorizationManager;
+import org.xwiki.security.authorization.Right;
 import org.xwiki.security.authorization.UnableToRegisterRightException;
 
 /**
@@ -85,17 +85,20 @@ public class PublishBookRightInitializer extends AbstractEventListener implement
     @Override
     public void dispose() throws ComponentLifecycleException
     {
-        try {
-            this.authorizationManager.unregister(PublishBookRight.getRight());
-        } catch (AuthorizationException e) {
-            throw new ComponentLifecycleException("Error while unregistering rights", e);
-        }
+        // Do not unregister the right, because it causes performance issues and it can bring the instance down.
+        // Every Right has a value, and that value needs to be below 64 because of
+        // the way we store right sets. And when you unregister a right that is not the last registered right, you break
+        // that whole system. So, basically, unregistering of rights is only supported when you unregister the last
+        // registered right. Plus, the values that are associated with rights need to be continuous.
     }
 
     private void registerPublishBookRight()
     {
         try {
-            this.authorizationManager.register(PublishBookRight.INSTANCE);
+            // Only registering the right if it wasn't registered before
+            if (PublishBookRight.getRight().equals(Right.ILLEGAL)) {
+                this.authorizationManager.register(PublishBookRight.INSTANCE);
+            }
         } catch (UnableToRegisterRightException e) {
             logger.error("Error when trying to register the custom rights", e);
         }
