@@ -293,8 +293,8 @@
         'reference': $currentValue,
         'placeholder': 'core.create.spaceReference.placeholder'
       },
-      "root": "space:$services.model.serialize($rootParentRef, 'default')",
-      'showSpaces': true
+      "root": "document:$services.model.serialize($rootDocument, 'default')",
+      'showTerminalDocuments': false
     })
 #else
   #hierarchy($currentValue, {"local": false})
