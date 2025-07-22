@@ -236,7 +236,6 @@
           ## target top level documents (e.g. create a top level document, move a document to the top level, etc.).
           #set ($showRoot = !$showWikis)
           #set ($showTerminalDocuments = false || $options.showTerminalDocuments)
-          #set ($showSpaces = false || $options.showSpaces)
           #documentTree({
             'class': 'location-tree',
             'finder': true,
@@ -246,8 +245,7 @@
             'showTranslations': false,
             'showWikis': $showWikis,
             'exclusions': "$!options.exclusions",
-            'root': "$!options.root",
-            'showSpaces': $showSpaces
+            'root': "$!options.root"
           })
         &lt;/div&gt;
         &lt;div class="modal-footer"&gt;
@@ -293,7 +291,7 @@
         'reference': $currentValue,
         'placeholder': 'core.create.spaceReference.placeholder'
       },
-      "root": "space:$services.model.serialize($rootParentRef, 'default')",
+      "root": "document:${services.model.serialize($rootParentRef, 'default')}.WebHome",
       'showSpaces': true
     })
 #else
