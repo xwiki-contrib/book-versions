@@ -236,6 +236,12 @@ public class BookPublicationReferencesTransformationHelper
 
                     hasXDOMChanged |= transformMacroBlock(macroBlock, parameterDescriptors, originalReference,
                         spaceReferencesMap, collectionReferencesMap);
+
+                    if (macroBlock.getId().equals(DOCUMENTTREE_MACRO_ID)) {
+                        // The Include Sibling macro is a special case
+                        hasXDOMChanged |= transformDocumentTreeMacroBlock(macroBlock, DOCUMENTTREE_PARAM_ROOT,
+                            parameterDescriptors, originalReference, spaceReferencesMap, collectionReferencesMap);
+                    }
                 }
             } catch (ComponentLookupException e) {
                 // Should never happen
@@ -335,22 +341,16 @@ public class BookPublicationReferencesTransformationHelper
             }
         }
 
-        if (macroBlock.getId().equals(DOCUMENTTREE_MACRO_ID)) {
-            // The Document Tree macro is a special case, because its root parameter is a String
-            hasXDOMChanged = hasXDOMChanged || transformDocumentTreeMacroBlock(macroBlock, parameterDescriptors,
-                originalReference, spaceReferencesMap, collectionReferencesMap);
-        }
-
         return hasXDOMChanged;
     }
 
-    private boolean transformDocumentTreeMacroBlock(MacroBlock macroBlock,
+    private boolean transformDocumentTreeMacroBlock(MacroBlock macroBlock, String parameterName,
         Map<String, ParameterDescriptor> parameterDescriptors, DocumentReference originalReference,
         Map<SpaceReference, SpaceReference> spaceReferencesMap,
         Map<SpaceReference, SpaceReference> collectionReferencesMap)
     {
         boolean hasXDOMChanged = false;
-        String root = macroBlock.getParameter(DOCUMENTTREE_PARAM_ROOT);
+        String root = macroBlock.getParameter(parameterName);
         if (root == null || root.isEmpty()) {
             return false;
         }
@@ -371,7 +371,7 @@ public class BookPublicationReferencesTransformationHelper
                 getEquivalentReference(reference, spaceReferencesMap, collectionReferencesMap);
             String equivalentReferenceSerialized = this.convertToString(equivalentReference);
             if (equivalentReferenceSerialized != null && !root.equals(equivalentReferenceSerialized)) {
-                macroBlock.setParameter(DOCUMENTTREE_PARAM_ROOT, equivalentReferenceSerialized);
+                macroBlock.setParameter(parameterName, equivalentReferenceSerialized);
                 hasXDOMChanged = true;
             }
         }
@@ -480,7 +480,15 @@ public class BookPublicationReferencesTransformationHelper
         }
     }
 
-    private DocumentReference getEquivalentReference(DocumentReference reference,
+    /**
+     * Get the equivalent reference of the published location.
+     * 
+     * @param reference the internal reference.
+     * @param spaceReferencesMap the map of references.
+     * @param collectionReferencesMap the collection reference.
+     * @return the equivalent reference.
+     */
+    public DocumentReference getEquivalentReference(DocumentReference reference,
         Map<SpaceReference, SpaceReference> spaceReferencesMap,
         Map<SpaceReference, SpaceReference> collectionReferencesMap)
     {
