@@ -35,9 +35,11 @@ import org.xwiki.contrib.bookversions.internal.BookVersionsConstants;
 import org.xwiki.job.JobException;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
+import org.xwiki.observation.ObservationContext;
 import org.xwiki.observation.event.AbstractLocalEventListener;
 import org.xwiki.observation.event.Event;
 import org.xwiki.query.QueryException;
+import org.xwiki.refactoring.event.DocumentRenamingEvent;
 import org.xwiki.user.UserReference;
 import org.xwiki.user.UserReferenceResolver;
 
@@ -63,6 +65,8 @@ public class VersionDeletingEventListener extends AbstractLocalEventListener
 
     private static final List<Event> EVENT_LIST = List.of(new DocumentDeletingEvent());
 
+    private static final DocumentRenamingEvent DOCUMENT_RENAMING_EVENT = new DocumentRenamingEvent();
+
     @Inject
     private Provider<BookVersionsManager> bookVersionsManagerProvider;
 
@@ -74,6 +78,9 @@ public class VersionDeletingEventListener extends AbstractLocalEventListener
 
     @Inject
     private Provider<XWikiContext> contextProvider;
+
+    @Inject
+    private ObservationContext observationContext;
 
     @Inject
     @Named("document")
@@ -97,7 +104,9 @@ public class VersionDeletingEventListener extends AbstractLocalEventListener
 
         try {
             DocumentReference deletedVersionReference = deletedXDoc.getDocumentReference();
-            if (bookVersionsManager.isVersion(deletedXDoc.getOriginalDocument())) {
+            if (bookVersionsManager.isVersion(deletedXDoc.getOriginalDocument())
+                && !this.observationContext.isIn(DOCUMENT_RENAMING_EVENT))
+            {
                 DocumentReference collectionReference =
                     bookVersionsManager.getVersionedCollectionReference(deletedVersionReference);
                 DocumentReference newPrecedingVersionRef =
