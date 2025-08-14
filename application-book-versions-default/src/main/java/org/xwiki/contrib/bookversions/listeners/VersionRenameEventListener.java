@@ -102,18 +102,15 @@ public class VersionRenameEventListener extends AbstractLocalEventListener
                     bookVersionsManager.getVersionedCollectionReference(updatedXDoc.getDocumentReference());
                 List<String> pageReferences = bookVersionsManager.queryPages(collectionReference,
                     BookVersionsConstants.BOOKVERSIONEDCONTENT_CLASS_REFERENCE);
-                String transformedPreviousName = bookVersionsManager.transformUsingSlugValidation(previousName);
 
                 for (String pageReferenceString : pageReferences) {
                     DocumentReference pageReference = referenceResolver.resolve(pageReferenceString,
                         collectionReference);
-                    if (transformedPreviousName.equals(pageReference.getName())
-                        || previousName.equals(pageReference.getName()))
+                    if (previousName.equals(pageReference.getName()))
                     {
                         logger.debug("[VersionRenameEventListener] Page [{}] will be renamed.", pageReference);
                         DocumentReference targetPageReference =
-                            new DocumentReference(bookVersionsManager.transformUsingSlugValidation(newName),
-                            pageReference.getLastSpaceReference());
+                            new DocumentReference(newName, pageReference.getLastSpaceReference());
 
                         // Check if the user performing the move has edit rights on the new document reference.
                         if (!authorizationManager.hasAccess(Right.EDIT, context.getUserReference(),
