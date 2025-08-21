@@ -266,6 +266,7 @@ public class BookPublicationReferencesTransformationHelper
                     linkBlock.getReference(), originalReference, spaceReferencesMap, collectionReferencesMap);
 
                 if (equivalentResourceReference != null) {
+                    equivalentResourceReference.setParameters(linkBlock.getReference().getParameters());
                     LinkBlock newLinkBlock = new LinkBlock(linkBlock.getChildren(), equivalentResourceReference,
                         linkBlock.isFreeStandingURI());
                     linkBlock.getParent().replaceChild(newLinkBlock, linkBlock);
@@ -276,6 +277,7 @@ public class BookPublicationReferencesTransformationHelper
                     linkBlock.getReference(), originalReference, spaceReferencesMap, collectionReferencesMap);
 
                 if (equivalentResourceReference != null) {
+                    equivalentResourceReference.setParameters(linkBlock.getReference().getParameters());
                     LinkBlock newLinkBlock = new LinkBlock(linkBlock.getChildren(), equivalentResourceReference,
                         linkBlock.isFreeStandingURI());
                     linkBlock.getParent().replaceChild(newLinkBlock, linkBlock);
