@@ -1213,6 +1213,11 @@
   #set ($xclass = $xobject.xWikiClass)
   #set ($discard = $doc.use($xobject))
   #set ($editing = $xcontext.action == 'edit')
+  ## Load the JavaScript code required to make the object properties editable in-place.
+  #set ($discard = $xwiki.jsfx.use('uicomponents/edit/editableProperty.js', {
+    'forceSkinAction': true,
+    'language': $xcontext.locale
+  }))
   &lt;div class="formContainer"&gt;
     &lt;div class="xform"&gt;
       &lt;dl&gt;
