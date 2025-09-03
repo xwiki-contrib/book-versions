@@ -2629,7 +2629,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         if ((boolean) configuration.get("publishPageOrder")) {
             logger.info(localization.getTranslationPlain("BookVersions.DefaultBookVersionsManager.publishInternal"
                 + ".updatePageOrder", userLocale));
-            copyPinnedPagesInfo(sourceReference, collectionReference, targetReference, publicationComment,
+            copyPinnedPagesInfo(sourceReference, targetReference, publicationComment,
                 configurationReference, userReference);
         }
 
@@ -3507,9 +3507,8 @@ public class DefaultBookVersionsManager implements BookVersionsManager
         return hasChanged;
     }
 
-    private void copyPinnedPagesInfo(DocumentReference sourceReference, DocumentReference collectionReference,
-        SpaceReference targetReference, String publicationComment, DocumentReference configurationReference,
-        UserReference userReference)
+    private void copyPinnedPagesInfo(DocumentReference sourceReference, SpaceReference targetReference,
+        String publicationComment, DocumentReference configurationReference, UserReference userReference)
         throws QueryException, XWikiException
     {
         XWikiContext xcontext = getXWikiContext();
@@ -3528,8 +3527,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
         for (String source : webPreferences) {
             DocumentReference sourceRef = referenceResolver.resolve(source, configurationReference);
-            DocumentReference publishedReference =
-                getPublishedReference(sourceRef, collectionReference, targetReference);
+            DocumentReference publishedReference = getPublishedReference(sourceRef, sourceReference, targetReference);
             if (publishedReference == null) {
                 logger.debug("[publishInternal] Ignore pinned page for [{}] because 'publishedReference' is null",
                     sourceRef);
