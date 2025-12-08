@@ -46,7 +46,7 @@ BookVersions.Code.PageStatusClass_status_complete=Terminé
 ### Missing: BookVersions.Code.PageTranslationClass_status_translated=Translated
 
 # Library Reference Class
-### Missing: BookVersions.Code.LibraryReferenceClass_libraryReference=
+BookVersions.Code.LibraryReferenceClass_libraryReference=Référence de la librairie
 BookVersions.Code.LibraryReferenceClass_libraryReference.Empty=---
 ### Missing: BookVersions.Code.LibraryReferenceClass_libraryReference_=
 ### Missing: BookVersions.Code.LibraryReferenceClass_libraryVersionReference=Library Version Reference
@@ -376,7 +376,7 @@ BookVersions.Code.BookOverview.changeStatusBtn=Modifier l'état des pages sélec
 ### Missing: BookVersions.includesibling.doesnotexist=The referenced page in Include Sibling Page macro does not exist.
 ### Missing: rendering.macro.includeSiblingBookPage.name=Include Sibling Book Page (Book Versions)
 rendering.macro.includeSiblingBookPage.description=Inclure les pages du même livre ayant la même version.
-### Missing: rendering.macro.includeSiblingBookPage.parameter.reference.name=Reference
-### Missing: rendering.macro.includeSiblingBookPage.parameter.reference.description=Reference of the page to include.
+rendering.macro.includeSiblingBookPage.parameter.reference.name=Référence
+rendering.macro.includeSiblingBookPage.parameter.reference.description=Référence de la page à inclure.
 </content>
 </xwikidoc>
