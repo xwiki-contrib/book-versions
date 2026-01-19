@@ -261,6 +261,10 @@ public class BookPublicationReferencesTransformationHelper
         for (Block block : xdom.getBlocks(new ClassBlockMatcher(LinkBlock.class), Block.Axes.DESCENDANT_OR_SELF)) {
             LinkBlock linkBlock = (LinkBlock) block;
             ResourceType resourceType = linkBlock.getReference().getType();
+            if (linkBlock.getReference().getReference().isEmpty()) {
+                // Link to same page shouldn't be transformed
+                continue;
+            }
             if (SUPPORTED_DOCUMENT_RESOURCES.contains(resourceType)) {
                 ResourceReference equivalentResourceReference = getEquivalentDocumentResourceReference(
                     linkBlock.getReference(), originalReference, spaceReferencesMap, collectionReferencesMap);
