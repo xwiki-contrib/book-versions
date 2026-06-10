@@ -181,7 +181,12 @@
 
   switchDeletedLink.on('click', function(e) {
     e.preventDefault();
-    fetch(new URL(window.location.origin+'/'+XWiki.webapppath+XWiki.servletpath+"view/BookVersions/Code/SwitchDeletedMark" + '?form_token=' + document.documentElement.dataset.xwikiFormToken + '&amp;pageReference=' + encodeURIComponent(XWiki.Model.serialize( XWiki.currentDocument.documentReference))), {
+    var location = window.location.origin;
+    if (XWiki.webapppath !== "/") {
+      // When XWiki is deployed as ROOT, webapppath is already a dash so there's no need to add one
+      location = location + "/";
+    }
+    fetch(new URL(location+XWiki.webapppath+XWiki.servletpath+"view/BookVersions/Code/SwitchDeletedMark" + '?form_token=' + document.documentElement.dataset.xwikiFormToken + '&amp;pageReference=' + encodeURIComponent(XWiki.Model.serialize( XWiki.currentDocument.documentReference))), {
       method: 'post'
     })
     .then(() =&gt; {
