@@ -2151,7 +2151,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
 
             // Get published reference
             DocumentReference publishedReference =
-                    getPublishedReference(pageReference, collectionReference, targetReference);
+                    getPublishedReference(pageReference, sourceReference, targetReference);
             if (publishedReference == null) {
                 Map<String, Object> errorLine = new HashMap<>();
                 errorLine.put("message", "Could not determine target reference");
@@ -2251,7 +2251,7 @@ public class DefaultBookVersionsManager implements BookVersionsManager
                 DocumentReference sourceDocRef = null;
                 for (String pageStringRef : pageReferenceTree) {
                     DocumentReference pageRef = referenceResolver.resolve(pageStringRef, configurationReference);
-                    DocumentReference pubRef = getPublishedReference(pageRef, collectionReference, targetReference);
+                    DocumentReference pubRef = getPublishedReference(pageRef, sourceReference, targetReference);
                     if (pubRef != null && pubRef.equals(deletedRef)) {
                         sourceDocRef = pageRef;
                         break;
